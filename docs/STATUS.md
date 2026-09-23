@@ -163,7 +163,9 @@ scripts/chain_parts123.py runs parts 1–3 and verify. It does not rank-save-til
 
 ## What is NOT built (do not pretend it is)
 
-Nothing in Parts 1–6. Do not invent a Part 7. A new part needs an explicit user start and written done criteria first.
+Nothing in Parts 1–6 of the inherited pipeline. Part 7A/7B/7C (frozen brief +
+bounded planner + run-brief) IS implemented in this fork — see its section
+below. A new part still needs an explicit user start and written done criteria.
 
 Part 5 — capped export: DONE (see evidence above).
 Part 6 — skill + 3-clip delivery: DONE (see Part 6 evidence below).
@@ -379,15 +381,43 @@ recorded context, not enforced visual gates.
   network model call). Full suite: 341 passed. `explain-prompt` and the
   legacy `run --dry-run` behavior are unchanged.
 
+## Live smoke evidence (2026-09-23, offline-with-frozen-plan)
+
+  CLI: run-brief --brief <lab alpaca brief> --dry-run --plan <lab frozen
+  model-query-plan-luna.json> --max-results 6 --max-metadata 6 --sleep 0
+  Result: exit 0; run data/runs/20260923T211413Z; 3 planned queries executed
+  verbatim; 6 distinct ids; 6 candidates; 0 rejects; stopped_reason complete;
+  discovery.json carries brief_discovery_v1 with the correct brief hash
+  (8c75b061…), frozen-plan provenance and plan hash; every candidate marked
+  visual_status=unverified / acceptance_level=metadata_only; no download
+  section flag in the run log (metadata-only confirmed).
+  The planner-call path (no --plan) is covered by offline fakes; it has not
+  been exercised against the live model from this project yet.
+
+## Known gaps and honest limits (this project)
+
+  1. The planner shapes search queries only. It cannot make rank/analyze/
+     shortlist enforce brief scene fields; explicit exclusions stay recorded
+     context, not gates.
+  2. Search hits are leads: visual_status=unverified always. Downstream
+     visual acceptance is inherited from scenery-clips and equally permissive
+     (generic "water"/"coast" tile prompts etc.).
+  3. Benchmark context (lab, 2026-09-23): on an easy request both the legacy
+     query builder and the frozen-brief planner delivered 3/3 usable clips
+     (~19 min common stages each); on a hard request (alpacas in a field)
+     both produced zero strictly usable clips. Single passes; no general
+     performance claim; network bytes and billing were not measured.
+  4. The final verifier establishes file integrity, not scene fidelity.
+     Operator review of exported clips remains mandatory before delivery.
+
 ## Proposed next part (design only)
 
-Part 7 — a frozen, provenance-marked request form plus one bounded model
-query-planning call, followed by the existing deterministic YouTube search and
-metadata checks — is specified with subparts and done criteria in
-docs/SEARCH_BRIEF.md. The proposed fixed worker instruction is there. No Part 7
-source code, CLI command, vision gate, or live run has been implemented or
-tested; vision remains unchanged. This proposal does not make explicit visual
-exclusions enforceable. Obtain agreement on the contract before coding.
+The implemented Part 7A/7B/7C above covers brief validation, the bounded
+planner, and the run-brief discovery path (see the implemented section for
+evidence). Still design-only: a live planner-model run from this project, and
+any future work making brief exclusions enforceable by the vision stages.
+docs/SEARCH_BRIEF.md keeps the full contract; obtain agreement before coding
+more.
 
 ## Suggested pickup order
 

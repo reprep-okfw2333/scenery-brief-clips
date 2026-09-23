@@ -2,8 +2,8 @@
 
 All runtime files stay under the project root. `data/` and `tmp/` are gitignored.
 
-  /root/projects/scenery-clips/
-    src/scenery_clips/     code
+  /root/projects/scenery-brief-clips/
+    src/scenery_brief_clips/  code (adds brief.py, planner.py to the inherited set)
     tests/                 pytest
     scripts/chain_parts123.py
     docs/                  STATUS, architecture, roadmap, CLI, vision, data
@@ -24,6 +24,9 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
         export/<...>.mp4.complete.json       marker schema 2: policy/format/span/probe/mapping/SHA-256
         export/<...>.mp4.lock                per-key concurrency lock
       runs/<UTC timestamp>/
+        discovery.json               run-brief sidecar (brief_discovery_v1): brief hash,
+                                     query plan, planner provenance, counts, stop reason;
+                                     candidates/rejects annotated unverified/metadata_only
         constraint.json
         candidates.json              B keepers
         rejected.json                B rejects
@@ -59,6 +62,7 @@ Its completion marker uses schema 2. Export plan and manifest use schema 2 and c
 
 Metadata cache is reusable across prompts. ranked.json, vision_scores.json, and excerpts.json are prompt-specific.
 
-Latest delivered live run: data/runs/20260922T205123Z, with four ocean clips
-in out/ocean-waves-crashing-against-rocky-cliffs-no-people/ (see docs/STATUS.md
-and docs/RUN-20260922T205123Z-ocean-waves.md).
+Latest delivered live run in THIS project: data/runs/20260923T211413Z — a
+run-brief smoke with a frozen plan (metadata-only, 6 candidates, no download;
+see docs/STATUS.md). The ocean-wave run below is inherited scenery-clips
+history, not run from this fork.

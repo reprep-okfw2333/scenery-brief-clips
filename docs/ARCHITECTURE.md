@@ -1,6 +1,14 @@
 # Architecture
 
-Goal: from a prompt such as “Beautiful natural European scenery, 720p, 16:9, 20 clips”, return N on-disk clips plus a manifest. If fewer than N pass, return what passed and say why. Do not silently loosen the brief. With no named resolution, the source-acceptance default is ≥720p (1280×720); an explicit resolution remains a gate.
+This is scenery-brief-clips: an independent fork of scenery-clips whose only
+architectural addition is a frozen-brief, model-planned discovery stage ahead
+of the inherited funnel. Downstream stages (C–F below) are scenery-clips code,
+unchanged in behavior.
+
+Goal: from a validated structured brief (or a legacy prompt string), return N
+on-disk clips plus a manifest. If fewer than N pass, return what passed and
+say why. Do not silently loosen the brief. With no named resolution, the
+source-acceptance default is ≥720p (1280×720); an explicit resolution remains a gate.
 
 Honest cost rule: never pull an export rendition until excerpts are chosen. Low-resolution analysis copies and storyboard JPEGs are allowed after cheap gates.
 
@@ -8,13 +16,39 @@ Implementation status of each stage is in docs/ROADMAP.md and docs/STATUS.md.
 
 ## Stages
 
+-1. Frozen brief + one-call query planner  (built in this fork; Part 7A/7B)
+   A structured `search_brief_v1` JSON is validated by `brief.validate_brief`
+   (strict schema: provenance quotes, geometry bounds, limit caps,
+   contradiction checks) and hash-frozen via `canonical_json_hash`. The
+   planner instruction (`search_query_planner_v1`) is application-owned and
+   fixed. `planner.plan_queries` makes exactly ONE model call (wire named in
+   planner.yaml, mirroring vision.yaml's no-secrets rules) returning a
+   `search_queries_v1` plan, which is validated against the brief (version,
+   hash binding, subject fidelity, length/duplicate bounds, strategy set).
+   `--plan` skips the model call and validates a frozen plan file instead.
+   The planner only proposes search phrases; it never judges pixels, sets
+   policy, or downloads. Validation failures and empty plans stop the run
+   fail-closed (exit 2 / exit 1 with `empty_query_plan`); there is no
+   fallback search that quietly broadens the brief. Provenance (model,
+   instruction version, elapsed seconds, plan hash) is recorded without
+   secrets. Provenance reality: queries are leads only; every discovery
+   result is `visual_status=unverified`, `acceptance_level=metadata_only`.
+   Legacy `run --dry-run --prompt` and `build_queries()` are unchanged and
+   remain the default for prompt callers. Full contract: docs/SEARCH_BRIEF.md.
+
 0. Prompt + policy  (built)
    Compile the sentence into a Constraint (theme, min width/height, aspect band, N, target duration, geo flag, run limits). `visual_positives` and `visual_negatives` are serialized defaults but no pipeline stage consumes them; they are NOT active label or export gates. The wired vision prompt uses the actual theme text and its conditional activity/scenery rubric.
    Flat project config.yaml or --config can provide stricter/default limits; explicit flags win, and config cannot enable downloads or loosen prompt geometry.
    No named resolution defaults to 1280×720; 720p and 1280×720 mean 1280×720; 1920p means 1920×1080. allow_download stays false until the explicitly authorized Part 5 export path.
 
 A. Discovery  (built)
-   YouTube search via yt-dlp (`ytsearchN:`). Text only. Query variants. Dedup by video_id. Cap + sleep.
+   YouTube search via yt-dlp (`ytsearchN:`). Text only. Queries come from the
+   validated brief plan (new path), or from build_queries() variants (legacy
+   prompt path). Dedup by video_id. Cap + sleep.
+   run-brief adds a discovery.json sidecar (brief_discovery_v1) binding the
+   brief hash, full query plan, planner provenance, attempted queries, counts,
+   and stop reason; candidates/rejects in the run dir and sidecar carry
+   visual_status=unverified and acceptance_level=metadata_only.
 
 B. Metadata eligibility  (built)
    `yt-dlp -j --skip-download`. Keep if a real format has height >= min_height and aspect in band; the default constraint is ≥720p / 1280×720 when the prompt names no resolution. Explicit prompt resolutions and any stricter config remain gates. Ignore “4K” in titles. Duration is a hint, not a class. Live / upcoming / auth / private are rejects.
@@ -72,6 +106,9 @@ F. Acquire + export  (built 2026-09-22; design + rules in docs/EXPORT.md)
 
   yt-dlp       search, metadata, analysis copies, later HD ranges. Never scores pixels.
   Storyboards  cheap timeline stills, not frame-accurate cuts.
+  Planner      ONE text-model call proposing search phrases for a frozen brief.
+               Switch in planner.yaml (no secrets). Validated deterministically
+               afterward; can be replaced by a frozen --plan file. Not pixels.
   Vision       tile and strip labels. The model is named in vision.yaml, not hardcoded. Hermes must show that model and get a yes before a run. Not cuts.
   PySceneDetect  cut times only, not “European scenery”.
   ffmpeg       analysis decode, later export and probes.
@@ -80,8 +117,12 @@ F. Acquire + export  (built 2026-09-22; design + rules in docs/EXPORT.md)
 
   Acquire wide, export interior. Do not expand the final clip into neighboring shots.
   Detection spacing ≠ minimum usable duration.
+  A planner query is a search lead, not evidence of scene content. Brief scene
+  fields and exclusions are recorded context — the visual stages do not
+  enforce them; operator review remains mandatory before delivering clips.
 
 ## Home
 
-  /root/projects/scenery-clips
-  No other copies. Hermes invokes the CLI here.
+  /root/projects/scenery-brief-clips (this fork; independent git history).
+  The inherited original lives at /root/projects/scenery-clips and is treated
+  as read-only by this project.
