@@ -1,0 +1,34 @@
+# Copy to config.yaml for automatic project defaults, or pass explicitly:
+#   .venv/bin/scenery-clips <run|rank|analyze|export> ... --config config.example.yaml
+# Explicit CLI flags override these values. Config cannot loosen
+# resolution/aspect requirements compiled from the prompt. Downloads stay
+# forbidden in the default pipeline; the Part 5 export path must be authorized
+# explicitly (allow_export: true here, or the --allow-export flag) and only
+# acquires shortlisted sections at the configured cap (default 720p; valid
+# range 720..2160), without scaling or upscaling.
+allow_download: false
+allow_export: false
+# final export cap in pixels; valid range 720..2160
+export_max_height: 720
+max_search_results: 20
+max_metadata_fetches: 30
+sleep_s: 2.0
+min_height: 720
+min_width: 1280
+aspect_min: 1.70
+aspect_max: 1.86
+max_tiles: 12
+max_rank_videos: 10
+max_analysis_s: 120
+max_analyze_videos: 1
+
+# Part 3 continuity gate (soft dissolve / mid-excerpt cut detection on analysis copies).
+# Samples ~continuity_sample_fps dHashes across each candidate excerpt; if adjacent or
+# first↔last Hamming exceeds the thresholds, trim to the longest stable subspan that
+# still meets duration_min_s, or reject the excerpt. Fail-closed and deterministic.
+continuity_enabled: true
+continuity_sample_fps: 2.0
+continuity_max_adjacent_hamming: 18
+continuity_max_endpoint_hamming: 22
+continuity_max_adjacent_color: 28.0
+continuity_max_endpoint_color: 35.0

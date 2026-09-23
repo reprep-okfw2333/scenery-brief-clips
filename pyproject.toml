@@ -1,0 +1,23 @@
+[project]
+name = "scenery-brief-clips"
+version = "0.1.0"
+description = "Find and cut scenery clips from YouTube with a cheap-first funnel."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "opencv-python-headless>=5.0.0.93",
+    "pillow>=12.3.0",
+    "scenedetect>=0.7.1",
+]
+
+[project.scripts]
+scenery-brief-clips = "scenery_brief_clips.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
