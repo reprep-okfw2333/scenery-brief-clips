@@ -24,11 +24,16 @@ def run_dry(
     yt: YtDlp,
     cache: MetadataCache,
     sleep_fn: Callable[[float], None],
+    queries: list[str] | None = None,
 ) -> DryRunResult:
     if constraint.allow_download:
         raise RuntimeError("dry-run refuses allow_download=True")
 
-    queries = build_queries(constraint)
+    if queries is None:
+        queries = build_queries(constraint)
+    else:
+        # A validated plan supplies queries verbatim; no re-sort or dedupe.
+        queries = list(queries)
     result = DryRunResult(queries=queries)
     ordered_ids: list[str] = []
     titles: dict[str, str] = {}

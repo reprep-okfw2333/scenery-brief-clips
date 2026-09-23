@@ -10,6 +10,13 @@ import time
 from dataclasses import asdict, replace
 from pathlib import Path
 
+from scenery_brief_clips.brief import (
+    BriefValidationError,
+    QueryPlanValidationError,
+    canonical_json_hash,
+    validate_brief,
+    validate_query_plan,
+)
 from scenery_brief_clips.config import ConfigError, load_project_config
 from scenery_brief_clips.continuity import continuity_settings_from_config
 from scenery_brief_clips.detect import detect_scenes
@@ -17,6 +24,11 @@ from scenery_brief_clips.fetch import cached_fetcher
 from scenery_brief_clips.pipeline import run_dry
 from scenery_brief_clips.pipeline_analyze import analyze_run
 from scenery_brief_clips.analyze import ConstraintError
+from scenery_brief_clips.planner import (
+    PlannerError,
+    load_planner_wire,
+    plan_queries,
+)
 from scenery_brief_clips.prompt import parse_prompt
 from scenery_brief_clips.rank import rank_run
 from scenery_brief_clips.review import review_run
@@ -29,6 +41,7 @@ from scenery_brief_clips.shortlist import (
 )
 from scenery_brief_clips.store import MetadataCache, write_json_atomic, write_run
 from scenery_brief_clips.export import ExportError, ExportStaleError, export_run
+from scenery_brief_clips.models import Constraint, RunLimits
 from scenery_brief_clips.verify import verify_run
 from scenery_brief_clips.vision import apply_scores_run_detailed
 from scenery_brief_clips.vision_wire import (
@@ -220,6 +233,30 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_run.add_argument("--config", type=Path, default=None)
 
+    p_rb = sub.add_parser(
+        "run-brief",
+        help="Frozen-brief discovery: one planner call or a frozen plan, then metadata-only search",
+    )
+    p_rb.add_argument("--brief", type=Path, required=True)
+    p_rb.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="Required. Never downloads video; metadata eligibility only.",
+    )
+    p_rb.add_argument(
+        "--plan",
+        type=Path,
+        default=None,
+        help="Use this frozen plan JSON instead of calling the planner model",
+    )
+    p_rb.add_argument("--planner-config", type=Path, default=None)
+    p_rb.add_argument("--max-results", type=_positive_int, default=None)
+    p_rb.add_argument("--max-metadata", type=_nonnegative_int, default=None)
+    p_rb.add_argument("--sleep", type=_nonnegative_float, default=None)
+    p_rb.add_argument("--root", type=Path, default=None)
+    p_rb.add_argument("--config", type=Path, default=None)
+
     p_rank = sub.add_parser("rank", help="Storyboard sample + cheap rank for a run")
     p_rank.add_argument("--run-dir", type=Path, required=True)
     p_rank.add_argument("--max-videos", type=_positive_int, default=None)
@@ -292,6 +329,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "run":
         return _cmd_run(args)
+    if args.command == "run-brief":
+        return _cmd_run_brief(args)
     if args.command == "rank":
         return _cmd_rank(args)
     if args.command == "analyze":
@@ -380,6 +419,172 @@ def _cmd_run(args: argparse.Namespace) -> int:
         "rejected": len(result.rejected),
         "stopped_reason": result.stopped_reason,
         "allow_download": False,
+    }
+    print(json.dumps(summary, indent=2))
+    return 1 if result.stopped_reason in ("search_error", "metadata_errors") else 0
+
+
+def _brief_constraint_from_brief(brief: dict, limits_overrides: dict) -> tuple[Constraint, RunLimits]:
+    """Build (Constraint, RunLimits) from a validated brief the way the lab benchmark did."""
+    geometry = brief["source_geometry"]
+    durations = brief["clip_duration_s"]
+    limits = RunLimits(
+        max_search_results=int(brief["search_limits"]["max_search_results"]),
+        max_metadata_fetches=int(brief["search_limits"]["max_metadata_fetches"]),
+        max_bytes=0,
+        max_seconds=120,
+        sleep_s=float(brief["search_limits"]["sleep_s"]),
+    )
+    max_results = limits_overrides.get("max_results")
+    if max_results is not None:
+        limits = replace(limits, max_search_results=min(limits.max_search_results, int(max_results)))
+    max_metadata = limits_overrides.get("max_metadata")
+    if max_metadata is not None:
+        limits = replace(limits, max_metadata_fetches=min(limits.max_metadata_fetches, int(max_metadata)))
+    sleep_s = limits_overrides.get("sleep")
+    if sleep_s is not None:
+        limits = replace(limits, sleep_s=min(limits.sleep_s, float(sleep_s)))
+    constraint = Constraint(
+        theme_text=brief["theme_text"],
+        min_width=int(geometry["min_width"]),
+        min_height=int(geometry["min_height"]),
+        aspect_min=float(geometry["aspect_min"]),
+        aspect_max=float(geometry["aspect_max"]),
+        n_clips=int(brief["n_clips"]),
+        target_duration_s=float(durations["target"]),
+        duration_min_s=float(durations["min"]),
+        duration_max_s=float(durations["max"]),
+        geo_requirement="european" if brief["geography"] == "european" else "none",
+        allow_download=False,
+        limits=limits,
+    )
+    return constraint, limits
+
+
+def _load_json_file(path: Path, label: str):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        print(f"cannot read {label}: {exc}", file=sys.stderr)
+        return None
+    except json.JSONDecodeError as exc:
+        print(f"invalid {label} JSON: {exc}", file=sys.stderr)
+        return None
+
+
+def _cmd_run_brief(args: argparse.Namespace) -> int:
+    root = Path(args.root) if args.root else project_root()
+    brief_path = Path(args.brief)
+    if not brief_path.is_file():
+        print(f"brief file not found: {brief_path}", file=sys.stderr)
+        return 2
+    brief = _load_json_file(brief_path, "brief")
+    if brief is None:
+        return 2
+    try:
+        validate_brief(brief)
+    except BriefValidationError as exc:
+        print(f"invalid brief ({exc.code}): {exc}", file=sys.stderr)
+        return 2
+    brief_sha256 = canonical_json_hash(brief)
+
+    plan = None
+    plan_provenance = None
+    if args.plan is not None:
+        plan_path = Path(args.plan)
+        if not plan_path.is_file():
+            print(f"plan file not found: {plan_path}", file=sys.stderr)
+            return 2
+        plan = _load_json_file(plan_path, "plan")
+        if plan is None:
+            return 2
+        try:
+            validate_query_plan(plan, brief)
+        except QueryPlanValidationError as exc:
+            print(f"invalid query plan ({exc.code}): {exc}", file=sys.stderr)
+            return 2
+        plan_provenance = {
+            "schema_version": "brief_plan_provenance_v1",
+            "instruction_version": "search_query_planner_v1",
+            "plan_sha256": canonical_json_hash(plan),
+            "source": "frozen_plan_file",
+        }
+    else:
+        try:
+            wire = load_planner_wire(root, args.planner_config)
+        except PlannerError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        try:
+            plan, plan_provenance = plan_queries(brief, wire)
+        except PlannerError as exc:
+            print(f"planner failed: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps({"plan_provenance": plan_provenance}, indent=2))
+
+    queries = [item["query"] for item in plan["queries"]]
+    if not queries:
+        print(json.dumps({"stopped_reason": "empty_query_plan", "brief_sha256": brief_sha256}, indent=2))
+        return 1
+
+    constraint, limits = _brief_constraint_from_brief(
+        brief,
+        {
+            "max_results": args.max_results,
+            "max_metadata": args.max_metadata,
+            "sleep": args.sleep,
+        },
+    )
+    tmp_dir = root / "tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False)
+    cache = MetadataCache(root / "data" / "cache" / "metadata")
+    result = run_dry(constraint, yt=yt, cache=cache, sleep_fn=time.sleep, queries=queries)
+    log_text = "\n".join(result.log_lines) + ("\n" if result.log_lines else "")
+    run_dir = write_run(
+        root / "data" / "runs",
+        constraint=constraint,
+        candidates=result.candidates,
+        rejected=result.rejected,
+        log_text=log_text,
+    )
+    candidates_json = json.loads((run_dir / "candidates.json").read_text(encoding="utf-8"))
+    rejected_json = json.loads((run_dir / "rejected.json").read_text(encoding="utf-8"))
+    for record in candidates_json + rejected_json:
+        record["visual_status"] = "unverified"
+        record["acceptance_level"] = "metadata_only"
+    discovery = {
+        "schema_version": "brief_discovery_v1",
+        "brief_sha256": brief_sha256,
+        "query_plan": plan,
+        "plan_provenance": plan_provenance,
+        "attempted_queries": result.queries,
+        "counts": {
+            "attempted_queries": len(result.queries),
+            "distinct_ids": len({c.video_id for c in result.candidates} | {r.video_id for r in result.rejected}),
+            "candidates": len(result.candidates),
+            "rejected": len(result.rejected),
+        },
+        "stopped_reason": result.stopped_reason,
+        "allow_download": False,
+        "candidates": candidates_json,
+        "rejected": rejected_json,
+    }
+    write_json_atomic(run_dir / "discovery.json", discovery)
+    # Overwrite the run files with the annotated records so the run dir is
+    # self-describing; the discovery sidecar keeps the plan provenance.
+    write_json_atomic(run_dir / "candidates.json", candidates_json)
+    write_json_atomic(run_dir / "rejected.json", rejected_json)
+    summary = {
+        "run_dir": str(run_dir),
+        "brief_sha256": brief_sha256,
+        "queries": result.queries,
+        "candidates": len(result.candidates),
+        "rejected": len(result.rejected),
+        "stopped_reason": result.stopped_reason,
+        "allow_download": False,
+        "visual_status": "unverified",
+        "acceptance_level": "metadata_only",
     }
     print(json.dumps(summary, indent=2))
     return 1 if result.stopped_reason in ("search_error", "metadata_errors") else 0

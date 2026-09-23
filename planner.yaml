@@ -1,0 +1,13 @@
+# This file is the query-planner switch. Edit it to point query planning at a
+# different login or API. Do not put a password or API key in this file.
+#
+# backend: codex-login
+#   The ChatGPT/Codex sign-in already on this machine. Not a paid API key.
+#   model: the model name that sign-in accepts.
+#
+# backend: openai-api
+#   A normal API call. model is the model name. base_url is the service
+#   address. api_key_env is the NAME of the environment variable that holds
+#   the key.
+backend: codex-login
+model: gpt-6-sol

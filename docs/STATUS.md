@@ -337,6 +337,48 @@ Independent review (deepseek-flash, 2026-09-21) of Parts 1–4 confirmed these; 
   overnight pause makes this unsuitable as an active-runtime benchmark.
   Full account and remaining limits: docs/RUN-20260922T205123Z-ocean-waves.md.
 
+## Part 7A/7B/7C: frozen brief + bounded planner + run-brief CLI (implemented)
+
+The discovery stage of docs/SEARCH_BRIEF.md is implemented; vision, analysis,
+shortlist, and export are unchanged, and explicit brief exclusions are still
+recorded context, not enforced visual gates.
+
+- `src/scenery_brief_clips/brief.py`: strict `search_brief_v1` validation
+  (`validate_brief`, `BriefValidationError`), canonical JSON SHA-256
+  (`canonical_json_hash`), the fixed `search_query_planner_v1` instruction
+  (`PLANNER_INSTRUCTION`), `render_planner`, and `validate_query_plan`
+  (`search_queries_v1`, 0 or 2-4 subject-faithful queries). Ported from the
+  validated lab pilot.
+- `src/scenery_brief_clips/planner.py`: `planner.yaml` wire (backend
+  `codex-login` or `openai-api`, model name, no secrets) parsed like
+  vision.yaml; `plan_queries(brief, wire, caller=None)` makes exactly one
+  bounded model call (instruction as instructions, compact search view as the
+  user message), parses JSON, validates the plan against the brief, and
+  returns `(plan, provenance)` with schema version, instruction version,
+  backend/model, elapsed seconds, and plan hash — no secrets. `queries=[]` is
+  a valid refusal-shaped plan. Every failure raises `PlannerError`.
+- `pipeline.run_dry` gained `queries=None`; when a list is passed it is used
+  verbatim (no re-sort/dedupe). Legacy `build_queries` behavior unchanged.
+- `cli.py run-brief --brief <path> --dry-run [--plan <path>] [--planner-config
+  <path>] [--max-results] [--max-metadata] [--sleep]`: validates the brief
+  (exit 2 with the error code on failure), uses a frozen plan file or makes
+  the one planner call (provenance printed as JSON), stops with exit 1 and
+  `{"stopped_reason": "empty_query_plan"}` without calling yt-dlp when the
+  plan is empty, else runs the budgeted metadata-only search via
+  `run_dry(..., queries=...)` with `allow_download=False` and `write_run`s
+  plus a `discovery.json` sidecar (`brief_discovery_v1`: brief hash, full
+  plan, provenance, attempted queries, counts, stop reason; every candidate
+  and reject carries `visual_status=unverified` and
+  `acceptance_level=metadata_only`). `--max-results/--max-metadata/--sleep`
+  only tighten the brief's own limits (final = min). The new path never
+  fetches video, calls vision, or exports.
+- `planner.yaml` at the project root selects the planner model
+  (`codex-login`, model `gpt-6-sol`), mirroring vision.yaml's no-secrets rule.
+- Tests: `tests/test_brief.py`, `tests/test_planner.py`,
+  `tests/test_run_brief_cli.py` (offline fakes only; no live YouTube, no
+  network model call). Full suite: 341 passed. `explain-prompt` and the
+  legacy `run --dry-run` behavior are unchanged.
+
 ## Proposed next part (design only)
 
 Part 7 — a frozen, provenance-marked request form plus one bounded model
