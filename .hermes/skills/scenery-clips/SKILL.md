@@ -70,6 +70,7 @@ Find the project root as the git checkout that contains this skill. Run every CL
 - Do not pass `--confirm-vision` until the user has agreed to the model printed by `vision-show`.
 - If the wired call fails, say so and stop. Do not quietly switch to another model or to `vision_analyze`.
 - `analyze` defaults to `--max-videos 1`. Pass an explicit count or only one source is cut.
+- Analyze spans run concurrently (default 4 workers). Scene detect defaults to `frame_skip=1`; continuity decode width defaults to 160. Legacy: `SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0`.
 - Gate the next stage on `ready_for_shortlist`, not on analyze's exit code alone.
 - Export frame counts use full-precision packet PTS against half-open millisecond window endpoints. If a section reports one fewer frame, inspect the raw packet at the right boundary before loosening any gate; never accept a real gap or missing coverage.
 - For speed evidence, measure the same ranked tile set with a fixed-latency caller before/after changing concurrency. Report a real run's stage times too, but do not treat runs with different models, cache state, excerpt counts, or interrupted stages as controlled comparisons.

@@ -23,8 +23,9 @@ Part 3 — done and stabilized
   ≤720p video-only copies, preferring AVC/H.264, of planned ranges (windowed / full / spread), cap seconds.
   Scored windows are authoritative; over-budget windows are capped internally rather than replaced by unscored spread sampling.
   Span/policy cache keys + SHA-256 completion markers; locked staged downloads; legacy index-only cache is ignored.
-  PySceneDetect min_scene_len 0.5s. Long shots → target-length interior excerpt.
-  Continuity gate (~2 fps dHash + mean-RGB) trims/rejects soft dissolves PySceneDetect misses.
+  Planned spans run concurrently (default 4 workers; SCENERY_ANALYZE_WORKERS). Shared by legacy run and run-brief.
+  PySceneDetect min_scene_len 0.5s, default frame_skip=1 (SCENERY_DETECT_FRAME_SKIP). Long shots → target-length interior excerpt.
+  Continuity gate (~2 fps dHash + mean-RGB; default decode width 160 via SCENERY_CONTINUITY_DECODE_WIDTH) trims/rejects soft dissolves PySceneDetect misses.
   Per-range outcomes preserve all attempt errors; partial/failed work exits nonzero.
   excerpts.json + analysis_manifest.json bind outputs to ranked/constraint/settings and publish fail-closed.
   CLI: analyze (default --max-videos 1)

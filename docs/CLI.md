@@ -47,6 +47,9 @@ apply-scores
 analyze
   promising/uncertain rows only. Selected-window ≤720p video-only ranges, validated span-keyed cache, PySceneDetect, continuity gate (dHash + mean-RGB trim/reject), excerpts.json + analysis_manifest.json.
   Defaults: --max-videos 1, --max-analysis-s 120 unless config overrides. Partial/failed/invalid work exits 1; complete sources with no usable cuts are counted explicitly.
+  Spans across selected videos run concurrently (default 4 workers). Scene detection defaults to frame_skip=1; continuity decode width defaults to 160px before dHash/mean-RGB. Applies to runs from both legacy `run` and `run-brief`. Env overrides restore legacy serial/full-frame behaviour:
+    SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0
+  Optional phase timings: SCENERY_ANALYZE_PROFILE=/path/to.json.
   Invalid duration settings in constraint.json (non-positive, min > max, or target outside the band) exit 2 without writing. Downloaded media shorter than its planned span fails the range (fetch-time duration-vs-span check, same 3s tolerance verify uses) and stale short cache entries are replaced on re-run instead of being reused forever.
   A completed source with no usable cuts stays exit 0 and is disclosed via videos_without_excerpts. verify.ready_for_shortlist means at least one verified excerpt exists and there are no integrity errors; verify.n_sources_without_excerpts and all_analyzed_sources_have_excerpts disclose per-source completeness separately. A run with no excerpts remains not ready.
 

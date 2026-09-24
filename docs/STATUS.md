@@ -16,8 +16,11 @@ Part 2  Storyboard tiles + vision labels.
         The model is named in vision.yaml, not hardcoded. label-tiles refuses without --confirm-vision.
         Dark tiles are recorded as reject and are not sent to the model.
 Part 3  Capped ≤720p video-only analysis copies (AVC/H.264 preferred) + PySceneDetect + continuity gate + excerpt timestamps.
-        CLI: analyze
+        CLI: analyze (shared by legacy run and run-brief discovery outputs)
         Continuity gate (~2 fps dHash + mean-RGB) trims or rejects mid-excerpt dissolves/cuts PySceneDetect misses before excerpts.json is published.
+        Analysis spans run concurrently (default 4 workers). Scene detection defaults to frame_skip=1; continuity samples default to a 160px decode width before dHash/mean-RGB.
+        Env overrides (legacy serial / full-frame): SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0.
+        Optional phase dump: SCENERY_ANALYZE_PROFILE=/path/to.json.
         Every yt-dlp fallback is video-only and ≤720p; inherited yt-dlp config is ignored.
         YtDlp.download() (full quality) is still forbidden.
 Part 4  Shortlist: temporal review of candidate moments, dedup, diversity, shortfall.
@@ -42,10 +45,7 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 309 passed in 229.37s on the last recorded full-suite run for the
-tree-cutting stabilization pass (before the ocean run). The ocean run was live
-verified as described below; this documentation update did not rerun tests.
-Python 3.14, uv project, deps in .venv (pillow, scenedetect, opencv).
+Tests: 343 passed on the analyze-parallelization port (2026-09-24; 341 prior + 2 env-default tests).
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to
@@ -74,6 +74,20 @@ AMENDED 2026-09-22 — Part 5 contract and source-floor decision:
   run `data/runs/20260918T210550Z` keeps its recorded 1920×1080 constraint and
   4K sources; 720p clips still verify against it because final clips use the
   export cap band, not the recorded constraint floor.
+
+## Analyze performance (2026-09-24)
+
+Analyze spans are concurrent by default (ported from scenery-clips1.1; shared by
+legacy `run` and `run-brief` outputs).
+
+Measured cold legacy E2E on this repo (same 3-video/90s bench protocol as
+scenery-clips1.1: ocean waves prompt, max-results 8, deterministic keep-scores,
+no export/vision): **analyze ~73s**, **pipeline to shortlist ~139s**, verify_ok,
+N=3 fulfilled. That matches the 1.1 patched arm (~70s / ~137s). On 1.1 the
+pre-change baseline was analyze ~226s and pipeline ~295s.
+
+Legacy serial/full-frame: SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0
+SCENERY_CONTINUITY_DECODE_WIDTH=0. See docs/ARCHITECTURE.md stage D and docs/CLI.md.
 
 ## Parts 1–3 stabilization — complete
 

@@ -63,7 +63,7 @@ Honest limits (measured, not assumed):
   # Legacy prompt path (unchanged):
   .venv/bin/scenery-brief-clips run --dry-run --prompt "Beautiful natural european scenery, 720p, 16:9, 20 individual clips"
 
-  # Downstream stages are the inherited scenery-clips commands (rank, analyze, ...):
+  # Analyze (shared with those downstream stages) runs spans in parallel by default (SCENERY_ANALYZE_WORKERS=4; cold bench analyze ~73s / pipeline ~139s on 2026-09-24; see docs/CLI.md). Downstream stages are the inherited scenery-clips commands (rank, analyze, ...):
   .venv/bin/scenery-brief-clips rank --run-dir data/runs/<id> --max-videos 5 --max-tiles 8
 
 The planner model switch is planner.yaml (codex-login / gpt-6-sol by default,

@@ -26,6 +26,12 @@ max_analyze_videos: 1
 # Samples ~continuity_sample_fps dHashes across each candidate excerpt; if adjacent or
 # first↔last Hamming exceeds the thresholds, trim to the longest stable subspan that
 # still meets duration_min_s, or reject the excerpt. Fail-closed and deterministic.
+#
+# Analyze concurrency and decode defaults are env vars (not YAML keys):
+#   SCENERY_ANALYZE_WORKERS=4          # parallel spans; set 1 for serial legacy
+#   SCENERY_DETECT_FRAME_SKIP=1        # PySceneDetect frame skip; set 0 for every frame
+#   SCENERY_CONTINUITY_DECODE_WIDTH=160  # px width before dHash/mean-RGB; set 0 for full frame
+#   SCENERY_ANALYZE_PROFILE=/path.json # optional phase timings dump
 continuity_enabled: true
 continuity_sample_fps: 2.0
 continuity_max_adjacent_hamming: 18

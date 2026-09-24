@@ -41,6 +41,7 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
         shortlist.json                Part 4 decision: selected, excluded+reasons, counts, shortfall
         export.json                   Part 5 pointer to the published export (theme, manifest path + sha256)
         .pipeline.lock                serializes rank/apply-scores/analyze/shortlist-*/verify/export for this run
+        analysis_manifest.json settings include analyze_workers (default 4) when present
         log.txt
 
     out/<theme>/                      Part 5 export publication; owned by one run

@@ -24,7 +24,7 @@ docs/SEARCH_BRIEF.md (the Part 7 contract this fork implements).
   delivering files remains mandatory.
 - Temps: project `tmp/` only. Never host /tmp for media.
 - Part 2: rank saves tiles. Picture labels come from the model named in vision.yaml (`vision-show`, then `label-tiles --confirm-vision`). Show that model and get a yes before a run. Dark tiles are reject and are not sent.
-- Part 3: selected-window ≤720p video-only, time-capped; continuity gate trims/rejects mid-excerpt dissolves. Span/policy cache keys + validated SHA-256 markers; never YtDlp.download(). IDs may start with `-`; use watch URLs.
+- Part 3: selected-window ≤720p video-only, time-capped; spans analyze concurrently (default 4 workers). Continuity gate trims/rejects mid-excerpt dissolves (default decode width 160). Scene detect defaults to frame_skip=1. Legacy serial/full-frame: SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0. Span/policy cache keys + validated SHA-256 markers; never YtDlp.download(). IDs may start with `-`; use watch URLs.
 - Every yt-dlp call uses `--ignore-config`. Search/metadata use --skip-download. Analysis uses --download-sections and only `bv`/`wv` selectors with `[height<=720]`, preferring AVC/H.264.
 - Cookies off unless the user opts in.
 - Do not silently lower resolution, aspect, or N.
