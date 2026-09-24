@@ -264,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
     p_rank.add_argument("--root", type=Path, default=None)
     p_rank.add_argument("--config", type=Path, default=None)
 
-    p_an = sub.add_parser("analyze", help="720p analysis copy + scene cuts + excerpts")
+    p_an = sub.add_parser("analyze", help="720p analysis copy + scene cuts + excerpts (parallel spans by default)")
     p_an.add_argument("--run-dir", type=Path, required=True)
     p_an.add_argument("--max-videos", type=_positive_int, default=None)
     p_an.add_argument("--max-analysis-s", type=_positive_float, default=None)

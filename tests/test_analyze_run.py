@@ -568,3 +568,23 @@ def test_analyze_run_local_file_detects_and_excerpts(tmp_path):
     assert len(rows[0]["excerpts"]) >= 1
     for excerpt in rows[0]["excerpts"]:
         assert excerpt["end_s"] - excerpt["start_s"] >= 4.0
+
+
+def test_analyze_workers_env_default_and_override(monkeypatch):
+    from scenery_brief_clips.pipeline_analyze import _analyze_workers
+
+    monkeypatch.delenv("SCENERY_ANALYZE_WORKERS", raising=False)
+    assert _analyze_workers() == 4
+    monkeypatch.setenv("SCENERY_ANALYZE_WORKERS", "1")
+    assert _analyze_workers() == 1
+    monkeypatch.setenv("SCENERY_ANALYZE_WORKERS", "0")
+    assert _analyze_workers() == 1  # clamped
+
+
+def test_detect_frame_skip_env_default(monkeypatch):
+    from scenery_brief_clips.detect import _detect_frame_skip
+
+    monkeypatch.delenv("SCENERY_DETECT_FRAME_SKIP", raising=False)
+    assert _detect_frame_skip() == 1
+    monkeypatch.setenv("SCENERY_DETECT_FRAME_SKIP", "0")
+    assert _detect_frame_skip() == 0

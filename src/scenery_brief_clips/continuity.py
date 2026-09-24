@@ -370,12 +370,22 @@ def sample_features_from_video(
     if not cap.isOpened():
         raise RuntimeError(f"continuity scan could not open {path}")
     features: list[FrameFeatures] = []
+    # Optional decode downscale (SCENERY_CONTINUITY_DECODE_WIDTH). Default 160; set 0 for full-frame legacy decode.
+    # Speeds seek/decode; dhash/mean_rgb already shrink further. Width 0 preserves legacy.
+    import os
+    try:
+        decode_width = int(os.environ.get("SCENERY_CONTINUITY_DECODE_WIDTH", "160") or "0")
+    except ValueError:
+        decode_width = 0
     try:
         for t_s in times:
             cap.set(cv2.CAP_PROP_POS_MSEC, max(0.0, t_s) * 1000.0)
             ok, frame = cap.read()
             if not ok or frame is None:
                 raise RuntimeError(f"continuity scan failed to read frame at {t_s:.3f}s in {path}")
+            if decode_width > 0 and frame.shape[1] > decode_width:
+                new_h = max(1, int(round(frame.shape[0] * (decode_width / frame.shape[1]))))
+                frame = cv2.resize(frame, (decode_width, new_h), interpolation=cv2.INTER_AREA)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             features.append(features_from_image(Image.fromarray(rgb)))
     finally:
