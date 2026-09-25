@@ -37,7 +37,7 @@ Implementation status of each stage is in docs/ROADMAP.md and docs/STATUS.md.
    remain the default for prompt callers. Full contract: docs/SEARCH_BRIEF.md.
 
 0. Prompt + policy  (built)
-   Compile the sentence into a Constraint (theme, min width/height, aspect band, N, target duration, geo flag, run limits). `visual_positives` and `visual_negatives` are serialized defaults but no pipeline stage consumes them; they are NOT active label or export gates. The wired vision prompt uses the actual theme text and its conditional activity/scenery rubric.
+   Compile the sentence into a Constraint (theme, min width/height, aspect band, N, target duration, geo flag, run limits). `visual_positives` and `visual_negatives` are serialized defaults; they are NOT active label or export gates. The only consumer is the optional Jev gate (B′), which passes `theme_text` and `visual_negatives` to Jev as text context. The wired vision prompt uses the actual theme text and its conditional activity/scenery rubric.
    Flat project config.yaml or --config can provide stricter/default limits; explicit flags win, and config cannot enable downloads or loosen prompt geometry.
    No named resolution defaults to 1280×720; 720p and 1280×720 mean 1280×720; 1920p means 1920×1080. allow_download stays false until the explicitly authorized Part 5 export path.
 
@@ -52,6 +52,16 @@ A. Discovery  (built)
 
 B. Metadata eligibility  (built)
    `yt-dlp -j --skip-download`. Keep if a real format has height >= min_height and aspect in band; the default constraint is ≥720p / 1280×720 when the prompt names no resolution. Explicit prompt resolutions and any stricter config remain gates. Ignore “4K” in titles. Duration is a hint, not a class. Live / upcoming / auth / private are rejects.
+
+B′. Jev metadata gate  (optional, experimental, off by default; docs/JEV_GATE.md)
+   `jev-gate --run-dir RUN` runs after discovery (A+B) and before C / tile review, only when the config has
+   `jev_gate: true`. One request per candidate to `typesafe/jev-1.13` via the OpenRouter decisions endpoint,
+   with the run theme plus cached metadata (no download, no pixels). Rejects only when P(keep) ≤
+   `jev_reject_below` (default 0.40); never auto-keeps, so every survivor still goes through C–E. Survivors are
+   ordered by P(keep). The key is read only from the `OPENROUTER_API_KEY` env var. No key, errors, timeouts, or
+   reaching the per-run cost cap (`jev_max_usd_per_run`) fall back to the rule gate (kept). Cache
+   data/cache/jev/; outputs jev_gate.json + candidates_pre_jev.json; candidates.json is rewritten to the
+   survivors. About $0.07 per 1,000 candidates. Cannot see watermarks; cutoff tuned on train footage only.
 
 C. Storyboard prioritization  (built; vision is external)
    Parse storyboard formats from cached player JSON. Sample tiles; do not download every sheet of an 8-hour film. Save tile JPEGs. Status: promising / uncertain / low / unknown, plus time windows.
@@ -110,6 +120,9 @@ F. Acquire + export  (built 2026-09-22; design + rules in docs/EXPORT.md)
   Planner      ONE text-model call proposing search phrases for a frozen brief.
                Switch in planner.yaml (no secrets). Validated deterministically
                afterward; can be replaced by a frozen --plan file. Not pixels.
+  Jev          optional (off by default) metadata-only reject filter before rank: P(keep) per candidate from
+               typesafe/jev-1.13 via OpenRouter; key only from OPENROUTER_API_KEY. Rejects at P(keep) ≤ 0.40,
+               never auto-keeps, falls back to the rule gate. Not pixels, cannot see watermarks.
   Vision       tile and strip labels. The model is named in vision.yaml, not hardcoded. Hermes must show that model and get a yes before a run. Not cuts.
   PySceneDetect  cut times only, not “European scenery”.
   ffmpeg       analysis decode, later export and probes.

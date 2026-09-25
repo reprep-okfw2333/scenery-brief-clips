@@ -1,5 +1,5 @@
 # Copy to config.yaml for automatic project defaults, or pass explicitly:
-#   .venv/bin/scenery-clips <run|rank|analyze|export> ... --config config.example.yaml
+#   .venv/bin/scenery-brief-clips <run|rank|jev-gate|analyze|export> ... --config config.example.yaml
 # Explicit CLI flags override these values. Config cannot loosen
 # resolution/aspect requirements compiled from the prompt. Downloads stay
 # forbidden in the default pipeline; the Part 5 export path must be authorized
@@ -38,3 +38,25 @@ continuity_max_adjacent_hamming: 18
 continuity_max_endpoint_hamming: 22
 continuity_max_adjacent_color: 28.0
 continuity_max_endpoint_color: 35.0
+
+# Optional Jev metadata gate (experimental; off by default). See docs/JEV_GATE.md.
+# Used only by the `jev-gate` command, run after discovery (run/run-brief) and
+# before rank/tile review. It asks typesafe/jev-1.13 via the OpenRouter
+# decisions endpoint for P(keep) from metadata, rejects only when
+# P(keep) <= jev_reject_below, and never auto-keeps. The key is read ONLY from
+# the OPENROUTER_API_KEY environment variable; never put a key in this file.
+# No key, errors/timeouts, or reaching jev_max_usd_per_run fall back to the
+# rule gate (candidate kept). Cache: data/cache/jev/. Outputs: jev_gate.json,
+# candidates_pre_jev.json. Roughly $0.07 per 1,000 candidates. Cannot detect
+# watermarks; the 0.40 cutoff was tuned on train footage only.
+jev_gate: false
+# reject when P(keep) <= this (0..1, must be below jev_keep_above)
+jev_reject_below: 0.40
+# informational keep_high label only; never skips rank/tile review
+jev_keep_above: 0.85
+# per-request timeout, seconds
+jev_timeout_s: 20
+# per-run cost cap in USD; once reached, remaining candidates fall back to rules
+jev_max_usd_per_run: 0.25
+# order survivors by P(keep) so rank/analyze caps take the best first
+jev_order_by_p: true

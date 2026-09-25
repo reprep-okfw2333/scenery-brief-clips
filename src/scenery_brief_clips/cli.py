@@ -266,11 +266,31 @@ def main(argv: list[str] | None = None) -> int:
 
     p_jg = sub.add_parser(
         "jev-gate",
-        help="Optional Jev metadata gate before rank/analyze (needs jev_gate: true in config; key from OPENROUTER_API_KEY)",
+        help=(
+            "Optional, off by default: Jev metadata reject filter after discovery, "
+            "before rank (needs jev_gate: true and OPENROUTER_API_KEY; see docs/JEV_GATE.md)"
+        ),
+        description=(
+            "Optional Jev metadata gate (off by default; enable with jev_gate: true in config). "
+            "Run after run/run-brief and before rank/tile review. Asks typesafe/jev-1.13 via the "
+            "OpenRouter decisions endpoint for P(keep) from cached metadata only; rejects a "
+            "candidate only when P(keep) <= jev_reject_below (default 0.40) and never auto-keeps. "
+            "Reads the key only from the OPENROUTER_API_KEY environment variable. With no key, on "
+            "errors/timeouts, or once jev_max_usd_per_run is reached, candidates fall back to the "
+            "rule gate (kept). Caches in data/cache/jev/; writes jev_gate.json and "
+            "candidates_pre_jev.json and rewrites candidates.json to the survivors. "
+            "Roughly $0.07 per 1,000 candidates. Cannot see watermarks; cutoff tuned on "
+            "train footage only. See docs/JEV_GATE.md."
+        ),
     )
-    p_jg.add_argument("--run-dir", type=Path, required=True)
-    p_jg.add_argument("--root", type=Path, default=None)
-    p_jg.add_argument("--config", type=Path, default=None)
+    p_jg.add_argument("--run-dir", type=Path, required=True, help="Existing run dir with candidates.json")
+    p_jg.add_argument("--root", type=Path, default=None, help="Project root (default: install location)")
+    p_jg.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Flat YAML config inside the project (default: <root>/config.yaml when present)",
+    )
 
     p_an = sub.add_parser("analyze", help="720p analysis copy + scene cuts + excerpts (parallel spans by default)")
     p_an.add_argument("--run-dir", type=Path, required=True)
