@@ -347,6 +347,21 @@ def main(argv: list[str] | None = None) -> int:
     p_ls.add_argument("--confirm-vision", action="store_true")
     p_ls.add_argument("--root", type=Path, default=None)
 
+    p_pipe = sub.add_parser(
+        "run-pipeline",
+        help="Walk the existing stages, stopping only for a judgment or approval",
+    )
+    p_pipe.add_argument("--brief", type=Path, required=True)
+    p_pipe.add_argument("--plan", type=Path, default=None)
+    p_pipe.add_argument("--run-dir", type=Path, default=None)
+    p_pipe.add_argument("--vision-agree", action="store_true")
+    p_pipe.add_argument("--allow-export", action="store_true")
+    p_pipe.add_argument("--judgments", type=Path, default=None)
+    p_pipe.add_argument("--acknowledge-uncertain", default=None)
+    p_pipe.add_argument("--config", type=Path, default=None)
+    p_pipe.add_argument("--root", type=Path, default=None)
+    p_pipe.add_argument("--theme", default=None)
+
     args = parser.parse_args(argv)
     if args.command == "doctor":
         report = doctor(project_root())
@@ -382,6 +397,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_label_tiles(args)
     if args.command == "label-strips":
         return _cmd_label_strips(args)
+    if args.command == "run-pipeline":
+        return _cmd_run_pipeline(args)
     parser.error(f"unknown command {args.command}")
     return 2
 
@@ -1106,6 +1123,48 @@ def _cmd_label_strips(args: argparse.Namespace) -> int:
         )
     )
     return 0
+
+
+def _cmd_run_pipeline(args: argparse.Namespace) -> int:
+    from scenery_brief_clips.detect import detect_scenes
+    from scenery_brief_clips.fetch import cached_fetcher
+    from scenery_brief_clips.runner import Ports, advance
+    from scenery_brief_clips.yt import YtDlp
+
+    root = Path(args.root) if args.root else project_root()
+    tmp_dir = root / "tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False, allow_export=True, export_cache_dir=root / "data" / "cache" / "export")
+
+    def fetch_span(video_id, dest, span):
+        return yt.fetch_analysis(video_id, dest, span, timeout=300)
+
+    result = advance(
+        root,
+        brief=args.brief,
+        plan=args.plan,
+        run_dir=args.run_dir,
+        vision_agree=bool(args.vision_agree),
+        allow_export=bool(args.allow_export),
+        judgments=args.judgments,
+        acknowledge_uncertain=args.acknowledge_uncertain,
+        config_path=args.config,
+        theme=args.theme,
+        ports=Ports(
+            yt=yt,
+            sleep_fn=time.sleep,
+            rank_fetcher=cached_fetcher(root / "data" / "cache" / "storyboards"),
+            fetch_span=fetch_span,
+            detect_fn=detect_scenes,
+            invalidate_span=yt.invalidate_analysis,
+        ),
+    )
+    print(json.dumps(result, indent=2))
+    if result["status"] == "completed":
+        return 0
+    if result["status"] in {"paused", "recovery", "locked"}:
+        return 0
+    return 1
 
 
 if __name__ == "__main__":

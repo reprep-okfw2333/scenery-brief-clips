@@ -6,6 +6,10 @@ Project root: this repository (discoverable; do not hard-code a machine-specific
 Do not scatter caches, notes, or clones. Runtime data is gitignored under data/ and tmp/. Host /tmp is a small tmpfs — never put media there.
 Expected host: Linux with Python 3.14 (see .python-version). Native Windows lacks fcntl flock used by run/export locks — use WSL or Linux.
 
+## Runner milestone (2026-09-25)
+
+`run-pipeline` walks the existing stages in-process. Spec and handoffs: docs/RUNNER.md. Contract tests: tests/test_runner_contract.py (16 passed). Jev stays off. A frozen plan makes no planner call. Resume reuses validated work. A missing judgment or export allow pauses and can be supplied on the next run of the same command. A rejected moment is not exported, and a shortfall is left as a shortfall. This was proved with fakes, not a live YouTube run, so it does not establish speed, token cost, or scene quality.
+
 ## What is built (Parts 1–6 + external vision)
 
 Part 1  Search + metadata gate. No video download.
@@ -45,7 +49,7 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 358 passed on 2026-09-25 (343 after the analyze-parallelization port on 2026-09-24, + 15 Jev gate tests).
+Tests: 374 passed in 178.03s on 2026-09-25. Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to

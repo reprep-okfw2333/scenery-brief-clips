@@ -9,6 +9,7 @@ From the project root. Prefer the venv binary (`uv` is often not on PATH):
   .venv/bin/scenery-brief-clips explain-prompt "PROMPT"
   .venv/bin/scenery-brief-clips run --dry-run --prompt "PROMPT" [--max-results N] [--max-metadata N] [--sleep S] [--config PATH]
   .venv/bin/scenery-brief-clips run-brief --brief BRIEF.json --dry-run [--plan PLAN.json] [--planner-config PATH] [--max-results N] [--max-metadata N] [--sleep S]
+  .venv/bin/scenery-brief-clips run-pipeline --brief BRIEF.json [--plan PLAN.json] [--run-dir RUN] [--vision-agree] [--allow-export] [--judgments FILE] [--acknowledge-uncertain STAGE] [--theme SLUG]
   .venv/bin/scenery-brief-clips jev-gate --run-dir data/runs/<id> [--config PATH]   # optional, off unless jev_gate: true
   .venv/bin/scenery-brief-clips rank --run-dir data/runs/<id> [--max-videos N] [--max-tiles N] [--config PATH]
   .venv/bin/scenery-brief-clips apply-scores --run-dir data/runs/<id> --scores data/runs/<id>/vision_scores.json
@@ -39,6 +40,13 @@ explain-prompt
 
 run --dry-run
   Required flag. Multi-query search + metadata only. Earlier hits survive a later query error; the command exits 1 to disclose that partial search, or a total metadata failure (stopped_reason `metadata_errors`).
+
+run-pipeline
+  One in-process walk of the existing stages. See docs/RUNNER.md. It does not
+  call Jev. A frozen --plan skips the planner. It pauses for vision agreement,
+  missing judgments, and export allowance, and can be resumed with the same
+  --run-dir. This command will use the local yt-dlp binary when you run it
+  for real. The contract tests do not do that; they substitute fakes.
 
 jev-gate (optional, experimental, off by default)
   Jev metadata reject filter. Run after run/run-brief (discovery) and before rank/tile review. Does nothing unless the loaded config has `jev_gate: true`; when off it prints `"enabled": false`, exits 0, and leaves candidates.json unchanged.
