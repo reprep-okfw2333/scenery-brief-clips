@@ -1,5 +1,14 @@
 # Current issues and resolved regressions
 
+## Active local runner reliability pass
+
+See docs/IMPROVEMENT_PASS.md and benchmark/improvement/RESULTS.md. Local fixes
+cover changed-output reuse, interrupted-stage promotion, cached final-verifier
+reports, ignored discovery limits, and repeated successful image judgments.
+Explicit --live-vision now connects the approved vision wire to the runner.
+The final working tree is not yet signed off; historical open issues below
+are not all resolved. Live automation worked, but analysis/export remain slow.
+
 As of 2026-09-23. Read this before calling the project ready for a normal order. Fixed history and the latest run evidence are in docs/STATUS.md. An honest shortfall is not itself a defect.
 
 ## Open: latency varies and duplicate acquisition remains

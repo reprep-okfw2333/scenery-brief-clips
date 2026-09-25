@@ -11,7 +11,7 @@ import hashlib
 import json
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable
 
@@ -216,12 +216,9 @@ def _advance_locked(**kw) -> dict:
     inflight = _read_inflight(run_dir)
     if inflight is not None:
         stage = inflight["stage"]
-        if _outputs_ok(run_dir, stage):
-            state["completed"][stage] = {"binding": inflight.get("binding")}
+        if kw["acknowledge_uncertain"] == stage:
             _clear_inflight(run_dir)
-        elif kw["acknowledge_uncertain"] == stage:
-            _clear_inflight(run_dir)
-            state["completed"].pop(stage, None)
+            _drop_from(state, stage)
             state["timing"]["retries"] = int(state["timing"].get("retries") or 0) + 1
         elif stage in EXTERNAL_STAGES:
             return _pause(
@@ -239,6 +236,15 @@ def _advance_locked(**kw) -> dict:
 
     bindings = _bindings(kw["brief_doc"], kw["plan_doc"], config, model_id)
     for stage in STAGE_ORDER:
+        saved = state["completed"].get(stage)
+        if saved and saved.get("outputs") != _output_hashes(run_dir, stage):
+            if kw["acknowledge_uncertain"] == stage:
+                _drop_from(state, stage)
+                state["timing"]["retries"] += 1
+            else:
+                return _pause(state, run_dir, clock, status="recovery", stage=stage,
+                    missing="completed stage outputs changed or lack a content checkpoint",
+                    how_to_supply=f"inspect {run_dir}, then resume with acknowledge_uncertain={stage}")
         if _reusable(state, run_dir, stage, bindings):
             _record(state, stage, "reused", 0.0, 0, None)
             continue
@@ -281,9 +287,14 @@ def _advance_locked(**kw) -> dict:
                     "only after the partial output is understood"
                 ),
             )
-        _clear_inflight(run_dir)
-        state["completed"][stage] = {"binding": bindings.get(stage)}
+        state["completed"][stage] = {
+            "binding": bindings.get(stage), "outputs": _output_hashes(run_dir, stage)}
+        # apply-scores intentionally rewrites rank's output; bind both owners.
+        if stage == "apply_scores" and "rank" in state["completed"]:
+            state["completed"]["rank"]["outputs"] = _output_hashes(run_dir, "rank")
         _record(state, stage, "executed", elapsed, counters.model_calls, _tokens(counters))
+        _save(run_dir, state, clock)
+        _clear_inflight(run_dir)
         counters.model_calls = 0
         counters.tokens = None
         counters.saw_unreported_usage = False
@@ -402,7 +413,18 @@ def _discover(root, run_dir, kw, ports: Ports, counters: _Counters) -> dict:
     queries = [item["query"] for item in plan["queries"]]
     if not queries:
         return {"failed": True, "error": "empty_query_plan"}
-    constraint, _limits = _brief_constraint_from_brief(brief, {})
+    config = kw["config"]
+    constraint, _limits = _brief_constraint_from_brief(brief, {
+        "max_results": config.get("max_search_results"),
+        "max_metadata": config.get("max_metadata_fetches"),
+    })
+    constraint = replace(constraint,
+        min_width=max(constraint.min_width, config.get("min_width", constraint.min_width)),
+        min_height=max(constraint.min_height, config.get("min_height", constraint.min_height)),
+        aspect_min=max(constraint.aspect_min, config.get("aspect_min", constraint.aspect_min)),
+        aspect_max=min(constraint.aspect_max, config.get("aspect_max", constraint.aspect_max)))
+    if constraint.aspect_min > constraint.aspect_max:
+        raise ValueError("configured aspect band does not overlap the brief")
     cache = MetadataCache(root / "data" / "cache" / "metadata")
     result = run_dry(
         constraint,
@@ -461,7 +483,7 @@ def _label(run_dir, wire, caller, counters: _Counters, *, kind: str, judgments: 
         return {}
     if caller is None:
         return {"failed": True, "error": f"{kind} caller missing"}
-    wrapped = _wrap_caller(caller, counters, "planner" if False else ("tile" if kind == "tile" else "strip"))
+    wrapped = _wrap_caller(caller, counters, kind)
     if kind == "tile":
         result = label_ranked_tiles(run_dir, wire, caller=wrapped)
         if result["failures"]:
@@ -590,7 +612,9 @@ def _bindings(brief, plan, config, model_id) -> dict:
         "config": {key: config.get(key) for key in DISCOVERY_KEYS},
     }
     rank = {**discovery, "config": {key: config.get(key) for key in RANK_KEYS}}
-    vision = {"model": model_id}
+    from scenery_brief_clips.vision_wire import brief_prompt
+    vision = {"model": model_id, "tile_prompt": brief_prompt("tile", ""),
+              "strip_prompt": brief_prompt("strip", ""), "label_policy": "vision_label_v1"}
     analyze = {
         "config": {key: config.get(key) for key in ANALYZE_KEYS},
         "env": {key: os.environ.get(key) for key in ANALYZE_ENV},
@@ -623,23 +647,24 @@ def _invalidate(state, bindings) -> None:
             drop = True
         if drop:
             completed.pop(stage, None)
-    if (state.get("approvals") or {}).get("vision") != bindings and False:
-        pass
-    saved_model = (state.get("approvals") or {}).get("vision")
-    current = json.loads(json.dumps(saved_model)) if saved_model else None
-    # vision binding is a hash, so compare the stored approval to the live model
-    # via the caller. _invalidate receives hashes only; the live check is in _handoff.
     state["completed"] = completed
-    del current
 
 
 def _reusable(state, run_dir, stage, bindings) -> bool:
+    # A saved report is not proof that referenced media is still intact.
+    if stage == "verify_export":
+        return False
     saved = (state.get("completed") or {}).get(stage) or {}
     return saved.get("binding") == bindings.get(stage) and _outputs_ok(run_dir, stage)
 
 
-def _outputs_ok(run_dir: Path, stage: str) -> bool:
-    need = {
+def _drop_from(state, stage):
+    for name in STAGE_ORDER[STAGE_ORDER.index(stage):]:
+        state["completed"].pop(name, None)
+
+
+def _output_names(stage):
+    return {
         "discover": ["candidates.json", "constraint.json", "discovery.json"],
         "rank": ["ranked.json"],
         "agree_vision": [],
@@ -654,7 +679,27 @@ def _outputs_ok(run_dir: Path, stage: str) -> bool:
         "export": ["export.json"],
         "verify_export": ["verify_export.json"],
     }[stage]
-    return all((run_dir / name).is_file() and (run_dir / name).stat().st_size > 0 for name in need)
+
+
+def _output_hashes(run_dir, stage):
+    try:
+        return {name: hashlib.sha256((run_dir / name).read_bytes()).hexdigest()
+                for name in _output_names(stage)}
+    except OSError:
+        return None
+
+
+def _outputs_ok(run_dir: Path, stage: str) -> bool:
+    try:
+        for name in _output_names(stage):
+            value = _load_json(run_dir / name)
+            if not isinstance(value, (dict, list)):
+                return False
+            if stage in {"verify_review", "verify_export"} and not value.get("ok"):
+                return False
+        return True
+    except (OSError, ValueError, AttributeError):
+        return False
 
 
 def _pause(state, run_dir, clock, **fields) -> dict:

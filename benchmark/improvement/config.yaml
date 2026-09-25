@@ -1,0 +1,6 @@
+max_rank_videos: 2
+max_tiles: 4
+max_analyze_videos: 2
+max_analysis_s: 60
+export_max_height: 720
+jev_gate: false

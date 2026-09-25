@@ -1,0 +1,14 @@
+{
+  "version": "search_queries_v1",
+  "brief_sha256": "2e31ec2d9718175afb5034b83cccce10e473edbcfff136686e0750a7e80bcc26",
+  "queries": [
+    {
+      "query": "ocean waves scenery",
+      "strategy": "exact"
+    },
+    {
+      "query": "ocean waves stock footage",
+      "strategy": "context"
+    }
+  ]
+}

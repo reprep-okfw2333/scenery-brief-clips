@@ -7,6 +7,8 @@ pictures until a person confirms that choice. Secrets never live in the file.
 from __future__ import annotations
 
 import base64
+import fcntl
+import hashlib
 from concurrent.futures import Future, ThreadPoolExecutor
 import json
 import os
@@ -448,6 +450,54 @@ def label_image(
     raise VisionWireError(f"unknown label kind: {kind}")
 
 
+def _checkpointed_label(run_dir, wire, image_path, kind, caller, theme):
+    """Reuse successful judgments only for identical pixels, prompt and wire.
+
+    Checkpoints are run-local, atomically published, and serialized per key.
+    Missing fixture images retain the injection seam but cannot be cached.
+    """
+    from scenery_brief_clips.store import write_json_atomic
+
+    image_path = Path(image_path)
+    if not image_path.is_file():
+        return label_image(wire, image_path, kind, caller, theme)
+    image_hash = hashlib.sha256(image_path.read_bytes()).hexdigest()
+    identity = {
+        "schema": "vision_label_v1", "kind": kind,
+        "backend": wire.backend, "model": wire.model, "base_url": wire.base_url,
+        "prompt": hashlib.sha256(brief_prompt(kind, theme).encode()).hexdigest(),
+        "image": image_hash,
+    }
+    digest = lambda value: hashlib.sha256(json.dumps(
+        value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    key = digest(identity)
+    directory = Path(run_dir) / "vision_labels"
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{key}.json"
+    normalize = normalize_tile_label if kind == "tile" else normalize_strip_label
+    with (directory / f"{key}.lock").open("a+") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        hit = None
+        try:
+            cached = json.loads(path.read_text())
+            value = cached["label"]
+            if (cached["identity"] == identity and cached["label_sha256"] == digest(value)
+                    and normalize(value) == value):
+                hit = dict(value)
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            pass
+        if hit is not None:
+            if hashlib.sha256(image_path.read_bytes()).hexdigest() != image_hash:
+                raise VisionWireError("image changed during checkpoint lookup")
+            return hit
+        value = label_image(wire, image_path, kind, caller, theme)
+        if hashlib.sha256(image_path.read_bytes()).hexdigest() != image_hash:
+            raise VisionWireError("image changed during labeling; judgment not published")
+        write_json_atomic(path, {"identity": identity, "label": value,
+                                 "label_sha256": digest(value)})
+        return value
+
+
 def label_ranked_tiles(run_dir: str | Path, wire: VisionWire, caller=None) -> dict:
     ranked_path = Path(run_dir) / "ranked.json"
     if not ranked_path.is_file():
@@ -484,7 +534,7 @@ def label_ranked_tiles(run_dir: str | Path, wire: VisionWire, caller=None) -> di
                     pending.append((record, None))
                     continue
                 if path:
-                    pending.append((record, pool.submit(label_image, wire, path, "tile", caller, theme)))
+                    pending.append((record, pool.submit(_checkpointed_label, run_dir, wire, path, "tile", caller, theme)))
             pending_rows.append((video_id, pending))
         for video_id, pending in pending_rows:
             entries: list[dict] = []
@@ -525,7 +575,7 @@ def label_review_strips(run_dir: str | Path, wire: VisionWire, caller=None) -> d
             strip_path = run_dir / strip_path
         prompt_kind = "strip"
         try:
-            labeled = label_image(wire, strip_path, prompt_kind, caller, theme)
+            labeled = _checkpointed_label(run_dir, wire, strip_path, prompt_kind, caller, theme)
         except VisionWireError as exc:
             failures.append({"path": str(strip_path), "error": str(exc)})
             continue

@@ -1,5 +1,14 @@
 # Status (read this first)
 
+## Active improvement pass — not yet signed off
+
+Local changes and acceptance criteria: docs/IMPROVEMENT_PASS.md. Observed results:
+benchmark/improvement/RESULTS.md. A live automatic run exported 2/2 720p clips
+and passed final verification in 20.18 active minutes. This is automation
+evidence, not a speedup. The pre-commit full suite passed 390 tests in 182.71s. Later fixes were not
+loaded by the already-running live process. This snapshot is not final
+acceptance: live replay and complete documentation synchronization remain.
+
 Anyone picking this up: this file is the current snapshot. Open problems are in docs/ISSUES.md. Design lives in docs/ARCHITECTURE.md. Implementation order lives in docs/ROADMAP.md. Do not start a new part until the user explicitly says to.
 
 Project root: this repository (discoverable; do not hard-code a machine-specific absolute path as the only instruction).

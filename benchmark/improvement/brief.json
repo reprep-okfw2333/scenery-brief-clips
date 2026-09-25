@@ -1,0 +1,91 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "two 720p ocean-wave clips",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "ocean waves",
+        "min_visible": 1
+      }
+    ],
+    "setting": null,
+    "action": null,
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "ocean waves",
+  "geography": null,
+  "n_clips": 2,
+  "clip_duration_s": {
+    "min": 4,
+    "target": 6,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 6,
+    "max_metadata_fetches": 6,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_clarification",
+      "quote": "two 720p ocean-wave clips"
+    },
+    "scene.setting": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.action": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.required_other": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.excluded": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "geography": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "n_clips": {
+      "origin": "user_clarification",
+      "quote": "two 720p ocean-wave clips"
+    },
+    "clip_duration_s": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "source_geometry": {
+      "origin": "user_clarification",
+      "quote": "two 720p ocean-wave clips"
+    },
+    "export_max_height": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "delivery": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "search_limits": {
+      "origin": "project_default",
+      "quote": null
+    }
+  }
+}

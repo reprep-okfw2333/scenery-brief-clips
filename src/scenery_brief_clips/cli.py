@@ -355,6 +355,8 @@ def main(argv: list[str] | None = None) -> int:
     p_pipe.add_argument("--plan", type=Path, default=None)
     p_pipe.add_argument("--run-dir", type=Path, default=None)
     p_pipe.add_argument("--vision-agree", action="store_true")
+    p_pipe.add_argument("--live-vision", action="store_true",
+                        help="Use the configured vision wire after model agreement")
     p_pipe.add_argument("--allow-export", action="store_true")
     p_pipe.add_argument("--judgments", type=Path, default=None)
     p_pipe.add_argument("--acknowledge-uncertain", default=None)
@@ -1129,6 +1131,7 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
     from scenery_brief_clips.detect import detect_scenes
     from scenery_brief_clips.fetch import cached_fetcher
     from scenery_brief_clips.runner import Ports, advance
+    from scenery_brief_clips.vision_wire import call_wired_vision
     from scenery_brief_clips.yt import YtDlp
 
     root = Path(args.root) if args.root else project_root()
@@ -1153,6 +1156,8 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
         ports=Ports(
             yt=yt,
             sleep_fn=time.sleep,
+            tile_caller=call_wired_vision if args.live_vision else None,
+            strip_caller=call_wired_vision if args.live_vision else None,
             rank_fetcher=cached_fetcher(root / "data" / "cache" / "storyboards"),
             fetch_span=fetch_span,
             detect_fn=detect_scenes,

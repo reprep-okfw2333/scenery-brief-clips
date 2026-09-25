@@ -696,6 +696,10 @@ def test_missing_discovery_file_is_not_reused(tmp_path, monkeypatch):
     run_dir = Path(first["run_dir"])
     (run_dir / "discovery.json").unlink()
     second = advance(root, brief=brief_path, plan=plan_path, run_dir=run_dir, ports=_ports(yt))
+    assert second["status"] == "recovery"
+    assert yt.searches == searches
+    second = advance(root, brief=brief_path, plan=plan_path, run_dir=run_dir,
+                     ports=_ports(yt), acknowledge_uncertain="discover")
     assert yt.searches > searches
     assert not any(
         item["stage"] == "discover" and item["status"] == "reused"
