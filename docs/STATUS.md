@@ -45,7 +45,7 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 343 passed on the analyze-parallelization port (2026-09-24; 341 prior + 2 env-default tests).
+Tests: 358 passed on 2026-09-25 (343 after the analyze-parallelization port on 2026-09-24, + 15 Jev gate tests).
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to
@@ -437,3 +437,28 @@ more.
 
 1. Read this file, then docs/ISSUES.md, docs/ARCHITECTURE.md, docs/ROADMAP.md, docs/VISION.md.
 2. Do not start a new part until the user writes done criteria and says to start. The open problems in ISSUES.md come before new features.
+
+## Experimental: optional Jev metadata gate (off by default)
+
+Full reference: docs/JEV_GATE.md. Added 2026-09-25 on branch exp/jev-gate.
+
+`jev-gate --run-dir RUN [--config CFG]` runs after discovery (`run`/`run-brief`) and before `rank`/tile
+review. It is a no-op unless the config sets `jev_gate: true`. For each metadata-eligible candidate it asks
+TypeSafe Jev (`typesafe/jev-1.13`, OpenRouter decisions endpoint `POST /api/alpha/decisions`) seven typed
+questions about title, description, tags, channel and the run theme. It rejects only candidates with
+P(keep) ≤ `jev_reject_below` (default 0.40) and orders survivors by P(keep). It never auto-keeps:
+`keep_high` (≥ `jev_keep_above`, 0.85) is a label only, and every survivor still goes through rank, tile
+review, analyze and shortlist review. Nothing is downloaded.
+
+- Key: read only from the `OPENROUTER_API_KEY` environment variable; never written to config or artifacts.
+- Fallback to the rule gate (candidate kept, reason recorded): no key, HTTP error, timeout, malformed answer,
+  or the per-run cost cap (`jev_max_usd_per_run`, default 0.25) reached.
+- Artifacts: `jev_gate.json` (per-candidate P(keep), answers, decision, source, cost) and
+  `candidates_pre_jev.json` (original list; re-runs re-gate from it). Cache: `data/cache/jev/<sha256>.json`.
+- Cost: about $0.07 per 1,000 candidates; median latency about 0.18 s per candidate.
+- Offline evaluation (96 hand-labeled train-footage candidates): accuracy 0.74 vs 0.49 for rules only,
+  reject precision 0.97, reject recall 0.60 vs 0.18, AUC 0.88; about 30% fewer tile reviews but only about
+  2–3% less analyze download.
+- Limitations: it cannot detect watermarks; the cutoff and the question wording are tuned on train footage
+  only, with one reviewer's labels; the live A/B was blocked by YouTube's bot check (see docs/ISSUES.md).
+- Tests: tests/test_jev_gate.py (15, stubbed HTTP; no network).

@@ -6,7 +6,7 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
     src/scenery_brief_clips/  code (adds brief.py, planner.py to the inherited set)
     tests/                 pytest
     scripts/chain_parts123.py
-    docs/                  STATUS, architecture, roadmap, CLI, vision, data
+    docs/                  STATUS, architecture, roadmap, CLI, vision, data, JEV_GATE (optional gate)
     config.example.yaml    copy to config.yaml, or pass with --config; flat validated defaults
     tmp/                   yt-dlp / HTTP temp (never host /tmp)
     data/
@@ -14,6 +14,8 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
         metadata/<video_id>.json     Part 1 player JSON
         storyboards/                 Part 2 sheet JPEGs (hashed URLs)
         tiles/<video_id>/            Part 2 sliced tiles for vision
+        jev/<sha256>.json            optional Jev gate answers, keyed by model + question
+                                     version + questions + state (no key stored)
         analysis/<video_id>_<start_ms>-<end_ms>_<policy>.mp4
                                             Part 3 validated ≤720p video-only span
         analysis/<...>.mp4.complete.json     schema/policy/video/span/size/SHA-256 marker
@@ -28,7 +30,10 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
                                      query plan, planner provenance, counts, stop reason;
                                      candidates/rejects annotated unverified/metadata_only
         constraint.json
-        candidates.json              B keepers
+        candidates.json              B keepers (after the optional jev-gate: its survivors, ordered by P(keep))
+        candidates_pre_jev.json      optional; original B keepers, written once by jev-gate (re-runs re-gate from it)
+        jev_gate.json                optional jev-gate report (jev_gate_v1): model, thresholds, counts, cost,
+                                     per-candidate p_keep, answers, decision, fallback source
         rejected.json                B rejects
         ranked.json                  C after last apply-scores (or rank if unscored)
         ranked_before_vision.json    backup written once by apply-scores
@@ -40,7 +45,7 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
         shortlist_scores.json         Part 4 labels written by Hermes/a person
         shortlist.json                Part 4 decision: selected, excluded+reasons, counts, shortfall
         export.json                   Part 5 pointer to the published export (theme, manifest path + sha256)
-        .pipeline.lock                serializes rank/apply-scores/analyze/shortlist-*/verify/export for this run
+        .pipeline.lock                serializes jev-gate/rank/apply-scores/analyze/shortlist-*/verify/export for this run
         analysis_manifest.json settings include analyze_workers (default 4) when present
         log.txt
 

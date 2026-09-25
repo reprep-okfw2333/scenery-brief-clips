@@ -2,19 +2,21 @@
 
 From the project root. Prefer the venv binary (`uv` is often not on PATH):
 
-  .venv/bin/scenery-clips vision-show
-  .venv/bin/scenery-clips label-tiles --run-dir data/runs/<id> --confirm-vision
-  .venv/bin/scenery-clips label-strips --run-dir data/runs/<id> --confirm-vision
-  .venv/bin/scenery-clips doctor
-  .venv/bin/scenery-clips explain-prompt "PROMPT"
-  .venv/bin/scenery-clips run --dry-run --prompt "PROMPT" [--max-results N] [--max-metadata N] [--sleep S] [--config PATH]
-  .venv/bin/scenery-clips rank --run-dir data/runs/<id> [--max-videos N] [--max-tiles N] [--config PATH]
-  .venv/bin/scenery-clips apply-scores --run-dir data/runs/<id> --scores data/runs/<id>/vision_scores.json
-  .venv/bin/scenery-clips analyze --run-dir data/runs/<id> [--max-videos N] [--max-analysis-s S] [--config PATH]
-  .venv/bin/scenery-clips shortlist-review --run-dir data/runs/<id> [--frames N]
-  .venv/bin/scenery-clips shortlist-apply --run-dir data/runs/<id> --scores data/runs/<id>/shortlist_scores.json
-  .venv/bin/scenery-clips export --run-dir data/runs/<id> [--theme SLUG] [--allow-export] [--config PATH]
-  .venv/bin/scenery-clips verify --run-dir data/runs/<id> [--require-export]
+  .venv/bin/scenery-brief-clips vision-show
+  .venv/bin/scenery-brief-clips label-tiles --run-dir data/runs/<id> --confirm-vision
+  .venv/bin/scenery-brief-clips label-strips --run-dir data/runs/<id> --confirm-vision
+  .venv/bin/scenery-brief-clips doctor
+  .venv/bin/scenery-brief-clips explain-prompt "PROMPT"
+  .venv/bin/scenery-brief-clips run --dry-run --prompt "PROMPT" [--max-results N] [--max-metadata N] [--sleep S] [--config PATH]
+  .venv/bin/scenery-brief-clips run-brief --brief BRIEF.json --dry-run [--plan PLAN.json] [--planner-config PATH] [--max-results N] [--max-metadata N] [--sleep S]
+  .venv/bin/scenery-brief-clips jev-gate --run-dir data/runs/<id> [--config PATH]   # optional, off unless jev_gate: true
+  .venv/bin/scenery-brief-clips rank --run-dir data/runs/<id> [--max-videos N] [--max-tiles N] [--config PATH]
+  .venv/bin/scenery-brief-clips apply-scores --run-dir data/runs/<id> --scores data/runs/<id>/vision_scores.json
+  .venv/bin/scenery-brief-clips analyze --run-dir data/runs/<id> [--max-videos N] [--max-analysis-s S] [--config PATH]
+  .venv/bin/scenery-brief-clips shortlist-review --run-dir data/runs/<id> [--frames N]
+  .venv/bin/scenery-brief-clips shortlist-apply --run-dir data/runs/<id> --scores data/runs/<id>/shortlist_scores.json
+  .venv/bin/scenery-brief-clips export --run-dir data/runs/<id> [--theme SLUG] [--allow-export] [--config PATH]
+  .venv/bin/scenery-brief-clips verify --run-dir data/runs/<id> [--require-export]
   .venv/bin/python scripts/chain_parts123.py
 
 vision.yaml is the switch for which model looks at pictures. See docs/VISION.md. Hermes must show `vision-show` and get a yes before starting a run. label-tiles and label-strips refuse without `--confirm-vision`.
@@ -25,9 +27,9 @@ emit no per-image progress; wait for their exit status and published score
 file before applying labels. A foreground tool timeout does not prove the
 underlying CLI stopped, so do not launch a duplicate without checking.
 
-`--root` on run/rank/analyze/verify/apply-scores/shortlist-review/shortlist-apply/export/vision-show/label-tiles/label-strips sets the project root (default: install location).
-Run-scoped commands (rank, analyze, apply-scores, verify, shortlist-review, shortlist-apply, export) require an existing run dir; a missing `--run-dir` exits 2 with "run dir not found" and creates nothing.
-run/rank/analyze/export load `<root>/config.yaml` when present; `--config PATH` selects another flat YAML file inside the project. Flags override config. Config cannot loosen prompt geometry, and downloads stay forbidden in the default pipeline (only the export path is gated open, explicitly). `export_max_height` is the export cap: default 720, valid integer range 720..2160.
+`--root` on run/run-brief/rank/jev-gate/analyze/verify/apply-scores/shortlist-review/shortlist-apply/export/vision-show/label-tiles/label-strips sets the project root (default: install location).
+Run-scoped commands (rank, jev-gate, analyze, apply-scores, verify, shortlist-review, shortlist-apply, export) require an existing run dir; a missing `--run-dir` exits 2 with "run dir not found" and creates nothing.
+run/rank/jev-gate/analyze/export load `<root>/config.yaml` when present (run-brief accepts `--config` but does not read it; its limits come from the brief and its own flags); `--config PATH` selects another flat YAML file inside the project. Flags override config. Config cannot loosen prompt geometry, and downloads stay forbidden in the default pipeline (only the export path is gated open, explicitly). `export_max_height` is the export cap: default 720, valid integer range 720..2160.
 
 doctor
   yt-dlp, ffmpeg, ffprobe, node, pillow, scenedetect, tmp/, data/, plus versions (python, yt-dlp, ffmpeg/ffprobe, node) and actionable messages if yt-dlp predates the 2025.11.12 external JS runtime transition or node is missing. allow_download is always false.
@@ -37,6 +39,13 @@ explain-prompt
 
 run --dry-run
   Required flag. Multi-query search + metadata only. Earlier hits survive a later query error; the command exits 1 to disclose that partial search, or a total metadata failure (stopped_reason `metadata_errors`).
+
+jev-gate (optional, experimental, off by default)
+  Jev metadata reject filter. Run after run/run-brief (discovery) and before rank/tile review. Does nothing unless the loaded config has `jev_gate: true`; when off it prints `"enabled": false`, exits 0, and leaves candidates.json unchanged.
+  When on, asks `typesafe/jev-1.13` through the OpenRouter decisions endpoint (`POST https://openrouter.ai/api/alpha/decisions`) for P(keep) from cached metadata only (no download, no pictures). Rejects a candidate only when P(keep) ≤ `jev_reject_below` (default 0.40); it never auto-keeps, and survivors still go through rank and tile review, ordered by P(keep).
+  The key comes only from the `OPENROUTER_API_KEY` environment variable; never put it in a file. With no key, on HTTP errors, timeouts, or malformed answers, and once `jev_max_usd_per_run` is reached, candidates fall back to the rule gate (kept) and the reason is recorded.
+  Caches decisions in data/cache/jev/. Writes jev_gate.json and candidates_pre_jev.json (the original list, written once; re-runs re-gate from it) and rewrites candidates.json to the survivors. If you re-run it after rank, run rank again.
+  Roughly $0.07 per 1,000 candidates. Cannot detect watermarks; the 0.40 cutoff was tuned on train footage only. Exits 2 on invalid config, a missing run dir, or a missing candidates.json. See docs/JEV_GATE.md.
 
 rank
   Storyboard sample, save tiles under data/cache/tiles/, write ranked.json (uncertain until scored).

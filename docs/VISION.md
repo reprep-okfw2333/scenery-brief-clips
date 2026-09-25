@@ -13,14 +13,14 @@ vision.yaml, in the project root, is the switch. Edit that file to point labelin
 
 Show the current setting:
 
-  .venv/bin/scenery-clips vision-show
+  .venv/bin/scenery-brief-clips vision-show
 
 Hermes must read that sentence to the user and ask whether to continue with that model or change vision.yaml. Do not start the pipeline, and do not pass --confirm-vision, until the user agrees.
 
 Label commands, after that agreement:
 
-  .venv/bin/scenery-clips label-tiles --run-dir data/runs/<id> --confirm-vision
-  .venv/bin/scenery-clips apply-scores --run-dir data/runs/<id> --scores data/runs/<id>/vision_scores.json
+  .venv/bin/scenery-brief-clips label-tiles --run-dir data/runs/<id> --confirm-vision
+  .venv/bin/scenery-brief-clips apply-scores --run-dir data/runs/<id> --scores data/runs/<id>/vision_scores.json
 
 Without `--confirm-vision`, labeling refuses and prints the wired model; it
 does not look at pictures. `label-tiles` and `label-strips` currently emit no

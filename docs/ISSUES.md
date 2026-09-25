@@ -39,7 +39,7 @@ The former base tile prompt unconditionally rejected people as subjects even whe
 
 `vision_scores.json` stores per-tile labels but not a durable model/backend identity. The CLI reports the active model when it writes scores, and path matching prevents some stale score application, but a future re-label of the same paths with a different model cannot be distinguished from the JSON alone. The current live run used a new run ID and a freshly approved gpt-6-sol wire; no stale-file failure was demonstrated. A provenance schema/migration and policy for manually authored score files require a separate contract; do not claim this has been fixed.
 
-`visual_positives` and `visual_negatives` in constraint JSON are serialized defaults and have no downstream consumer. In particular, the listed `people` negative is not an active rejection gate. The actual vision prompt and review labels determine visual matching. These fields should not be presented as enforced constraints; removing or wiring them requires explicit intended semantics and tests.
+`visual_positives` and `visual_negatives` in constraint JSON are serialized defaults and have no enforcing consumer (the optional, off-by-default Jev gate passes `visual_negatives` to Jev as text context only; see docs/JEV_GATE.md). In particular, the listed `people` negative is not an active rejection gate. The actual vision prompt and review labels determine visual matching. These fields should not be presented as enforced constraints; removing or wiring them requires explicit intended semantics and tests.
 
 ## Open: no incremental vision-label progress
 
@@ -50,6 +50,21 @@ long stages as tracked background terminal jobs with completion notification;
 that prevents a foreground tool timeout from obscuring the job's fate but does
 not add per-image progress. A future progress mechanism should report completed,
 failed, and total images without changing score-file publication semantics.
+
+## Open: Jev gate is evaluated offline on train footage only
+
+The optional `jev-gate` (off by default; docs/JEV_GATE.md) was evaluated on 96 hand-labeled train-footage
+candidates labeled by one reviewer (accuracy 0.74 vs 0.49 for rules only; reject precision 0.97; AUC 0.88).
+Not yet shown:
+
+- A live A/B run through analyze. The attempt on 2026-09-25 was blocked by YouTube's "Sign in to confirm
+  you're not a bot" check on the test host, and cookies are off by policy.
+- Any theme other than trains. The 0.40 cutoff and the question wording (`jev_gate_q_v1`) are tuned for
+  train footage; P(keep) shifted by up to ±0.1 when the state format changed.
+- Watermark or burned-in text detection. Jev sees metadata only, so tile review and vision stay mandatory.
+
+It never auto-keeps, and every failure path falls back to the rule gate, so the worst case of enabling it is
+a wrongly rejected candidate (in the offline set, 1 of the 38 candidates scoring below 0.5 was a true keep).
 
 ## Operational traps, not logic bugs
 
