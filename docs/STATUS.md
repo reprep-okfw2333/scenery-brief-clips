@@ -437,3 +437,20 @@ more.
 
 1. Read this file, then docs/ISSUES.md, docs/ARCHITECTURE.md, docs/ROADMAP.md, docs/VISION.md.
 2. Do not start a new part until the user writes done criteria and says to start. The open problems in ISSUES.md come before new features.
+
+## Experimental (branch exp/jev-gate only): optional Jev metadata gate
+
+`jev-gate --run-dir RUN [--config CFG]` runs after `run-brief` and before `rank`. It is a no-op unless the
+config sets `jev_gate: true`. For each metadata-eligible candidate it asks TypeSafe Jev
+(`typesafe/jev-1.13`, OpenRouter `POST /api/alpha/decisions`) seven typed questions about title,
+description, tags, channel and the run theme, then drops candidates with P(keep) <= `jev_reject_below`
+(default 0.40) and orders survivors by P(keep). Nothing is downloaded.
+
+- Key: read only from the `OPENROUTER_API_KEY` environment variable; never written to artifacts.
+- Fallback: no key, HTTP error, timeout, malformed answer, or per-run budget (`jev_max_usd_per_run`,
+  default 0.25) keeps the candidate (the metadata rules already accepted it); the source is recorded.
+- Artifacts: `jev_gate.json` (per-candidate probabilities, decision, source, cost), `candidates_pre_jev.json`
+  (original list; re-runs re-gate from it). Cache: `data/cache/jev/<sha256>.json`.
+- Other keys: `jev_keep_above` (0.85, informational `keep_high` label), `jev_timeout_s` (20),
+  `jev_order_by_p` (true).
+- Evaluation and caveats: /workspace/jev-test/REPORT.md. Tests: tests/test_jev_gate.py (mocked HTTP).

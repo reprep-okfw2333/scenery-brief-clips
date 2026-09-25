@@ -29,7 +29,11 @@ _FLOAT_KEYS = {
     "continuity_max_adjacent_color",
     "continuity_max_endpoint_color",
 }
+_JEV_FLOAT_KEYS = {"jev_reject_below", "jev_keep_above", "jev_timeout_s", "jev_max_usd_per_run"}
+_JEV_BOOL_KEYS = {"jev_gate", "jev_order_by_p"}
 _ALLOWED_KEYS = {
+    *_JEV_FLOAT_KEYS,
+    *_JEV_BOOL_KEYS,
     "allow_download",
     "allow_export",
     "export_max_height",
@@ -94,6 +98,24 @@ def _validate_config(config: dict) -> dict:
             relation = "at least 0" if key == "sleep_s" else "greater than 0"
             raise ConfigError(f"{key} must be finite and {relation}")
         config[key] = value
+
+    for key in _JEV_BOOL_KEYS:
+        if key in config and not isinstance(config[key], bool):
+            raise ConfigError(f"{key} must be a boolean")
+    for key in _JEV_FLOAT_KEYS:
+        if key not in config:
+            continue
+        value = config[key]
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
+            raise ConfigError(f"{key} must be a finite number")
+        value = float(value)
+        if key in {"jev_reject_below", "jev_keep_above"} and not (0.0 <= value <= 1.0):
+            raise ConfigError(f"{key} must be between 0 and 1")
+        if key in {"jev_timeout_s", "jev_max_usd_per_run"} and value <= 0:
+            raise ConfigError(f"{key} must be greater than 0")
+        config[key] = value
+    if config.get("jev_reject_below", 0.40) >= config.get("jev_keep_above", 0.85):
+        raise ConfigError("jev_reject_below must be below jev_keep_above")
 
     aspect_min = config.get("aspect_min")
     aspect_max = config.get("aspect_max")

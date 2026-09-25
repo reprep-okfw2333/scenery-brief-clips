@@ -264,6 +264,14 @@ def main(argv: list[str] | None = None) -> int:
     p_rank.add_argument("--root", type=Path, default=None)
     p_rank.add_argument("--config", type=Path, default=None)
 
+    p_jg = sub.add_parser(
+        "jev-gate",
+        help="Optional Jev metadata gate before rank/analyze (needs jev_gate: true in config; key from OPENROUTER_API_KEY)",
+    )
+    p_jg.add_argument("--run-dir", type=Path, required=True)
+    p_jg.add_argument("--root", type=Path, default=None)
+    p_jg.add_argument("--config", type=Path, default=None)
+
     p_an = sub.add_parser("analyze", help="720p analysis copy + scene cuts + excerpts (parallel spans by default)")
     p_an.add_argument("--run-dir", type=Path, required=True)
     p_an.add_argument("--max-videos", type=_positive_int, default=None)
@@ -335,6 +343,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_rank(args)
     if args.command == "analyze":
         return _cmd_analyze(args)
+    if args.command == "jev-gate":
+        return _cmd_jev_gate(args)
     if args.command == "verify":
         return _cmd_verify(args)
     if args.command == "apply-scores":
@@ -647,6 +657,36 @@ def _cmd_rank(args: argparse.Namespace) -> int:
             indent=2,
         )
     )
+    return 0
+
+
+def _cmd_jev_gate(args: argparse.Namespace) -> int:
+    from scenery_brief_clips.jev_gate import JevGateSettings, gate_run
+
+    root = Path(args.root) if args.root else project_root()
+    try:
+        config = load_project_config(root, args.config)
+    except ConfigError as exc:
+        print(f"invalid config: {exc}", file=sys.stderr)
+        return 2
+    run_dir = Path(args.run_dir)
+    run_dir = (root / run_dir).resolve() if not run_dir.is_absolute() else run_dir.resolve()
+    missing = _require_run_dir(run_dir)
+    if missing is not None:
+        return missing
+    if not (run_dir / "candidates.json").is_file():
+        print(f"missing candidates.json in {run_dir}", file=sys.stderr)
+        return 2
+    settings = JevGateSettings.from_config(config)
+    result = gate_run(
+        run_dir,
+        metadata_cache=root / "data" / "cache" / "metadata",
+        jev_cache=root / "data" / "cache" / "jev",
+        settings=settings,
+    )
+    if not result.get("enabled"):
+        result["note"] = "jev_gate is off (set jev_gate: true in config); candidates.json unchanged"
+    print(json.dumps(result, indent=2))
     return 0
 
 
