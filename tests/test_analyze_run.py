@@ -193,7 +193,7 @@ def test_analyze_records_all_range_outcomes_and_input_provenance(tmp_path):
     assert len(manifest["constraint_sha256"]) == 64
     assert manifest["excerpts_sha256"] == sha256_file(run_dir / "excerpts.json")
     assert len(manifest["generation_id"]) >= 16
-    assert manifest["settings"]["cache_policy"] == "v3-video-only-720"
+    assert manifest["settings"]["cache_policy"] == "v4-copyts-720"
 
 
 def test_input_change_during_analysis_aborts_generation_publication(tmp_path):
@@ -355,6 +355,35 @@ def test_disappearing_analysis_file_becomes_recorded_range_failure(tmp_path):
     assert (run_dir / "excerpts.json").is_file()
 
 
+def test_passed_deadline_starts_no_new_span_and_records_why(tmp_path):
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "ranked.json").write_text(
+        json.dumps([{"video_id": "abcdefghijk", "priority": "promising", "windows": [], "duration_s": 10.0}])
+    )
+    (run_dir / "constraint.json").write_text(json.dumps({"duration_min_s": 4, "duration_max_s": 12}))
+    fetched = []
+
+    def fetch(video_id, dest, span):
+        fetched.append(span)
+        Path(dest).write_bytes(b"video")
+        return Path(dest)
+
+    rows = analyze_run(
+        run_dir,
+        cache_dir=tmp_path / "analysis",
+        fetch_span=fetch,
+        detect_fn=lambda path, min_scene_len_s: [(0.0, 10.0)],
+        continuity_settings=ContinuitySettings(enabled=False),
+        deadline=0.0,
+    )
+    assert fetched == []
+    assert rows[0]["status"] == "failed"
+    assert rows[0]["excerpts"] == []
+    assert rows[0]["ranges"][0]["stage"] == "deadline"
+    assert "deadline" in rows[0]["ranges"][0]["error"]
+
+
 def test_analyze_run_skips_low_priority(tmp_path):
     run_dir = tmp_path / "run"
     run_dir.mkdir()
@@ -461,12 +490,15 @@ def test_local_nonzero_offset_analysis_verifies_real_media_generation(tmp_path):
                 "-hide_banner",
                 "-loglevel",
                 "error",
+                # A copyts stream-copy section starts at the keyframe before
+                # the span: here 2 s early, keeping source timestamps.
                 "-ss",
-                "10",
+                "8",
                 "-i",
                 str(source),
-                "-t",
-                "10",
+                "-to",
+                "20",
+                "-copyts",
                 "-an",
                 "-c:v",
                 "libx264",
@@ -497,8 +529,23 @@ def test_local_nonzero_offset_analysis_verifies_real_media_generation(tmp_path):
     assert rows[0]["plan_ranges"] == [[10.0, 20.0]]
     assert rows[0]["excerpts"]
     assert all(10.0 <= excerpt["start_s"] < excerpt["end_s"] <= 20.0 for excerpt in rows[0]["excerpts"])
+    # Local 0 is the first packet (8 s), so the red/blue cut at local 2 s is source 10 s.
+    assert rows[0]["ranges"][0]["mapping_k_s"] == 8.0
+    assert rows[0]["excerpts"][0]["source_scene"][0] == pytest.approx(10.0, abs=0.05)
     report = verify_run(run_dir, analysis_dir=analysis_dir)
     assert report["ok"] is True, report
+
+    # A marker whose mapping disagrees with the file and the excerpt record fails closed.
+    from scenery_brief_clips.analysis_cache import analysis_marker_path
+
+    marker_path = analysis_marker_path(Path(rows[0]["ranges"][0]["path"]))
+    marker = json.loads(marker_path.read_text())
+    marker["first_pts_ms"] = 7000
+    marker_path.write_text(json.dumps(marker))
+    tampered = verify_run(run_dir, analysis_dir=analysis_dir)
+    assert tampered["ok"] is False
+    assert any("start_time does not match marker mapping" in e for e in tampered["errors"])
+    assert any("excerpt mapping does not match marker mapping" in e for e in tampered["errors"])
 
 
 def test_analyze_run_local_file_detects_and_excerpts(tmp_path):
@@ -574,7 +621,7 @@ def test_analyze_workers_env_default_and_override(monkeypatch):
     from scenery_brief_clips.pipeline_analyze import _analyze_workers
 
     monkeypatch.delenv("SCENERY_ANALYZE_WORKERS", raising=False)
-    assert _analyze_workers() == 4
+    assert _analyze_workers() == 2
     monkeypatch.setenv("SCENERY_ANALYZE_WORKERS", "1")
     assert _analyze_workers() == 1
     monkeypatch.setenv("SCENERY_ANALYZE_WORKERS", "0")
@@ -588,3 +635,37 @@ def test_detect_frame_skip_env_default(monkeypatch):
     assert _detect_frame_skip() == 1
     monkeypatch.setenv("SCENERY_DETECT_FRAME_SKIP", "0")
     assert _detect_frame_skip() == 0
+
+
+def test_pinned_rendition_reaches_fetch_and_prefetch(tmp_path):
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "ranked.json").write_text(
+        json.dumps([{"video_id": "abcdefghijk", "priority": "promising", "duration_s": 500.0,
+                     "windows": [{"start_s": 100.0, "end_s": 110.0}, {"start_s": 200.0, "end_s": 210.0}]}])
+    )
+    (run_dir / "constraint.json").write_text(json.dumps({"duration_min_s": 4, "duration_max_s": 12}))
+    prefetched, fetched = [], []
+
+    def prefetch(video_id, items, format_id=None):
+        prefetched.append((video_id, [span for _dest, span in items], format_id))
+
+    def fetch(video_id, dest, span, format_id=None):
+        fetched.append(format_id)
+        Path(dest).write_bytes(b"video")
+        return Path(dest)
+
+    rows = analyze_run(
+        run_dir,
+        cache_dir=tmp_path / "analysis",
+        fetch_span=fetch,
+        detect_fn=lambda path, min_scene_len_s: [(0.0, 8.0)],
+        continuity_settings=ContinuitySettings(enabled=False),
+        prefetch_spans=prefetch,
+        format_for=lambda row: "136",
+    )
+    assert rows[0]["status"] == "complete"
+    assert len(prefetched) == 1 and prefetched[0][2] == "136" and len(prefetched[0][1]) == 2
+    assert fetched == ["136", "136"]
+    # Fakes write no first_pts_ms, so the legacy span-start mapping applies.
+    assert [r["mapping_k_s"] for r in rows[0]["ranges"]] == [r["span"][0] for r in rows[0]["ranges"]]

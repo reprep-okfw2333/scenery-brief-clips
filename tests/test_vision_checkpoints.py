@@ -27,7 +27,10 @@ def test_checkpoint_hit_rejects_image_changed_during_lookup(tmp_path, monkeypatc
     def changing_read(path, *args, **kwargs):
         text = original(path, *args, **kwargs)
         if path.parent.name == 'vision_labels':
-            Image.new('RGB', (8, 8), (222, 0, 0)).save(tmp_path / '0.jpg')
+            # Tiles are looked up on two threads; change every image so the
+            # thread that read this checkpoint always sees its own image move.
+            for name in ('0.jpg', '1.jpg'):
+                Image.new('RGB', (8, 8), (222, 0, 0)).save(tmp_path / name)
         return text
     monkeypatch.setattr(Path, 'read_text', changing_read)
     result = label_ranked_tiles(tmp_path, WIRE, caller)

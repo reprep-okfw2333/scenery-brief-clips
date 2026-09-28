@@ -252,3 +252,29 @@ def test_analyze_run_continuity_gate_rejects_cut_window(tmp_path):
             assert excerpt["start_s"] >= 4.7
     if not excerpts:
         assert rows[0]["continuity_rejected"]
+
+
+def test_sequential_sampling_matches_per_sample_seek(tmp_path, monkeypatch):
+    import subprocess
+
+    from scenery_brief_clips.continuity import sample_features_from_video
+
+    video = tmp_path / "gop.mp4"
+    subprocess.run(
+        [
+            "ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+            "-i", "testsrc2=size=320x180:rate=30:duration=9",
+            "-c:v", "libx264", "-g", "90", "-pix_fmt", "yuv420p", str(video),
+        ],
+        check=True,
+    )
+    results = {}
+    for mode in ("1", None):
+        if mode:
+            monkeypatch.setenv("SCENERY_CONTINUITY_SEEK_EACH", mode)
+        else:
+            monkeypatch.delenv("SCENERY_CONTINUITY_SEEK_EACH", raising=False)
+        times, features = sample_features_from_video(video, 1.3, 7.9, fps=2.0)
+        results[mode] = (times, features)
+    assert results["1"] == results[None]
+    assert len(results[None][1]) >= 12

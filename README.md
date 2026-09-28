@@ -79,7 +79,7 @@ Honest limits (measured, not assumed):
   # Legacy prompt path (unchanged):
   .venv/bin/scenery-brief-clips run --dry-run --prompt "Beautiful natural european scenery, 720p, 16:9, 20 individual clips"
 
-  # Analyze (shared with those downstream stages) runs spans in parallel by default (SCENERY_ANALYZE_WORKERS=4; cold bench analyze ~73s / pipeline ~139s on 2026-09-24; see docs/CLI.md). Downstream stages are the inherited scenery-clips commands (rank, analyze, ...):
+  # Analyze (shared with those downstream stages) runs spans in parallel by default (SCENERY_ANALYZE_WORKERS=2 since 2026-09-28; the 4-worker cold bench measured analyze ~73s / pipeline ~139s on 2026-09-24; see docs/CLI.md). Downstream stages are the inherited scenery-clips commands (rank, analyze, ...):
   .venv/bin/scenery-brief-clips rank --run-dir data/runs/<id> --max-videos 5 --max-tiles 8
 
   # Optional Jev metadata gate (off by default). Needs jev_gate: true in the
@@ -87,7 +87,8 @@ Honest limits (measured, not assumed):
   # Run it after run/run-brief and BEFORE rank:
   .venv/bin/scenery-brief-clips jev-gate --run-dir data/runs/<id> --config config.yaml
 
-The planner model switch is planner.yaml (codex-login / gpt-6-sol by default,
+The planner model switch is planner.yaml (openai-api / z-ai/glm-5.3-flash on
+OpenRouter since 2026-09-27, key from OPENROUTER_API_KEY;
 mirroring vision.yaml's rules: no secrets in the file, explicit confirmation
 culture). --plan skips the model call entirely and uses a pre-validated plan.
 

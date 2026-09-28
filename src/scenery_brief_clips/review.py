@@ -190,7 +190,9 @@ def _review_run_locked(run_dir: Path, frames_per_moment: int) -> dict:
                 span = excerpt.get("analysis_span") or copy.get("span")
                 if not isinstance(span, (list, tuple)) or len(span) != 2:
                     raise RuntimeError("excerpt has no analysis_span to map times into the copy")
-                offset = float(span[0])
+                # copyts copies start at a keyframe before the span (K); legacy at span[0].
+                mapping_k = copy.get("mapping_k_s")
+                offset = float(span[0]) if mapping_k is None else float(mapping_k)
                 frame_records = []
                 frame_paths = []
                 seen_frame_names: set[str] = set()

@@ -1,5 +1,16 @@
 # Current issues and resolved regressions
 
+## Open (top yield problem): continuity gate rejects continuous camera motion
+
+Measured 2026-09-28 on 66 real gate decisions (Brazil run + military
+benchmark), blind-labeled from contact sheets: the gate misses 0 of 14 real
+transitions but flags 36 of 52 continuous single shots (26 rejected outright),
+mostly pans/tracking over marching troops, which is the requested footage.
+In the military benchmark PySceneDetect found no cut in any span, yet 7 of 10
+were rejected. A motion-compensated residual spike rule flags 3/52 but misses
+3/14 (cross-dissolves). No gate change has been made; see HANDOFF.md and
+benchmark/continuity_eval/. Do not loosen thresholds without this evaluation.
+
 ## Fixed on this branch: hung analysis downloads piled up and were retried
 
 Live run `data/runs/20260927T220608Z` (Brazilian military, 16 of 20 exported). Full account: `docs/RUN-20260927T220608Z-brazilian-military.md`.
@@ -10,7 +21,7 @@ Three faults, all in `yt.py`, not in the shortfall:
 2. The timeout killed only `yt-dlp`. `ffmpeg` children kept running. New tries stacked on top. This host (1.6 GB RAM) filled memory and swap. The job was stopped on purpose.
 3. Analysis calls did not cap `yt-dlp`'s own retry count or socket wait, so one stalled piece could be retried many times inside a single attempt.
 
-The branch stops treating that timeout as retryable, kills the whole download process group, and passes `--retries 1`, `--fragment-retries 1`, and `--socket-timeout 15`. `--force-keyframes-at-cuts` stays, because the analysis copy still has to land near the planned window.
+The branch stops treating that timeout as retryable, kills the whole download process group, and passes `--retries 1`, `--fragment-retries 1`, and `--socket-timeout 15`. (Superseded 2026-09-28: analysis dropped `--force-keyframes-at-cuts` for stream copy with `-copyts`; see "Resolved: duplicate acquisition" below.)
 
 The 16-of-20 result after the fix is a shortfall, not this bug. One later 403 on `BAx_9MNPzts` was a remote refusal; a cache-reusing retry cleared it.
 
@@ -25,7 +36,16 @@ are not all resolved. Live automation worked, but analysis/export remain slow.
 
 As of 2026-09-23. Read this before calling the project ready for a normal order. Fixed history and the latest run evidence are in docs/STATUS.md. An honest shortfall is not itself a defect.
 
-## Open: latency varies and duplicate acquisition remains
+## Resolved 2026-09-28: duplicate acquisition and the analysis re-encode
+
+With the owner's approval, analysis copies are now stream-copied copyts
+sections (one yt-dlp call per video) and export adopts them when the rendition
+and coverage match; see docs/EXPORT.md amendment and
+benchmark/RESULTS-2026-09-28.md. The paragraph below is the history. Latency
+still varies on this host; the export encode (x264 medium, one thread) is now
+the largest single export cost.
+
+## Open (history): latency varies and duplicate acquisition remains
 
 The older tree-cutting run (`data/runs/20260922T183756Z`) took about 25 minutes from search completion to export completion, including a killed/restarted seven-minute analysis pass. Its 20 tile labels and six strips were sent serially. The new four-clip run (`data/runs/20260922T201824Z`) produced only two reviewable moments; measured stage sum including final verify was 304.45s. Run creation to manifest was 433.87s, including agent pauses. The two runs have different model settings, source/clip counts and cache conditions; the total-time difference is NOT a controlled speedup estimate.
 

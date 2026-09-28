@@ -54,7 +54,7 @@ commands, in the only order that produces clips, are:
 | rank | rank.rank_run | storyboard image fetch | fetcher(url) -> bytes |
 | tile labels | vision_wire.label_ranked_tiles | vision model | caller= |
 | strip labels | vision_wire.label_review_strips | vision model | caller= |
-| analyze | pipeline_analyze.analyze_run | yt-dlp section download, scene detect | fetch_span=, detect_fn= |
+| analyze | pipeline_analyze.analyze_run | yt-dlp section download, scene detect | fetch_span= (may receive format_id=), prefetch_spans=, detect_fn= |
 | review frames | review.review_run | ffmpeg frame extract | no argument; the media call is review._extract_frame |
 | export | export.export_run | yt-dlp section + ffmpeg encode/probe | yt= ; encode and probe are inside export.py |
 | verify | verify.verify_run | ffprobe / ffmpeg decode | probe_fn=, decode_fn=, export_probe_fn= |
@@ -78,6 +78,13 @@ These are the only reasons the runner stops while the run can still continue:
 - Export allowance missing. Name the flag. Do not download.
 - Not ready for shortlist. verify ran, ready_for_shortlist is false. Stop.
   Do not invent excerpts.
+- Deadline (added 2026-09-28). Each invocation has a wall-clock budget,
+  `run_deadline_s` in config (default 10800). When it is spent the runner
+  stops before the next stage with status `deadline` (CLI exit 1); inside
+  analyze no new span download starts, and unstarted spans are recorded as
+  failed with stage `deadline`. Rerun the same command with the same
+  `--run-dir`: completed stages and cached spans are reused, and the new
+  invocation gets a fresh budget.
 - Uncertain external outcome. A stage was started and its required files do
   not validate. Stop with a recovery instruction. Do not call that outside
   step again until the operator acknowledges recovery.

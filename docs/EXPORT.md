@@ -27,6 +27,29 @@ the single gated path that acquires only the cap-selected sections it planned.
   cannot be proven for that exact window, the moment fails closed; it is never
   quietly shortened.
 
+## Amendment 2026-09-28: export adopts the analysis download
+
+Owner-approved relaxation of "analysis and export media are never substituted".
+Analysis now acquires the same thing export does (stream copy, `-copyts`, the
+pinned export rendition when it is ≤720p). At planning time, a shortlisted
+moment whose analysis copy has the same format id and dimensions, a proven K
+(marker first_pts_ms), covers the clip interval, and has an intact size and
+hash is planned with `acq_source = {kind: analysis_copy, cache_key, sha256}`
+and that copy's span as its acquisition span. Export then hard-links the file
+into the export cache and runs the unchanged acceptance (full decode, mapping
+proof, window frame count and gaps). A failed adoption re-downloads the same
+planned span. Anything else is planned and downloaded exactly as below. Verify
+checks the adopted digest against the plan. With a cap above 720p the export
+rendition is not an analysis rendition, so nothing is adopted.
+
+## Amendment 2026-09-28: encode preset `faster`
+
+The one encode is now x264 `faster` at crf 17 (recipe x264-crf17-faster-v1).
+Measured on two real 720p clips on the 1-CPU host: 1.35-1.85x faster than
+`medium`, +3% size, about -0.1 dB PSNR against the source frames. Verify
+accepts exports published under x264-crf17-medium-v1 (plan and manifest must
+agree with each other).
+
 ## Key decisions (with the changes the consult drove)
 
 1. Acquisition = stream copy, no acquisition-time encode.

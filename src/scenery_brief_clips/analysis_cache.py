@@ -5,7 +5,13 @@ import math
 import re
 from pathlib import Path
 
-ANALYSIS_CACHE_POLICY = "v3-video-only-720"
+# v4: stream copy with -copyts (no re-encode at cuts); local 0 is the first
+# packet PTS recorded in the marker as first_pts_ms, not the span start.
+ANALYSIS_CACHE_POLICY = "v4-copyts-720"
+# Policies verify still accepts for runs analyzed earlier; each run is checked
+# under the policy its analysis_manifest recorded (v3 = exact-cut re-encode,
+# local 0 = span start, duration tolerance).
+ACCEPTED_ANALYSIS_POLICIES = (ANALYSIS_CACHE_POLICY, "v3-video-only-720")
 ANALYSIS_MARKER_SCHEMA_VERSION = 1
 MEDIA_DURATION_TOLERANCE_S = 3.0
 EXPORT_CACHE_POLICY = "v2-export-cap-copyts"

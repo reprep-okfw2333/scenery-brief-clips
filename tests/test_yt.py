@@ -119,6 +119,32 @@ def test_fetch_analysis_rejects_media_shorter_than_span(tmp_path):
     assert len(calls) == 1
 
 
+def test_analysis_timeout_scales_with_span_length():
+    from scenery_brief_clips.yt import analysis_timeout_s
+
+    assert analysis_timeout_s((0.0, 3.0)) == 120
+    assert analysis_timeout_s((100.0, 114.0)) == 230
+    assert analysis_timeout_s((0.0, 60.0)) == 300
+    assert analysis_timeout_s((0.0, 600.0)) == 300
+
+
+def test_fetch_analysis_defaults_to_span_scaled_timeout(tmp_path):
+    import subprocess
+
+    seen = []
+
+    def runner(cmd, **kwargs):
+        seen.append(kwargs.get("timeout"))
+        _write_media(Path(cmd[cmd.index("-o") + 1]), 5.0)
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    client = YtDlp(tmp_dir=tmp_path, allow_download=False, runner=runner)
+    client.fetch_analysis("abcdefghijk", tmp_path / "clip.mp4", (0.0, 5.0))
+    assert seen == [140]
+    client.fetch_analysis("abcdefghijk", tmp_path / "other.mp4", (0.0, 5.0), timeout=30)
+    assert seen == [140, 30]
+
+
 def test_fetch_analysis_heals_short_cached_media(tmp_path):
     import subprocess
 
@@ -258,7 +284,9 @@ def test_analysis_args_are_720p_video_only_with_section(tmp_path):
     assert "bestaudio" not in fmt
     assert "--skip-download" not in cmd
     assert "--download-sections" in cmd
-    assert "--force-keyframes-at-cuts" in cmd
+    # Stream copy with source timestamps; no re-encode at the cut points.
+    assert "--force-keyframes-at-cuts" not in cmd
+    assert cmd[cmd.index("--downloader-args") + 1] == "ffmpeg:-copyts"
     # Bounded download policy: fast-fail instead of yt-dlp's default
     # 10 retries with a 30s socket timeout.
     assert "--retries" in cmd and cmd[cmd.index("--retries") + 1] == "1"
@@ -731,3 +759,124 @@ def test_ytdlp_retry_budget_is_small(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="429"):
         client._run(["-J", "https://www.youtube.com/watch?v=abc123abc12"])
     assert calls["n"] == ytmod._YTDLP_MAX_ATTEMPTS
+
+
+def _write_copyts_section(path, start: float, end: float) -> None:
+    """A copyts section like yt-dlp writes: source timestamps, keyframe lead-in."""
+    subprocess.run(
+        [
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-ss", str(max(0.0, start - 1.0)),
+            "-f", "lavfi", "-i", f"color=c=teal:s=320x180:d={end + 1}",
+            "-to", str(end), "-copyts",
+            "-pix_fmt", "yuv420p", str(path),
+        ],
+        check=True,
+    )
+
+
+def test_prefetch_analysis_fetches_all_spans_in_one_call_and_reports_misses(tmp_path):
+    calls = []
+
+    def runner(cmd, **kwargs):
+        calls.append(cmd)
+        template = cmd[cmd.index("-o") + 1]
+        sections = [cmd[i + 1] for i, arg in enumerate(cmd) if arg == "--download-sections"]
+        assert len(sections) == 3
+        assert cmd[cmd.index("-f") + 1] == "136"
+        # The host produced the first two sections, then failed.
+        for lo, hi in ((10.0, 16.0), (40.0, 46.0)):
+            out = template.replace("%(section_start)s", f"{lo:g}").replace("%(section_end)s", f"{hi:g}")
+            _write_copyts_section(Path(out), lo, hi)
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="HTTP Error 403")
+
+    client = YtDlp(tmp_dir=tmp_path, allow_download=False, runner=runner)
+    items = [(tmp_path / f"s{i}.mp4", span) for i, span in enumerate([(10.0, 16.0), (40.0, 46.0), (70.0, 76.0)])]
+    errors = client.prefetch_analysis("abcdefghijk", items, format_id="136")
+
+    assert len(calls) == 1
+    assert set(errors) == {str(tmp_path / "s2.mp4")}
+    for dest, span in items[:2]:
+        marker = json.loads(analysis_marker_path(dest).read_text())
+        assert marker["format_id"] == "136"
+        assert marker["first_pts_ms"] == int((span[0] - 1.0) * 1000)
+        # A later per-span fetch is a cache hit: no new download.
+        client.fetch_analysis("abcdefghijk", dest, span, format_id="136")
+    assert len(calls) == 1
+    assert not list(tmp_path.glob(".batch.staging-*"))
+
+
+def test_analysis_args_refuse_unsafe_pinned_format(tmp_path):
+    client = YtDlp(tmp_dir=tmp_path, allow_download=False)
+    with pytest.raises(ValueError):
+        client.analysis_args("abcdefghijk", tmp_path / "x.mp4", (0.0, 5.0), format_id="136; rm -rf")
+
+
+def test_export_adopts_matching_analysis_copy_without_downloading(tmp_path):
+    from scenery_brief_clips.analysis_cache import sha256_file
+    from scenery_brief_clips.export import _adoptable_analysis_copy
+
+    def analysis_runner(cmd, **kwargs):
+        assert cmd[cmd.index("-f") + 1] == "136"
+        _copyts_section(tmp_path, Path(cmd[cmd.index("-o") + 1]), 5.0, 15.0)
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    root = tmp_path / "proj"
+    cache = root / "data" / "cache" / "analysis"
+    cache.mkdir(parents=True)
+    dest = cache / "abcdefghijk_5000-15000_v4-copyts-720.mp4"
+    YtDlp(tmp_dir=tmp_path, allow_download=False, runner=analysis_runner).fetch_analysis(
+        "abcdefghijk", dest, (5.0, 15.0), format_id="136"
+    )
+    spec = {"format_id": "136", "width": 1280, "height": 720}
+
+    source = _adoptable_analysis_copy(root, dest.name, "abcdefghijk", spec, 7000, 13000)
+    assert source == {
+        "kind": "analysis_copy", "cache_key": dest.name,
+        "sha256": sha256_file(dest), "span_ms": [5000, 15000],
+    }
+    # Other rendition, clip past the copy's coverage, or another video: no adoption.
+    assert _adoptable_analysis_copy(root, dest.name, "abcdefghijk", {**spec, "format_id": "137"}, 7000, 13000) is None
+    assert _adoptable_analysis_copy(root, dest.name, "abcdefghijk", spec, 7000, 16000) is None
+    assert _adoptable_analysis_copy(root, dest.name, "zzzzzzzzzzz", spec, 7000, 13000) is None
+    assert _adoptable_analysis_copy(root, "../escape.mp4", "abcdefghijk", spec, 7000, 13000) is None
+
+    def no_download(cmd, **kwargs):
+        raise AssertionError("an adopted acquisition must not download")
+
+    client = _authorized_client(tmp_path, no_download)
+    acquired = client.fetch_export(_export_spec(span=(5.0, 15.0)), source=dest)
+    marker = json.loads(export_marker_path(acquired).read_text())
+    assert marker["adopted_from"] == {"analysis_copy": dest.name}
+    assert marker["first_pts_ms"] == 5000
+    assert sha256_file(acquired) == source["sha256"]
+
+    # A tampered analysis copy is never adopted.
+    with dest.open("ab") as handle:
+        handle.write(b"x")
+    assert _adoptable_analysis_copy(root, dest.name, "abcdefghijk", spec, 7000, 13000) is None
+
+
+def test_proven_cache_hit_skips_revalidation_but_legacy_marker_does_not(tmp_path):
+    validated = []
+
+    def validator(path, span):
+        validated.append(Path(path).name)
+        return {"first_pts_ms": 0, "last_end_ms": 5000, "width": 320, "height": 180}
+
+    def runner(cmd, **kwargs):
+        _write_media(Path(cmd[cmd.index("-o") + 1]), 5.0)
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+    client = YtDlp(tmp_dir=tmp_path, allow_download=False, runner=runner, analysis_validator=validator)
+    dest = tmp_path / "clip.mp4"
+    client.fetch_analysis("abcdefghijk", dest, (0.0, 5.0))
+    client.fetch_analysis("abcdefghijk", dest, (0.0, 5.0))
+    assert len(validated) == 1
+
+    marker_path = analysis_marker_path(dest)
+    marker = json.loads(marker_path.read_text())
+    del marker["first_pts_ms"]
+    marker_path.write_text(json.dumps(marker))
+    client.fetch_analysis("abcdefghijk", dest, (0.0, 5.0))
+    assert len(validated) == 2

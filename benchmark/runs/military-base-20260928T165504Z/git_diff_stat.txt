@@ -1,0 +1,18 @@
+ AGENTS.md                                   |  2 +-
+ README.md                                   |  2 +-
+ docs/ARCHITECTURE.md                        |  2 +-
+ docs/CLI.md                                 |  2 +-
+ docs/DATA.md                                |  2 +-
+ docs/ROADMAP.md                             |  2 +-
+ docs/RUNNER.md                              |  7 +++++
+ docs/STATUS.md                              | 11 +++++++-
+ src/scenery_brief_clips/cli.py              |  6 ++---
+ src/scenery_brief_clips/config.py           |  1 +
+ src/scenery_brief_clips/pipeline_analyze.py | 20 +++++++++++---
+ src/scenery_brief_clips/runner.py           | 38 +++++++++++++++++++++++++-
+ src/scenery_brief_clips/yt.py               | 15 ++++++++++-
+ tests/test_analyze_run.py                   | 31 ++++++++++++++++++++-
+ tests/test_runner_contract.py               | 42 +++++++++++++++++++++++++++++
+ tests/test_vision_checkpoints.py            |  5 +++-
+ tests/test_yt.py                            | 26 ++++++++++++++++++
+ 17 files changed, 197 insertions(+), 17 deletions(-)

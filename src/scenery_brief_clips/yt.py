@@ -5,6 +5,7 @@ import json
 import math
 import os
 import re
+import shutil
 import signal
 import subprocess
 import time
@@ -36,7 +37,7 @@ from scenery_brief_clips.analysis_cache import (
 from scenery_brief_clips.eligibility import watch_url
 
 Runner = Callable[..., subprocess.CompletedProcess]
-AnalysisValidator = Callable[[Path, tuple[float, float]], None]
+AnalysisValidator = Callable[[Path, tuple[float, float]], "dict | None"]
 
 
 def group_kill_runner(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
@@ -130,55 +131,53 @@ class ExportMediaError(RuntimeError):
         self.code = code
 
 
-def validate_analysis_media(path: Path, span: tuple[float, float] | None = None) -> None:
-    probe = subprocess.run(
-        [
-            "ffprobe",
-            "-v",
-            "error",
-            "-show_streams",
-            "-show_format",
-            "-of",
-            "json",
-            str(path),
-        ],
-        capture_output=True,
-        text=True,
-        timeout=60,
-    )
-    if probe.returncode != 0:
-        raise RuntimeError((probe.stderr or probe.stdout or "ffprobe failed").strip())
+def analysis_timeout_s(span: tuple[float, float]) -> int:
+    """Hard timeout for one analysis span, scaled to its length.
+
+    A healthy 12-14 s span took ~110-130 s on a 1-CPU host with two workers
+    (re-encode at cuts included); a flat 300 s let a stalled 3 s span burn
+    5 minutes per attempt. 90 s + 10 s per source second, capped at 300 s.
+    """
+    start, end = span
+    return int(min(300, 90 + 10 * max(0.0, float(end) - float(start))))
+
+
+def validate_analysis_media(path: Path, span: tuple[float, float] | None = None) -> dict:
+    """Accept one stream-copied, copyts analysis section and return its mapping.
+
+    The section starts at the keyframe at or before the span start, so local
+    time 0 is the first packet PTS (K), not the span start. That mapping is
+    only trusted when the container start_time equals K (the same proof export
+    uses). The section must cover the span to within the duration tolerance;
+    excerpts are later clamped to the span. One strict full decode follows.
+    """
     try:
-        payload = json.loads(probe.stdout)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"ffprobe returned invalid JSON: {exc}") from exc
-    streams = payload.get("streams") or []
-    videos = [stream for stream in streams if stream.get("codec_type") == "video"]
-    audios = [stream for stream in streams if stream.get("codec_type") == "audio"]
-    if not videos:
-        raise RuntimeError("analysis media has no video stream")
-    if audios:
-        raise RuntimeError("analysis media must be video-only")
-    width = max((int(stream.get("width") or 0) for stream in videos), default=0)
-    height = max((int(stream.get("height") or 0) for stream in videos), default=0)
+        info = probe_export_coverage(Path(path))
+    except ExportMediaError as exc:
+        raise RuntimeError(f"analysis media {exc.code}: {exc}") from exc
+    width, height = int(info["width"]), int(info["height"])
     if width <= 0 or height <= 0:
         raise RuntimeError("analysis media has invalid dimensions")
     if height > 720:
         raise RuntimeError(f"analysis media height {height} exceeds 720")
-    duration_raw = (payload.get("format") or {}).get("duration")
-    try:
-        duration = float(duration_raw)
-    except (TypeError, ValueError) as exc:
-        raise RuntimeError("analysis media has no finite positive duration") from exc
-    if not math.isfinite(duration) or duration <= 0:
-        raise RuntimeError("analysis media has no finite positive duration")
+    first_pts = float(info["first_pts_s"])
+    last_end = float(info["last_end_s"])
+    start_time = info.get("start_time_s")
+    if start_time is None or abs(float(start_time) - first_pts) > 1e-3:
+        raise RuntimeError(
+            f"analysis media start_time {start_time} does not match first packet PTS {first_pts} "
+            "(timeline mapping unproven)"
+        )
+    if not (math.isfinite(first_pts) and math.isfinite(last_end)) or last_end <= first_pts:
+        raise RuntimeError("analysis media has no finite positive timeline")
     if span is not None:
-        expected = float(span[1]) - float(span[0])
-        if not math.isfinite(expected) or expected <= 0:
+        span_start, span_end = float(span[0]), float(span[1])
+        if not (math.isfinite(span_start) and math.isfinite(span_end)) or span_end <= span_start:
             raise RuntimeError("analysis span is invalid")
-        if abs(duration - expected) > MEDIA_DURATION_TOLERANCE_S:
+        if first_pts > span_start + MEDIA_DURATION_TOLERANCE_S or last_end < span_end - MEDIA_DURATION_TOLERANCE_S:
             raise RuntimeError(
-                f"analysis media duration {duration:.3f}s does not match span {expected:.3f}s"
+                f"analysis media covers {first_pts:.3f}-{last_end:.3f}s, "
+                f"not span {span_start:.3f}-{span_end:.3f}s"
             )
 
     decode = subprocess.run(
@@ -202,6 +201,12 @@ def validate_analysis_media(path: Path, span: tuple[float, float] | None = None)
     )
     if decode.returncode != 0:
         raise RuntimeError((decode.stderr or decode.stdout or "ffmpeg decode failed").strip())
+    return {
+        "first_pts_ms": int(round(first_pts * 1000)),
+        "last_end_ms": int(round(last_end * 1000)),
+        "width": width,
+        "height": height,
+    }
 
 
 def _fsync_file(path: Path) -> None:
@@ -477,6 +482,17 @@ def _analysis_cache_valid(dest: Path, video_id: str, span: tuple[float, float]) 
         return False
 
 
+def _marker_proves_validation(marker: Path) -> bool:
+    """True when the marker was written by the v4 validator (it records the
+    proven timeline mapping); hand-written or legacy markers are re-validated."""
+    try:
+        payload = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    value = payload.get("first_pts_ms") if isinstance(payload, dict) else None
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def _export_cache_valid(dest: Path, video_id: str, span: tuple[float, float], spec, policy: str) -> bool:
     marker = export_marker_path(dest)
     if not dest.is_file() or not marker.is_file() or dest.stat().st_size <= 0:
@@ -645,14 +661,32 @@ class YtDlp:
             f"allow_download={self.allow_download}"
         )
 
-    def analysis_args(self, video_id: str, dest: str | Path, span: tuple[float, float]) -> list[str]:
-        start, end = canonical_span_seconds(span)
+    def analysis_args(
+        self,
+        video_id: str,
+        dest: str | Path,
+        span: tuple[float, float] | list[tuple[float, float]],
+        format_id: str | None = None,
+    ) -> list[str]:
+        """Stream-copy sections with source timestamps (-copyts), never re-encoded.
+
+        ``span`` may be a list: one yt-dlp call (one player/JS extraction) then
+        writes one file per section. ``format_id`` pins the export rendition so
+        the same file can later serve export; otherwise the <=720p selector.
+        """
+        spans = span if isinstance(span, list) else [span]
+        sections: list[str] = []
+        for item in spans:
+            start, end = canonical_span_seconds(item)
+            sections += ["--download-sections", f"*{format_ts(start)}-{format_ts(end)}"]
+        if format_id is not None and not _EXPORT_FORMAT_ID_RE.fullmatch(str(format_id)):
+            raise ValueError(f"unsafe analysis format id: {format_id!r}")
         return [
             "-f",
-            ANALYSIS_FORMAT,
-            "--download-sections",
-            f"*{format_ts(start)}-{format_ts(end)}",
-            "--force-keyframes-at-cuts",
+            str(format_id) if format_id is not None else ANALYSIS_FORMAT,
+            *sections,
+            "--downloader-args",
+            "ffmpeg:-copyts",
             # Bounded, fast-failing download: the outer retry budget (small,
             # transient-only) is the only retry loop. Without these flags
             # yt-dlp retries 10 times per attempt with a 30s socket timeout,
@@ -675,14 +709,22 @@ class YtDlp:
         video_id: str,
         dest: str | Path,
         span: tuple[float, float],
-        timeout: int = 300,
+        timeout: int | None = None,
+        format_id: str | None = None,
     ) -> Path:
+        if timeout is None:
+            timeout = analysis_timeout_s(span)
         dest_path = Path(dest)
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         marker = analysis_marker_path(dest_path)
         with _exclusive_cache_lock(dest_path):
             _cleanup_abandoned_staging(dest_path)
             if _analysis_cache_valid(dest_path, video_id, span):
+                if _marker_proves_validation(marker):
+                    # These exact bytes (hash just re-checked) already passed
+                    # the full validation, decode included, before the marker
+                    # was written; verify decodes them again independently.
+                    return dest_path
                 try:
                     self.analysis_validator(dest_path, span)
                 except Exception:
@@ -697,30 +739,120 @@ class YtDlp:
             stage = dest_path.with_name(f"{dest_path.stem}.staging-{token}{dest_path.suffix}")
             marker_tmp = marker.with_name(f"{marker.name}.staging-{token}")
             try:
-                self._run(self.analysis_args(video_id, stage, span), timeout=timeout)
-                if not stage.is_file() or stage.stat().st_size <= 0:
-                    raise RuntimeError(f"yt-dlp produced no analysis file at {stage}")
-                self.analysis_validator(stage, span)
-                start_ms, end_ms = canonical_span_ms(span)
-                payload = {
-                    "schema_version": ANALYSIS_MARKER_SCHEMA_VERSION,
-                    "cache_policy": ANALYSIS_CACHE_POLICY,
-                    "video_id": video_id,
-                    "span_ms": [start_ms, end_ms],
-                    "size_bytes": stage.stat().st_size,
-                    "sha256": sha256_file(stage),
-                }
-                _write_json_fsync(marker_tmp, payload)
-                os.replace(stage, dest_path)
-                os.replace(marker_tmp, marker)
-                stale_part = dest_path.with_suffix(dest_path.suffix + ".part")
-                if stale_part.is_file():
-                    stale_part.unlink()
-                return dest_path
+                self._run(self.analysis_args(video_id, stage, span, format_id), timeout=timeout)
+                return self._publish_analysis(stage, dest_path, marker_tmp, video_id, span, format_id)
             finally:
                 _cleanup_staging(stage)
                 if marker_tmp.is_file():
                     marker_tmp.unlink()
+
+    def _publish_analysis(
+        self,
+        stage: Path,
+        dest_path: Path,
+        marker_tmp: Path,
+        video_id: str,
+        span: tuple[float, float],
+        format_id: str | None,
+    ) -> Path:
+        """Validate a staged section and publish it with its marker (caller holds the lock)."""
+        if not stage.is_file() or stage.stat().st_size <= 0:
+            raise RuntimeError(f"yt-dlp produced no analysis file at {stage}")
+        info = self.analysis_validator(stage, span)
+        start_ms, end_ms = canonical_span_ms(span)
+        payload = {
+            "schema_version": ANALYSIS_MARKER_SCHEMA_VERSION,
+            "cache_policy": ANALYSIS_CACHE_POLICY,
+            "video_id": video_id,
+            "span_ms": [start_ms, end_ms],
+            "size_bytes": stage.stat().st_size,
+            "sha256": sha256_file(stage),
+            "format_id": format_id,
+        }
+        if isinstance(info, dict):
+            for key in ("first_pts_ms", "last_end_ms", "width", "height"):
+                payload[key] = info.get(key)
+        _write_json_fsync(marker_tmp, payload)
+        os.replace(stage, dest_path)
+        os.replace(marker_tmp, analysis_marker_path(dest_path))
+        stale_part = dest_path.with_suffix(dest_path.suffix + ".part")
+        if stale_part.is_file():
+            stale_part.unlink()
+        return dest_path
+
+    def prefetch_analysis(
+        self,
+        video_id: str,
+        items: list[tuple[str | Path, tuple[float, float]]],
+        format_id: str | None = None,
+        timeout: int | None = None,
+    ) -> dict[str, str]:
+        """Acquire several spans of one video with ONE yt-dlp call.
+
+        Each section is validated and published exactly as fetch_analysis
+        would, under that span's own lock. Spans already cached are skipped.
+        Returns {dest: error} for spans that were not published; callers then
+        use fetch_analysis for those, so a batch failure never loses a span.
+        """
+        pending = [
+            (Path(dest), canonical_span_seconds(span))
+            for dest, span in items
+            if not _analysis_cache_valid(Path(dest), video_id, span)
+        ]
+        if len(pending) < 2:
+            return {}
+        spans = [span for _dest, span in pending]
+        if timeout is None:
+            timeout = min(900, sum(analysis_timeout_s(span) for span in spans))
+        batch_dir = pending[0][0].parent / f".batch.staging-{uuid.uuid4().hex}"
+        batch_dir.mkdir(parents=True)
+        errors: dict[str, str] = {}
+        run_error = None
+        try:
+            try:
+                self._run(
+                    self.analysis_args(
+                        video_id,
+                        batch_dir / "%(section_start)s_%(section_end)s.mp4",
+                        spans,
+                        format_id,
+                    ),
+                    timeout=timeout,
+                )
+            except Exception as exc:  # sections finished before the failure are still usable
+                run_error = str(exc)
+            produced: dict[tuple[int, int], Path] = {}
+            for path in batch_dir.glob("*.mp4"):
+                try:
+                    lo, hi = path.stem.split("_", 1)
+                    produced[(round(float(lo) * 1000), round(float(hi) * 1000))] = path
+                except ValueError:
+                    continue
+            for dest, span in pending:
+                staged = produced.get(canonical_span_ms(span))
+                if staged is None:
+                    errors[str(dest)] = run_error or "batch produced no file for this span"
+                    continue
+                with _exclusive_cache_lock(dest):
+                    _cleanup_abandoned_staging(dest)
+                    if _analysis_cache_valid(dest, video_id, span):
+                        continue
+                    token = uuid.uuid4().hex
+                    stage = dest.with_name(f"{dest.stem}.staging-{token}{dest.suffix}")
+                    marker_tmp = analysis_marker_path(dest).with_name(
+                        f"{analysis_marker_path(dest).name}.staging-{token}"
+                    )
+                    try:
+                        os.replace(staged, stage)
+                        self._publish_analysis(stage, dest, marker_tmp, video_id, span, format_id)
+                    except Exception as exc:
+                        errors[str(dest)] = str(exc)
+                    finally:
+                        stage.unlink(missing_ok=True)
+                        marker_tmp.unlink(missing_ok=True)
+        finally:
+            shutil.rmtree(batch_dir, ignore_errors=True)
+        return errors
 
     def invalidate_analysis(self, dest: str | Path) -> None:
         dest_path = Path(dest)
@@ -754,12 +886,17 @@ class YtDlp:
             watch_url(video_id),
         ]
 
-    def fetch_export(self, spec, timeout: int = 900) -> Path:
+    def fetch_export(self, spec, timeout: int = 900, source: str | Path | None = None) -> Path:
         """Acquire one planned full-resolution section (stream copy with copyts).
 
         Only authorized clients (allow_export=True) may call this, and only
         with a spec built from an export plan; this method never falls back to
         another format or a wider span.
+
+        With ``source`` (an analysis copy the export plan chose to adopt: same
+        rendition, same copyts stream copy), that file is hard-linked into
+        staging instead of downloaded; it then passes exactly the same
+        acceptance (full decode included) and marker as a download.
         """
         if not self.allow_export:
             raise DownloadForbidden(
@@ -817,7 +954,14 @@ class YtDlp:
             stage = dest_path.with_name(f"{dest_path.stem}.staging-{token}{dest_path.suffix}")
             marker_tmp = marker.with_name(f"{marker.name}.staging-{token}")
             try:
-                self._run(self.export_args(video_id, stage, span, spec), timeout=timeout)
+                if source is not None:
+                    source_path = Path(source)
+                    try:
+                        os.link(source_path, stage)
+                    except OSError:
+                        shutil.copyfile(source_path, stage)
+                else:
+                    self._run(self.export_args(video_id, stage, span, spec), timeout=timeout)
                 if not stage.is_file() or stage.stat().st_size <= 0:
                     raise RuntimeError(f"yt-dlp produced no export file at {stage}")
                 if stage.stat().st_size > EXPORT_MAX_FILESIZE_BYTES:
@@ -846,6 +990,8 @@ class YtDlp:
                     "size_bytes": stage.stat().st_size,
                     "sha256": sha256_file(stage),
                 }
+                if source is not None:
+                    payload["adopted_from"] = {"analysis_copy": Path(source).name}
                 _write_json_fsync(marker_tmp, payload)
                 _fsync_file(stage)
                 os.replace(stage, dest_path)

@@ -1548,3 +1548,22 @@ def test_verify_ignores_unreferenced_shared_cache_files(tmp_path):
         decode_fn=lambda _path: None,
     )
     assert report["ok"] is True
+
+
+def test_verify_accepts_runs_analyzed_under_an_earlier_known_policy():
+    from scenery_brief_clips.verify import REQUIRED_SETTINGS, _validate_settings
+
+    base = {key: 1 for key in REQUIRED_SETTINGS}
+    base.update({"max_analysis_s": 60.0, "min_scene_len_s": 0.5, "target_duration_s": 6.0,
+                 "duration_min_s": 4.0, "duration_max_s": 12.0, "pad_s": 2.0})
+    for policy, accepted in (("v4-copyts-720", True), ("v3-video-only-720", True), ("v2-old", False)):
+        errors: list[str] = []
+        _validate_settings({"settings": {**base, "cache_policy": policy}}, errors)
+        assert (not any("cache_policy" in e for e in errors)) is accepted, (policy, errors)
+
+
+def test_published_exports_under_the_previous_recipe_stay_verifiable():
+    from scenery_brief_clips.export import ACCEPTED_RECIPES, ENCODE_PRESET, EXPORT_RECIPE
+
+    assert EXPORT_RECIPE == f"x264-crf17-{ENCODE_PRESET}-v1"
+    assert "x264-crf17-medium-v1" in ACCEPTED_RECIPES

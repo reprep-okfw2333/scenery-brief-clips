@@ -51,7 +51,7 @@ from scenery_brief_clips.vision_wire import (
     load_vision_wire,
     plain_description,
 )
-from scenery_brief_clips.yt import YtDlp
+from scenery_brief_clips.yt import YtDlp, analysis_timeout_s
 
 
 def project_root() -> Path:
@@ -759,8 +759,14 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         return 2
     yt = YtDlp(tmp_dir=root / "tmp", allow_download=False)
 
-    def fetch_span(video_id, dest, span):
-        return yt.fetch_analysis(video_id, dest, span, timeout=300)
+    def fetch_span(video_id, dest, span, format_id=None):
+        return yt.fetch_analysis(
+            video_id, dest, span, timeout=analysis_timeout_s(span), format_id=format_id
+        )
+
+    from scenery_brief_clips.export import analysis_format_id, resolve_max_height
+
+    analysis_height_cap = resolve_max_height(config)
 
     try:
         continuity = continuity_settings_from_config(config)
@@ -777,6 +783,8 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
             max_analysis_s=max_analysis_s,
             invalidate_span=yt.invalidate_analysis,
             continuity_settings=continuity,
+            prefetch_spans=yt.prefetch_analysis,
+            format_for=lambda row: analysis_format_id(root, row, analysis_height_cap),
         )
     except ConstraintError as exc:
         print(f"invalid duration settings in constraint: {exc}", file=sys.stderr)
@@ -1139,8 +1147,10 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
     tmp_dir.mkdir(parents=True, exist_ok=True)
     yt = YtDlp(tmp_dir=tmp_dir, allow_download=False, allow_export=True, export_cache_dir=root / "data" / "cache" / "export")
 
-    def fetch_span(video_id, dest, span):
-        return yt.fetch_analysis(video_id, dest, span, timeout=300)
+    def fetch_span(video_id, dest, span, format_id=None):
+        return yt.fetch_analysis(
+            video_id, dest, span, timeout=analysis_timeout_s(span), format_id=format_id
+        )
 
     result = advance(
         root,
@@ -1160,6 +1170,7 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
             strip_caller=call_wired_vision if args.live_vision else None,
             rank_fetcher=cached_fetcher(root / "data" / "cache" / "storyboards"),
             fetch_span=fetch_span,
+            prefetch_spans=yt.prefetch_analysis,
             detect_fn=detect_scenes,
             invalidate_span=yt.invalidate_analysis,
         ),

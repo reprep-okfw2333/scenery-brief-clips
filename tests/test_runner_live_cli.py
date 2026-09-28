@@ -19,7 +19,8 @@ def test_cli_live_vision_is_opt_in_and_approval_gated(tmp_path, monkeypatch, cap
     yt.base.mkdir()
     _patch_media(monkeypatch, yt)
     ports = _ports(yt)
-    yt.fetch_analysis = lambda vid, dest, span, timeout: ports.fetch_span(vid, dest, span)
+    yt.fetch_analysis = lambda vid, dest, span, timeout, format_id=None: ports.fetch_span(vid, dest, span)
+    yt.prefetch_analysis = lambda *a, **k: {}
     yt.invalidate_analysis = lambda *a, **k: None
     monkeypatch.setattr('scenery_brief_clips.yt.YtDlp', lambda **kw: yt)
     monkeypatch.setattr('scenery_brief_clips.fetch.cached_fetcher', lambda *a: ports.rank_fetcher)

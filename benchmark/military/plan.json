@@ -1,0 +1,14 @@
+{
+  "version": "search_queries_v1",
+  "brief_sha256": "b585822bdd93d4795945a09d88b04e6a5335ca82259765b62d32eab6d992b363",
+  "queries": [
+    {
+      "query": "Brazilian military parade",
+      "strategy": "exact"
+    },
+    {
+      "query": "Brazilian military march 7 de setembro",
+      "strategy": "context"
+    }
+  ]
+}

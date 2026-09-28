@@ -1,8 +1,35 @@
 # Status (read this first)
 
+Latest session (2026-09-28): see HANDOFF.md in the project root for what was
+done, results, and next steps. Running log: docs/PLAN-PROGRESS-2026-09-28.md.
+
 ## Latest delivery — Brazilian military, 16 of 20 (2026-09-27)
 
 Run `data/runs/20260927T220608Z`. Export verified: 16 clips, 0 failures, shortfall 4. The cutting step hung before a code fix; that hang is recorded and fixed on this branch. Full account: `docs/RUN-20260927T220608Z-brazilian-military.md`. Clips: `out/impressive-epic-brazilian-military-all-branches-a-march-mili/clips/`.
+
+## Handoff plan pass (2026-09-28, committed on fix/analysis-download-bounds)
+
+Working through docs/HANDOFF-2026-09-28.md. Benchmark and per-step results:
+benchmark/RESULTS-2026-09-28.md. Step 1 done: analyze defaults to 2 workers;
+each analysis span download has a hard timeout of 90 s + 10 s per span second
+(max 300 s); run-pipeline has a per-invocation `run_deadline_s` (config,
+default 10800) and stops with status `deadline`, resumable by rerunning the
+same command. Full suite 396 passed.
+Step 2 done (owner approved reusing one download for analysis and export):
+analysis copies are stream-copied `-copyts` sections, one yt-dlp call per
+video, pinned to the export rendition when it is <=720p (cache policy
+v4-copyts-720; local 0 = first packet PTS, recorded and verified); export
+adopts a matching analysis copy instead of downloading again; continuity
+sampling walks forward instead of seeking per sample (identical frames);
+proven cache hits skip a second full decode. Analyze on the seeded benchmarks:
+ocean 525 s -> 116 s, military 980 s -> 245 s, yield unchanged. Full suite
+403 passed.
+Export encode preset is now x264 `faster` (recipe x264-crf17-faster-v1;
+verify still accepts x264-crf17-medium-v1). Verify checks each run under the
+analysis cache policy it recorded (v4 or v3); the Brazil run still verifies.
+Step 3 evaluated but not built: the keep-ratio gate is contradicted by the
+Brazil data, and the yield loss is continuity-gate false rejects on camera
+motion (see docs/ISSUES.md). Full suite 405 passed.
 
 ## Active improvement pass — not yet signed off
 
@@ -35,7 +62,7 @@ Part 2  Storyboard tiles + vision labels.
 Part 3  Capped ≤720p video-only analysis copies (AVC/H.264 preferred) + PySceneDetect + continuity gate + excerpt timestamps.
         CLI: analyze (shared by legacy run and run-brief discovery outputs)
         Continuity gate (~2 fps dHash + mean-RGB) trims or rejects mid-excerpt dissolves/cuts PySceneDetect misses before excerpts.json is published.
-        Analysis spans run concurrently (default 4 workers). Scene detection defaults to frame_skip=1; continuity samples default to a 160px decode width before dHash/mean-RGB.
+        Analysis spans run concurrently (default 2 workers). Scene detection defaults to frame_skip=1; continuity samples default to a 160px decode width before dHash/mean-RGB.
         Env overrides (legacy serial / full-frame): SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0.
         Optional phase dump: SCENERY_ANALYZE_PROFILE=/path/to.json.
         Every yt-dlp fallback is video-only and ≤720p; inherited yt-dlp config is ignored.
@@ -62,14 +89,15 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 374 passed in 178.03s on 2026-09-25. Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
+Tests: 405 passed on 2026-09-28 (374 on 2026-09-25). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to
 make those tests pass.
 
-Vision switch: vision.yaml in the project root. The setting approved for the
-latest live test is codex-login / gpt-6-sol (ChatGPT sign-in, not a paid key).
+Vision switch: vision.yaml in the project root. Current setting (owner-approved
+2026-09-28 as canonical): openai-api / z-ai/glm-5.3-flash at OpenRouter, key
+from OPENROUTER_API_KEY (earlier live tests used codex-login / gpt-6-sol).
 Change backend and model there to point at another API later. Do not put a key
 in the file. `vision-show` prints the current model. label-tiles and
 label-strips refuse without `--confirm-vision`. Hermes must show the model
@@ -406,7 +434,8 @@ recorded context, not enforced visual gates.
   only tighten the brief's own limits (final = min). The new path never
   fetches video, calls vision, or exports.
 - `planner.yaml` at the project root selects the planner model
-  (`codex-login`, model `gpt-6-sol`), mirroring vision.yaml's no-secrets rule.
+  (now `openai-api` / `z-ai/glm-5.3-flash`; was `codex-login` / `gpt-6-sol`),
+  mirroring vision.yaml's no-secrets rule.
 - Tests: `tests/test_brief.py`, `tests/test_planner.py`,
   `tests/test_run_brief_cli.py` (offline fakes only; no live YouTube, no
   network model call). Full suite: 341 passed. `explain-prompt` and the

@@ -377,17 +377,47 @@ def sample_features_from_video(
         decode_width = int(os.environ.get("SCENERY_CONTINUITY_DECODE_WIDTH", "160") or "0")
     except ValueError:
         decode_width = 0
+    def _features(frame) -> FrameFeatures:
+        if decode_width > 0 and frame.shape[1] > decode_width:
+            new_h = max(1, int(round(frame.shape[0] * (decode_width / frame.shape[1]))))
+            frame = cv2.resize(frame, (decode_width, new_h), interpolation=cv2.INTER_AREA)
+        return features_from_image(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
+
     try:
-        for t_s in times:
-            cap.set(cv2.CAP_PROP_POS_MSEC, max(0.0, t_s) * 1000.0)
-            ok, frame = cap.read()
-            if not ok or frame is None:
-                raise RuntimeError(f"continuity scan failed to read frame at {t_s:.3f}s in {path}")
-            if decode_width > 0 and frame.shape[1] > decode_width:
-                new_h = max(1, int(round(frame.shape[0] * (decode_width / frame.shape[1]))))
-                frame = cv2.resize(frame, (decode_width, new_h), interpolation=cv2.INTER_AREA)
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            features.append(features_from_image(Image.fromarray(rgb)))
+        fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        if fps <= 0 or os.environ.get("SCENERY_CONTINUITY_SEEK_EACH") == "1":
+            # Legacy: one seek (keyframe + decode forward) per sample.
+            for t_s in times:
+                cap.set(cv2.CAP_PROP_POS_MSEC, max(0.0, t_s) * 1000.0)
+                ok, frame = cap.read()
+                if not ok or frame is None:
+                    raise RuntimeError(f"continuity scan failed to read frame at {t_s:.3f}s in {path}")
+                features.append(_features(frame))
+        else:
+            # One seek, then walk forward to the same frame numbers a
+            # POS_MSEC seek selects (int(ms * fps / 1000 + 0.5)); frames
+            # between samples are grabbed but not converted. Same samples,
+            # without re-decoding the GOP for every sample.
+            position = None  # index of the next frame read() would return
+            last = None
+            for t_s in times:
+                target = int(max(0.0, t_s) * 1000.0 * fps * 0.001 + 0.5)
+                if last is not None and target == last[0]:
+                    features.append(last[1])
+                    continue
+                if position is None or target < position:
+                    cap.set(cv2.CAP_PROP_POS_MSEC, max(0.0, t_s) * 1000.0)
+                    position = target
+                while position < target:
+                    if not cap.grab():
+                        raise RuntimeError(f"continuity scan failed to read frame at {t_s:.3f}s in {path}")
+                    position += 1
+                ok, frame = cap.read()
+                if not ok or frame is None:
+                    raise RuntimeError(f"continuity scan failed to read frame at {t_s:.3f}s in {path}")
+                position += 1
+                last = (target, _features(frame))
+                features.append(last[1])
     finally:
         cap.release()
     return times, features
@@ -416,10 +446,15 @@ def gate_excerpt(
     min_s: float,
     max_s: float,
     settings: ContinuitySettings,
+    mapping_k_s: float | None = None,
 ) -> ContinuityDecision:
-    """Scan one candidate excerpt on its analysis copy and decide keep/trim/reject."""
+    """Scan one candidate excerpt on its analysis copy and decide keep/trim/reject.
+
+    ``mapping_k_s`` is the source time of the copy's local 0 (first packet PTS
+    of a copyts section); legacy copies start exactly at the span start.
+    """
     settings = settings.validated()
-    offset = float(analysis_span[0])
+    offset = float(analysis_span[0]) if mapping_k_s is None else float(mapping_k_s)
     local_start = float(excerpt.start_s) - offset
     local_end = float(excerpt.end_s) - offset
     if local_end <= local_start:

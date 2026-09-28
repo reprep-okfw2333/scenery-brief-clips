@@ -8,6 +8,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from scenery_brief_clips.analysis_cache import (
+    ACCEPTED_ANALYSIS_POLICIES,
     ANALYSIS_CACHE_POLICY,
     ANALYSIS_MARKER_SCHEMA_VERSION,
     EXPORT_CACHE_POLICY,
@@ -27,7 +28,7 @@ from scenery_brief_clips.run_lock import exclusive_run_lock
 from scenery_brief_clips.shortlist import SHORTLIST_SCHEMA_VERSION, build_shortlist
 from scenery_brief_clips.export import (
     EXPORT_POLICY,
-    EXPORT_RECIPE,
+    ACCEPTED_RECIPES,
     EXPORT_SCHEMA_VERSION as EXPORT_DOC_SCHEMA_VERSION,
     POINTER_SCHEMA_VERSION,
     CLIP_DURATION_TOLERANCE_MS,
@@ -85,12 +86,15 @@ def _default_probe(path: Path) -> dict:
     height = max((int(stream.get("height") or 0) for stream in videos), default=0)
     duration_raw = (payload.get("format") or {}).get("duration")
     duration_s = float(duration_raw) if duration_raw not in (None, "N/A") else None
+    start_raw = (payload.get("format") or {}).get("start_time")
+    start_time_s = float(start_raw) if start_raw not in (None, "N/A") else None
     return {
         "video_streams": len(videos),
         "audio_streams": len(audios),
         "width": width,
         "height": height,
         "duration_s": duration_s,
+        "start_time_s": start_time_s,
     }
 
 
@@ -169,9 +173,10 @@ def _validate_settings(manifest: dict, errors: list[str]) -> dict | None:
             errors.append(f"missing manifest setting {key}")
     if any(key not in settings for key in REQUIRED_SETTINGS):
         return settings
-    if settings.get("cache_policy") != ANALYSIS_CACHE_POLICY:
+    if settings.get("cache_policy") not in ACCEPTED_ANALYSIS_POLICIES:
         errors.append(
-            f"manifest setting cache_policy is {settings.get('cache_policy')!r}, expected {ANALYSIS_CACHE_POLICY!r}"
+            f"manifest setting cache_policy is {settings.get('cache_policy')!r}, "
+            f"expected one of {list(ACCEPTED_ANALYSIS_POLICIES)!r}"
         )
     try:
         max_videos = int(settings["max_videos"])
@@ -266,23 +271,24 @@ def _validate_marker(
     expected_size: int,
     expected_hash: str,
     errors: list[str],
-) -> None:
+    policy: str = ANALYSIS_CACHE_POLICY,
+) -> dict | None:
     marker_path = analysis_marker_path(path)
     if not marker_path.is_file():
         errors.append(f"missing completion marker for {path}")
-        return
+        return None
     try:
         marker = _load_json(marker_path)
     except Exception as exc:
         errors.append(f"cannot load completion marker for {path}: {exc}")
-        return
+        return None
     if not isinstance(marker, dict):
         errors.append(f"completion marker is not an object for {path}")
-        return
+        return None
     expected_span_ms = list(canonical_span_ms(span))
     checks = {
         "schema_version": ANALYSIS_MARKER_SCHEMA_VERSION,
-        "cache_policy": ANALYSIS_CACHE_POLICY,
+        "cache_policy": policy,
         "video_id": video_id,
         "span_ms": expected_span_ms,
         "size_bytes": expected_size,
@@ -291,6 +297,7 @@ def _validate_marker(
     for key, expected_value in checks.items():
         if marker.get(key) != expected_value:
             errors.append(f"completion marker {key} mismatch for {path}")
+    return marker
 
 
 def _duplicate_reference_error(
@@ -604,7 +611,7 @@ def _check_export(
         errors.append(f"unsupported export manifest schema {doc.get('schema_version')}")
     if doc.get("run_id") != run_dir.name or doc.get("theme") != theme:
         errors.append("export manifest does not belong to this run and theme")
-    if doc.get("policy") != EXPORT_POLICY or doc.get("recipe") != EXPORT_RECIPE:
+    if doc.get("policy") != EXPORT_POLICY or doc.get("recipe") not in ACCEPTED_RECIPES:
         errors.append("export manifest policy or recipe does not match the current exporter")
     cap = doc.get("max_height")
     if (
@@ -641,7 +648,7 @@ def _check_export(
             errors.append(f"unsupported export plan schema {plan_doc.get('schema_version')}")
         if plan_doc.get("run_id") != run_dir.name or plan_doc.get("theme") != theme:
             errors.append("export plan.json does not belong to this run and theme")
-        if plan_doc.get("policy") != EXPORT_POLICY or plan_doc.get("recipe") != EXPORT_RECIPE:
+        if plan_doc.get("policy") != EXPORT_POLICY or plan_doc.get("recipe") != doc.get("recipe"):
             errors.append("export plan policy or recipe does not match the current exporter")
         if plan_doc.get("generation_id") != doc.get("generation_id"):
             errors.append("export plan and manifest disagree on the analysis generation; re-export")
@@ -818,6 +825,9 @@ def _check_export(
                 for value in (span_pair or [None, None])
             ]:
                 errors.append(f"export clip acquisition span does not match the plan: clips/{name}")
+            adopted = moment.get("acq_source")
+            if isinstance(adopted, dict) and adopted.get("sha256") != entry.get("acq_sha256"):
+                errors.append(f"export clip acquisition is not the analysis copy the plan adopted: clips/{name}")
         try:
             rich = export_probe(path)
         except Exception as exc:
@@ -991,6 +1001,11 @@ def _verify_run_locked(
     if manifest.get("excerpts_sha256") != excerpts_sha256:
         errors.append("excerpts.json does not match analysis manifest")
     settings = _validate_settings(manifest, errors)
+    run_policy = (
+        settings.get("cache_policy")
+        if isinstance(settings, dict) and settings.get("cache_policy") in ACCEPTED_ANALYSIS_POLICIES
+        else ANALYSIS_CACHE_POLICY
+    )
     if settings is not None and all(key in settings for key in REQUIRED_SETTINGS):
         expected_generation = analysis_generation_id(
             str(manifest.get("ranked_sha256") or ""),
@@ -1139,7 +1154,7 @@ def _verify_run_locked(
             if span is None:
                 errors.append(f"{video_id} copy has invalid span")
                 continue
-            expected_cache_key = analysis_cache_path(allowed_root, video_id, span).name
+            expected_cache_key = analysis_cache_path(allowed_root, video_id, span, policy=run_policy).name
             if cache_key != expected_cache_key:
                 errors.append(f"{video_id} cache key does not match source span")
             if not path_text:
@@ -1173,6 +1188,7 @@ def _verify_run_locked(
                 "size_bytes": expected_size,
                 "sha256": digest,
                 "path": resolved,
+                "mapping_k_s": copy.get("mapping_k_s"),
             }
             if previous is not None and previous != reference:
                 errors.append(f"conflicting duplicate media reference {resolved}")
@@ -1253,14 +1269,17 @@ def _verify_run_locked(
         actual_hash = sha256_file(path)
         if reference["sha256"] != actual_hash:
             errors.append(f"media hash changed {path}")
-        _validate_marker(
+        marker = _validate_marker(
             path,
             reference["video_id"],
             reference["span"],
             stat.st_size,
             actual_hash,
             errors,
+            policy=run_policy,
         )
+        marker_k_ms = (marker or {}).get("first_pts_ms")
+        copyts = isinstance(marker_k_ms, int) and not isinstance(marker_k_ms, bool)
         try:
             media = probe(path)
         except Exception as exc:
@@ -1283,9 +1302,30 @@ def _verify_run_locked(
             aspect = width / height
             if not (aspect_min <= aspect <= aspect_max):
                 errors.append(f"analysis media aspect outside band {path}")
-        expected_duration = reference["span"][1] - reference["span"][0]
-        if duration is None or duration <= 0 or abs(duration - expected_duration) > MEDIA_DURATION_TOLERANCE_S:
-            errors.append(f"media duration does not match span {path}")
+        span_start, span_end = reference["span"][0], reference["span"][1]
+        if copyts:
+            # Stream-copied copyts section: local 0 is K (first packet PTS), so
+            # prove K three ways (file, marker, excerpt record) and check coverage.
+            k_s = marker_k_ms / 1000.0
+            start_time = _finite_number(media.get("start_time_s"))
+            if start_time is None or abs(start_time - k_s) > 1e-3:
+                errors.append(f"media start_time does not match marker mapping {path}")
+            record_k = _finite_number(reference.get("mapping_k_s"))
+            if record_k is None or abs(record_k - k_s) > 1e-6:
+                errors.append(f"excerpt mapping does not match marker mapping {path}")
+            if (
+                duration is None
+                or duration <= 0
+                or k_s > span_start + MEDIA_DURATION_TOLERANCE_S
+                or k_s + duration < span_end - MEDIA_DURATION_TOLERANCE_S
+            ):
+                errors.append(f"media does not cover span {path}")
+        else:
+            expected_duration = span_end - span_start
+            if reference.get("mapping_k_s") not in (None, span_start):
+                errors.append(f"excerpt mapping without marker mapping {path}")
+            if duration is None or duration <= 0 or abs(duration - expected_duration) > MEDIA_DURATION_TOLERANCE_S:
+                errors.append(f"media duration does not match span {path}")
         try:
             decode(path)
         except Exception as exc:

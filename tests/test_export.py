@@ -918,7 +918,7 @@ def test_encode_recipe_defaults_are_the_production_arguments(tmp_path, monkeypat
     assert cmd.count("-i") == 1  # a single encode pass, no second input
     assert "-r" not in cmd and "-s" not in cmd
     assert "scale" not in vf and "crop" not in vf and "pad" not in vf
-    assert cmd[cmd.index("-preset") + 1] == ENCODE_PRESET == "medium"
+    assert cmd[cmd.index("-preset") + 1] == ENCODE_PRESET == "faster"
     assert cmd[cmd.index("-crf") + 1] == str(ENCODE_CRF) == "17"
     assert "-an" in cmd
     assert cmd[cmd.index("-fps_mode") + 1] == "passthrough"
@@ -961,3 +961,20 @@ def test_export_plan_preserves_shortlist_intervals(tmp_path):
     assert moment["end_ms"] == 18901
     assert moment["video_id"] == VIDEO
     assert moment["excerpt_index"] == 0
+
+
+def test_analysis_format_id_pins_export_rendition_only_at_or_below_720(tmp_path):
+    from scenery_brief_clips.export import analysis_format_id
+
+    meta_dir = tmp_path / "data" / "cache" / "metadata"
+    meta_dir.mkdir(parents=True)
+    formats = [
+        {"format_id": "136", "vcodec": "avc1.4d401f", "acodec": "none", "width": 1280, "height": 720, "fps": 30},
+        {"format_id": "137", "vcodec": "avc1.640028", "acodec": "none", "width": 1920, "height": 1080, "fps": 30},
+    ]
+    (meta_dir / "abcdefghijk.json").write_text(json.dumps({"formats": formats}))
+    row = {"video_id": "abcdefghijk", "width": 1920, "height": 1080}
+    assert analysis_format_id(tmp_path, row, 720) == "136"
+    # A 1080p export cap picks a rendition analysis may not use: no pin.
+    assert analysis_format_id(tmp_path, row, 1080) is None
+    assert analysis_format_id(tmp_path, {"video_id": "missingxxxx", "width": 1920, "height": 1080}, 720) is None

@@ -42,12 +42,14 @@ from functools import lru_cache
 from pathlib import Path
 
 from scenery_brief_clips.analysis_cache import (
+    ANALYSIS_CACHE_POLICY,
     EXPORT_ASPECT_TARGET,
     EXPORT_ASPECT_TOLERANCE,
     EXPORT_CAP_MAX,
     EXPORT_CAP_MIN,
     EXPORT_DEFAULT_MAX_HEIGHT,
     EXPORT_FLOOR_HEIGHT,
+    analysis_marker_path,
     safe_video_id,
     sha256_file,
 )
@@ -70,12 +72,16 @@ from scenery_brief_clips.yt import (
 
 EXPORT_SCHEMA_VERSION = 2
 EXPORT_POLICY = "v2-export-cap-sections"
-EXPORT_RECIPE = "x264-crf17-medium-v1"
+EXPORT_RECIPE = "x264-crf17-faster-v1"
+# Recipes verify still accepts for already-published exports. medium -> faster
+# (2026-09-28): 1.35-1.85x faster encodes on this 1-CPU host, +3% size,
+# about -0.1 dB PSNR vs the source frames (benchmark/RESULTS-2026-09-28.md).
+ACCEPTED_RECIPES = (EXPORT_RECIPE, "x264-crf17-medium-v1")
 MARGIN_S = 2.0
 MAX_HEIGHT_DEFAULT = EXPORT_DEFAULT_MAX_HEIGHT
 FLOOR_HEIGHT = EXPORT_FLOOR_HEIGHT
 CODEC_PREFERENCE = ("avc1", "av01", "vp09", "vp9")
-ENCODE_PRESET = "medium"
+ENCODE_PRESET = "faster"
 ENCODE_CRF = 17
 ENCODE_TIMEOUT_S = 2400
 COVERAGE_EPS_MS = 1
@@ -309,6 +315,79 @@ def _metadata_path(root: Path, video_id: str) -> Path:
     return root / "data" / "cache" / "metadata" / f"{safe}.json"
 
 
+ANALYSIS_MAX_HEIGHT = 720
+
+
+def analysis_format_id(root: Path, row: dict, max_height: int) -> str | None:
+    """The export rendition's format id when analysis may fetch it directly.
+
+    Analysis copies stay <=720p. When the rendition export would pick for this
+    ranked row (same metadata, same resolve_export_spec) is itself <=720p,
+    analysis downloads exactly that rendition so export can adopt the file.
+    Otherwise None: analysis uses its own <=720p selector and export fetches.
+    """
+    video_id = row.get("video_id")
+    if not isinstance(video_id, str) or not video_id:
+        return None
+    path = _metadata_path(Path(root), video_id)
+    try:
+        metadata = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(metadata, dict):
+        return None
+    spec, _reason = resolve_export_spec(
+        metadata.get("formats"), row.get("width"), row.get("height"), max_height
+    )
+    if spec is None or int(spec["height"]) > ANALYSIS_MAX_HEIGHT:
+        return None
+    return str(spec["format_id"])
+
+
+def _adoptable_analysis_copy(
+    root: Path, cache_key, video_id: str, spec: dict, start_ms: int, end_ms: int
+) -> dict | None:
+    """An analysis copy export may use instead of a second download, or None.
+
+    Only a copyts stream-copy section (policy v4) of the SAME rendition the
+    export plan resolved, whose marker proves the timeline (first packet PTS)
+    and which covers the whole clip interval, with intact size and hash.
+    The acquisition then passes the normal export acceptance unchanged.
+    """
+    if not isinstance(cache_key, str) or not cache_key or "/" in cache_key or "\\" in cache_key:
+        return None
+    path = Path(root) / "data" / "cache" / "analysis" / cache_key
+    if not path.is_file() or path.is_symlink():
+        return None
+    try:
+        marker = json.loads(analysis_marker_path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(marker, dict):
+        return None
+
+    def _is_int(value) -> bool:
+        return isinstance(value, int) and not isinstance(value, bool)
+
+    k_ms, last_ms, span_ms = marker.get("first_pts_ms"), marker.get("last_end_ms"), marker.get("span_ms")
+    if (
+        marker.get("cache_policy") != ANALYSIS_CACHE_POLICY
+        or marker.get("video_id") != video_id
+        or marker.get("format_id") is None
+        or str(marker.get("format_id")) != str(spec.get("format_id"))
+        or (marker.get("width"), marker.get("height")) != (spec.get("width"), spec.get("height"))
+        or not (_is_int(k_ms) and _is_int(last_ms))
+        or not (isinstance(span_ms, list) and len(span_ms) == 2 and all(_is_int(v) for v in span_ms))
+        or not (k_ms <= start_ms and last_ms >= end_ms)
+        or marker.get("size_bytes") != path.stat().st_size
+    ):
+        return None
+    digest = sha256_file(path)
+    if digest != marker.get("sha256"):
+        return None
+    return {"kind": "analysis_copy", "cache_key": cache_key, "sha256": digest, "span_ms": list(span_ms)}
+
+
 def _load_inputs(run_dir: Path, root: Path) -> dict:
     if not run_dir.is_dir():
         raise ExportError(f"run dir not found: {run_dir}")
@@ -516,6 +595,11 @@ def _plan_moments(inputs: dict, max_height: int) -> list[dict]:
         validated.append((video_id, index, start, end))
     validated.sort(key=lambda item: (item[0], item[1]))
 
+    analysis_keys = {
+        (entry.get("video_id"), entry.get("excerpt_index")): entry.get("analysis_cache_key")
+        for entry in inputs["shortlist"]["selected"]
+        if isinstance(entry, dict)
+    }
     metadata_cache: dict[str, tuple[dict | None, str | None]] = {}
     moments: list[dict] = []
     for video_id, index, start, end in validated:
@@ -563,6 +647,16 @@ def _plan_moments(inputs: dict, max_height: int) -> list[dict]:
         if reason is None and acq_end_ms <= start_ms:
             spec, reason = None, "coverage_impossible"
 
+        # Reuse the analysis download when it is the same rendition and covers
+        # the clip: the acquisition span is then that copy's span.
+        acq_source = None
+        if spec is not None:
+            acq_source = _adoptable_analysis_copy(
+                root, analysis_keys.get((video_id, index)), video_id, spec, start_ms, end_ms
+            )
+            if acq_source is not None:
+                acq_start_ms, acq_end_ms = acq_source.pop("span_ms")
+
         moments.append(
             {
                 "video_id": video_id,
@@ -574,6 +668,7 @@ def _plan_moments(inputs: dict, max_height: int) -> list[dict]:
                 "status": "ready" if spec is not None else "unplannable",
                 "reason": reason,
                 "spec": spec,
+                "acq_source": acq_source,
             }
         )
     return moments
@@ -936,9 +1031,16 @@ def export_run(
             acq_path: Path | None = None
             attempt_errors: list[str] = []
             failure_code: str | None = None
+            adopt = moment.get("acq_source")
             for _attempt in range(EXPORT_ATTEMPTS):
                 try:
-                    acq_path = Path(yt_client.fetch_export(export_spec))
+                    if adopt is not None and _attempt == 0:
+                        # Same span and rendition either way; a failed adoption
+                        # falls back to downloading that planned span.
+                        source = root / "data" / "cache" / "analysis" / adopt["cache_key"]
+                        acq_path = Path(yt_client.fetch_export(export_spec, source=source))
+                    else:
+                        acq_path = Path(yt_client.fetch_export(export_spec))
                     break
                 except Exception as exc:  # noqa: BLE001 - recorded with a reason code
                     attempt_errors.append(f"{type(exc).__name__}: {exc}")

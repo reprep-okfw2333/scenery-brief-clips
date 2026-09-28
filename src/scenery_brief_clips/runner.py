@@ -62,6 +62,11 @@ ANALYZE_KEYS = (
 )
 ANALYZE_ENV = ("SCENERY_DETECT_FRAME_SKIP", "SCENERY_CONTINUITY_DECODE_WIDTH")
 EXPORT_KEYS = ("export_max_height",)
+# Wall-clock budget for one runner invocation (config run_deadline_s). When it
+# is spent the runner stops before the next stage (analyze also stops starting
+# new spans) and returns status "deadline"; rerunning the same command resumes
+# with a fresh budget and reuses completed stages and cached spans.
+DEFAULT_RUN_DEADLINE_S = 3 * 3600.0
 
 EXTERNAL_STAGES = {
     "discover",
@@ -101,6 +106,7 @@ class Ports:
     detect_fn: Callable | None = None
     invalidate_span: Callable | None = None
     planner_caller: Callable | None = None
+    prefetch_spans: Callable | None = None
     tile_caller: Callable | None = None
     strip_caller: Callable | None = None
     verify_probe: Callable | None = None
@@ -235,6 +241,8 @@ def _advance_locked(**kw) -> dict:
             )
 
     bindings = _bindings(kw["brief_doc"], kw["plan_doc"], config, model_id)
+    deadline_s = float(config.get("run_deadline_s", DEFAULT_RUN_DEADLINE_S))
+    invocation_started = clock()
     for stage in STAGE_ORDER:
         saved = state["completed"].get(stage)
         if saved and saved.get("outputs") != _output_hashes(run_dir, stage):
@@ -251,6 +259,10 @@ def _advance_locked(**kw) -> dict:
         handoff = _handoff(stage, state, kw, ports, wire)
         if handoff is not None:
             return _pause(state, run_dir, clock, **handoff)
+        remaining_s = deadline_s - (clock() - invocation_started)
+        if remaining_s <= 0:
+            return _deadline(state, run_dir, clock, stage, deadline_s)
+        kw["span_deadline"] = time.monotonic() + remaining_s
         began = clock()
         _write_inflight(run_dir, stage, bindings.get(stage))
         try:
@@ -267,6 +279,8 @@ def _advance_locked(**kw) -> dict:
             _record(state, stage, "failed", elapsed, counters.model_calls, _tokens(counters))
             state["failed_stage"] = stage
             _save(run_dir, state, clock)
+            if outcome.get("deadline"):
+                return _deadline(state, run_dir, clock, stage, deadline_s, saved=True)
             return _result(
                 state,
                 run_dir,
@@ -333,10 +347,19 @@ def _run_stage(stage, root, run_dir, kw, ports: Ports, wire, counters: _Counters
             max_analysis_s=float(kw["config"].get("max_analysis_s", 120.0)),
             invalidate_span=ports.invalidate_span,
             continuity_settings=continuity_settings_from_config(kw["config"]),
+            deadline=kw.get("span_deadline"),
+            prefetch_spans=ports.prefetch_spans,
+            format_for=_analysis_format_for(root, kw["config"]),
         )
         bad = [row for row in rows if row.get("status") in {"partial", "failed", "invalid"}]
         if bad:
-            return {"failed": True, "error": f"analyze failed for {bad[0].get('video_id')}"}
+            deadline_hit = any(
+                (outcome.get("stage") == "deadline")
+                for row in bad
+                for outcome in row.get("ranges") or []
+            )
+            return {"failed": True, "deadline": deadline_hit,
+                    "error": f"analyze failed for {bad[0].get('video_id')}"}
         return {}
     if stage == "verify_review":
         report = verify_run(
@@ -700,6 +723,29 @@ def _outputs_ok(run_dir: Path, stage: str) -> bool:
         return True
     except (OSError, ValueError, AttributeError):
         return False
+
+
+def _analysis_format_for(root, config):
+    from scenery_brief_clips.export import analysis_format_id, resolve_max_height
+
+    max_height = resolve_max_height(config)
+    return lambda row: analysis_format_id(root, row, max_height)
+
+
+def _deadline(state, run_dir, clock, stage, deadline_s, saved=False) -> dict:
+    if not saved:
+        _save(run_dir, state, clock)
+    return _result(
+        state,
+        run_dir,
+        status="deadline",
+        stage=stage,
+        missing=f"run_deadline_s={deadline_s:g} was spent before {stage} finished",
+        how_to_supply=(
+            "rerun the same command with the same --run-dir; completed stages and "
+            "cached analysis spans are reused and the new invocation gets a fresh budget"
+        ),
+    )
 
 
 def _pause(state, run_dir, clock, **fields) -> dict:

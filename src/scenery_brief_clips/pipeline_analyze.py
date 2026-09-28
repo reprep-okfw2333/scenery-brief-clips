@@ -13,6 +13,7 @@ from pathlib import Path
 from scenery_brief_clips.analysis_cache import (
     ANALYSIS_CACHE_POLICY,
     analysis_cache_path,
+    analysis_marker_path,
     canonical_span_seconds,
     sha256_file,
 )
@@ -80,11 +81,26 @@ def _publish_generation(run_dir: Path, excerpts_bytes: bytes, manifest_bytes: by
         manifest_tmp.unlink(missing_ok=True)
 
 
+def _mapping_k_s(path: Path, span: tuple[float, float]) -> float:
+    """Source time of the copy's local 0: the marker's first packet PTS for a
+    copyts section, else the span start (legacy exact-cut copies and fakes)."""
+    try:
+        marker = json.loads(analysis_marker_path(path).read_text(encoding="utf-8"))
+        first_pts_ms = marker.get("first_pts_ms")
+    except (OSError, ValueError, AttributeError):
+        first_pts_ms = None
+    if isinstance(first_pts_ms, int) and not isinstance(first_pts_ms, bool):
+        return first_pts_ms / 1000.0
+    return float(span[0])
+
+
 def _clamp_source_scenes(
     local_scenes: list[tuple[float, float]],
     span: tuple[float, float],
+    mapping_k_s: float | None = None,
 ) -> list[tuple[float, float]]:
-    offset, span_end = span
+    span_start, span_end = span
+    offset = span_start if mapping_k_s is None else float(mapping_k_s)
     out = []
     for scene in local_scenes:
         if not isinstance(scene, (tuple, list)) or len(scene) != 2:
@@ -94,7 +110,7 @@ def _clamp_source_scenes(
             raise ValueError(f"non-finite detector scene: {scene!r}")
         if local_end <= local_start:
             raise ValueError(f"invalid detector scene interval: {scene!r}")
-        source_start = max(offset, offset + local_start)
+        source_start = max(span_start, offset + local_start)
         source_end = min(span_end, offset + local_end)
         if source_end > source_start:
             out.append((source_start, source_end))
@@ -164,7 +180,18 @@ def analyze_run(
     invalidate_span: Callable[[Path], None] | None = None,
     continuity_settings: ContinuitySettings | None = None,
     continuity_gate: Callable | None = None,
+    deadline: float | None = None,
+    prefetch_spans: Callable | None = None,
+    format_for: Callable[[dict], str | None] | None = None,
 ) -> list[dict]:
+    """``deadline`` is a time.monotonic() value; no span acquisition starts after it.
+
+    ``format_for(ranked_row)`` may pin the rendition a video's spans are fetched
+    in (the export rendition, so export can reuse the file); ``prefetch_spans``
+    (video_id, [(dest, span)], format_id=) acquires a video's spans in one call
+    before per-span processing. Both are optional; spans a prefetch did not
+    publish are fetched one by one as before.
+    """
     with exclusive_run_lock(Path(run_dir)):
         return _analyze_run_locked(
             run_dir=run_dir,
@@ -179,15 +206,21 @@ def analyze_run(
             invalidate_span=invalidate_span,
             continuity_settings=continuity_settings,
             continuity_gate=continuity_gate,
+            deadline=deadline,
+            prefetch_spans=prefetch_spans,
+            format_for=format_for,
         )
 
 
+DEFAULT_ANALYZE_WORKERS = 2  # 4 swapped a 1.6 GB host to a halt (Brazil run)
+
+
 def _analyze_workers() -> int:
-    raw = os.environ.get("SCENERY_ANALYZE_WORKERS", "4").strip()
+    raw = os.environ.get("SCENERY_ANALYZE_WORKERS", str(DEFAULT_ANALYZE_WORKERS)).strip()
     try:
         return max(1, int(raw))
     except ValueError:
-        return 4
+        return DEFAULT_ANALYZE_WORKERS
 
 
 class _PhaseTimer:
@@ -247,6 +280,8 @@ def _process_span(
     min_scene_len_s: float,
     acquisition_attempts: int,
     timer: _PhaseTimer | None,
+    deadline: float | None = None,
+    format_id: str | None = None,
 ) -> dict:
     """Acquire one span, detect scenes, run continuity; return outcome payload."""
     attempt_errors: list[dict] = []
@@ -254,10 +289,18 @@ def _process_span(
     last_error = "analysis acquisition failed"
 
     for attempt in range(1, acquisition_attempts + 1):
+        if deadline is not None and time.monotonic() >= deadline:
+            last_stage = "deadline"
+            last_error = "run deadline reached before this span was acquired"
+            attempt_errors.append({"attempt": attempt, "stage": last_stage, "error": last_error})
+            break
         path: Path | None = None
         try:
             t0 = time.perf_counter()
-            path = Path(fetch_span(video_id, dest, span))
+            if format_id is not None:
+                path = Path(fetch_span(video_id, dest, span, format_id=format_id))
+            else:
+                path = Path(fetch_span(video_id, dest, span))
             if timer is not None:
                 timer.add("acquire", time.perf_counter() - t0, video_id=video_id, span=list(span))
             if not path.is_file() or path.stat().st_size <= 0:
@@ -270,8 +313,9 @@ def _process_span(
 
         try:
             t0 = time.perf_counter()
+            mapping_k = _mapping_k_s(path, span)
             local_scenes = detect_fn(path, min_scene_len_s=min_scene_len_s)
-            source_scenes = _clamp_source_scenes(local_scenes, span)
+            source_scenes = _clamp_source_scenes(local_scenes, span, mapping_k)
             if timer is not None:
                 timer.add("detect", time.perf_counter() - t0, video_id=video_id, span=list(span))
         except Exception as exc:
@@ -289,6 +333,7 @@ def _process_span(
                 "cache_key": dest.name,
                 "size_bytes": path.stat().st_size,
                 "sha256": sha256_file(path),
+                "mapping_k_s": mapping_k,
             }
             if timer is not None:
                 timer.add("hash", time.perf_counter() - t_hash, video_id=video_id, span=list(span))
@@ -320,6 +365,7 @@ def _process_span(
                     min_s=min_s,
                     max_s=max_s,
                     settings=continuity,
+                    mapping_k_s=mapping_k,
                 )
                 if timer is not None:
                     timer.add(
@@ -367,7 +413,7 @@ def _process_span(
             "cache_key": dest.name,
             "status": "failed",
             "stage": last_stage,
-            "attempts": acquisition_attempts,
+            "attempts": sum(1 for item in attempt_errors if item["stage"] != "deadline"),
             "attempt_errors": attempt_errors,
             "error": last_error,
         },
@@ -387,6 +433,9 @@ def _analyze_run_locked(
     invalidate_span: Callable[[Path], None] | None = None,
     continuity_settings: ContinuitySettings | None = None,
     continuity_gate: Callable | None = None,
+    deadline: float | None = None,
+    prefetch_spans: Callable | None = None,
+    format_for: Callable[[dict], str | None] | None = None,
 ) -> list[dict]:
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -506,10 +555,17 @@ def _analyze_run_locked(
                 continue
             jobs.append({"span": span, "dest": dest})
 
+        format_id = None
+        if format_for is not None:
+            try:
+                format_id = format_for(item)
+            except Exception:
+                format_id = None
         video_plans.append(
             {
                 "kind": "work",
                 "item": item,
+                "format_id": format_id,
                 "video_id": video_id,
                 "priority": priority,
                 "plan": plan,
@@ -546,8 +602,38 @@ def _analyze_run_locked(
             min_scene_len_s=min_scene_len_s,
             acquisition_attempts=acquisition_attempts,
             timer=timer,
+            deadline=deadline,
+            format_id=plan.get("format_id"),
         )
         return (v_idx, s_idx), result
+
+    # One yt-dlp call per video for all of its spans: player/JS extraction is
+    # about two thirds of a single-span fetch. Whatever a prefetch does not
+    # publish is fetched per span below, with the normal attempts and records.
+    prefetches = [
+        (plan["video_id"], [(job["dest"], job["span"]) for job in plan["jobs"]], plan.get("format_id"))
+        for plan in video_plans
+        if plan["kind"] == "work" and len(plan["jobs"]) > 1
+    ]
+
+    def _prefetch(entry) -> None:
+        video_id, items, format_id = entry
+        if deadline is not None and time.monotonic() >= deadline:
+            return
+        t0 = time.perf_counter()
+        try:
+            prefetch_spans(video_id, items, format_id=format_id)
+        except Exception:
+            pass
+        timer.add("prefetch", time.perf_counter() - t0, video_id=video_id)
+
+    if prefetch_spans is not None and prefetches:
+        if workers == 1 or len(prefetches) == 1:
+            for entry in prefetches:
+                _prefetch(entry)
+        else:
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                list(pool.map(_prefetch, prefetches))
 
     t_pool = time.perf_counter()
     if workers == 1 or len(flat_jobs) <= 1:

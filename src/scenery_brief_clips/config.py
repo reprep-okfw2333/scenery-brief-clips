@@ -21,6 +21,7 @@ _INTEGER_KEYS = {
     "continuity_max_endpoint_hamming",
 }
 _FLOAT_KEYS = {
+    "run_deadline_s",
     "sleep_s",
     "aspect_min",
     "aspect_max",

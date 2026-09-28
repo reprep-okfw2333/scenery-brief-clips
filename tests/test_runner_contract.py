@@ -136,7 +136,7 @@ def _brief_plan(root: Path):
 
 
 def _ports(yt, **kwargs) -> Ports:
-    def fetch_span(video_id, dest, span):
+    def fetch_span(video_id, dest, span, format_id=None):
         from scenery_brief_clips.analysis_cache import (
             ANALYSIS_CACHE_POLICY,
             ANALYSIS_MARKER_SCHEMA_VERSION,
@@ -742,3 +742,45 @@ def test_unreported_label_usage_stays_null_and_counts_the_call(tmp_path, monkeyp
     expected = round(sum(item["elapsed_s"] for item in state["timing"]["stages"] if item["status"] in {"executed", "failed"}), 6)
     assert state["active_execution_s"] == expected
     assert isinstance(state["active_execution_s"], float)
+
+
+def test_run_deadline_stops_between_stages_and_resume_continues(tmp_path, monkeypatch):
+    Guard().install(monkeypatch)
+    root = _root(tmp_path)
+    with (root / "config.yaml").open("a", encoding="utf-8") as fh:
+        fh.write("run_deadline_s: 5\n")
+    brief_path, plan_path = _brief_plan(root)
+    yt = FakeYt()
+
+    class Ticking:
+        def __init__(self):
+            self.now = 0.0
+
+        def __call__(self):
+            self.now += 1.0
+            return self.now
+
+    clock = Ticking()
+    first = advance(root, brief=brief_path, plan=plan_path, vision_agree=True,
+                    ports=_ports(yt, tile_caller=_tile_text, clock=clock))
+    assert first["status"] == "deadline", first
+    assert "run_deadline_s" in first["missing"]
+    stopped_at = first["stage"]
+    executed = [row["stage"] for row in first["timing"]["stages"] if row["status"] == "executed"]
+    assert executed and stopped_at not in executed
+
+    # A fresh invocation gets a fresh budget and reuses completed stages.
+    clock.now = 0.0
+    second = advance(root, brief=brief_path, plan=plan_path, run_dir=first["run_dir"], vision_agree=True,
+                     ports=_ports(yt, tile_caller=_tile_text, clock=clock))
+    reused = [row["stage"] for row in second["timing"]["stages"] if row["status"] == "reused"]
+    assert set(executed) <= set(reused)
+
+
+def test_run_deadline_config_must_be_positive(tmp_path):
+    from scenery_brief_clips.config import ConfigError, load_project_config
+
+    root = _root(tmp_path)
+    (root / "config.yaml").write_text("run_deadline_s: 0\n", encoding="utf-8")
+    with pytest.raises(ConfigError):
+        load_project_config(root)

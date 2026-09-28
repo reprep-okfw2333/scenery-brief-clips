@@ -25,8 +25,8 @@ Jev gate is documented in docs/JEV_GATE.md.
   delivering files remains mandatory.
 - Temps: project `tmp/` only. Never host /tmp for media.
 - Part 2: rank saves tiles. Picture labels come from the model named in vision.yaml (`vision-show`, then `label-tiles --confirm-vision`). Show that model and get a yes before a run. Dark tiles are reject and are not sent.
-- Part 3: selected-window ≤720p video-only, time-capped; spans analyze concurrently (default 4 workers). Continuity gate trims/rejects mid-excerpt dissolves (default decode width 160). Scene detect defaults to frame_skip=1. Legacy serial/full-frame: SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0. Span/policy cache keys + validated SHA-256 markers; never YtDlp.download(). IDs may start with `-`; use watch URLs.
-- Every yt-dlp call uses `--ignore-config`. Search/metadata use --skip-download. Analysis uses --download-sections and only `bv`/`wv` selectors with `[height<=720]`, preferring AVC/H.264.
+- Part 3: selected-window ≤720p video-only, time-capped; spans analyze concurrently (default 2 workers; 4 swapped this 1.6 GB host). Each span download has a hard timeout of 90 s + 10 s per span second (max 300 s). run-pipeline stops with status `deadline` once `run_deadline_s` (config, default 10800) is spent; rerun the same command to resume. Continuity gate trims/rejects mid-excerpt dissolves (default decode width 160). Scene detect defaults to frame_skip=1. Legacy serial/full-frame: SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0. Span/policy cache keys + validated SHA-256 markers; never YtDlp.download(). IDs may start with `-`; use watch URLs.
+- Every yt-dlp call uses `--ignore-config`. Search/metadata use --skip-download. Analysis uses --download-sections as stream copy with `-copyts` (no `--force-keyframes-at-cuts`, no re-encode), one yt-dlp call per video for all its spans. It pins the export rendition when that is ≤720p (so export can adopt the same file), else only `bv`/`wv` selectors with `[height<=720]`, preferring AVC/H.264. Local time 0 of an analysis copy is its first packet PTS (marker `first_pts_ms`, range `mapping_k_s`), not the span start.
 - Cookies off unless the user opts in.
 - Do not silently lower resolution, aspect, or N.
 - Optional flat config: project config.yaml or `--config`; explicit flags win. Config may tighten geometry but never loosen the prompt. Downloads stay forbidden in the default pipeline; the Part 5 export path is authorized explicitly (`allow_export: true` or `--allow-export`) and only ever acquires shortlisted sections at the resolved cap rendition (largest video-only rendition at or under `export_max_height`, default 720p, never below the 720p floor).
@@ -42,7 +42,7 @@ Jev gate is documented in docs/JEV_GATE.md.
 - run-brief can NEVER fetch video, call vision, or export. Its limit flags only tighten the brief's own search_limits (final = min).
 - Metadata cache is reusable; prompt-specific files stay in the run dir.
 - `verify` is run-scoped and fail-closed: input/output hashes, exact plan/range/copy reconciliation, completion markers, probe, duration, and strict decode. The verifier checks file integrity, not scene fidelity.
-- Tests: `.venv/bin/python -m pytest tests/ -q` (358 passing as of 2026-09-25). Prefer fixtures over live YouTube.
+- Tests: `.venv/bin/python -m pytest tests/ -q` (405 passing as of 2026-09-28). Prefer fixtures over live YouTube.
 - Expected environment: Linux + Python 3.14. Run/export locks use fcntl (not available on native Windows).
 - Shortlist: `continuity_suspect` + keep without `continuity_ok:` / `continuity_ok: true` → exclude `continuity_suspect_uncleared`.
 - Export preserves approved shortlist intervals (no continuity re-trim).

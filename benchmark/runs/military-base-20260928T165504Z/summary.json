@@ -1,0 +1,78 @@
+{
+  "label": "military-base-20260928T165504Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "23:30.85",
+  "max_rss_mb_main_process": 277.8,
+  "stage_sum_s": 1407.52,
+  "stages_s": {
+    "discover": 73.05,
+    "rank": 7.92,
+    "agree_vision": 0.01,
+    "label_tiles": 87.81,
+    "apply_scores": 0.02,
+    "analyze": 980.48,
+    "verify_review": 38.86,
+    "shortlist_review": 29.62,
+    "label_strips": 26.7,
+    "shortlist_apply": 0.02,
+    "agree_export": 0.0,
+    "export": 105.58,
+    "verify_export": 57.45
+  },
+  "model_calls": 21,
+  "yield": {
+    "candidates": 6,
+    "candidate_ids": [
+      "p_PxOw22loE",
+      "YpI_w1KIWOs",
+      "5r00-o3YP8U",
+      "X1qd_tm91uY",
+      "5UUadakWxK8",
+      "BAx_9MNPzts"
+    ],
+    "ranked": 3,
+    "tile_labels": {
+      "keep": 15,
+      "reject": 2,
+      "uncertain": 1
+    },
+    "analyzed_sources": 3,
+    "analysis_ranges": 10,
+    "analysis_seconds_planned": 105.55,
+    "excerpts": 3,
+    "sources_without_excerpts": 1,
+    "continuity_rejected": 7,
+    "shortlist_counts": {
+      "n_candidates": 3,
+      "n_selected": 2,
+      "n_excluded": 1,
+      "n_excluded_by_reason": {
+        "beyond n_clips": 1
+      },
+      "n_sources_without_moments": 1,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 7,
+      "n_continuity_rejected_upstream_by_reason": {
+        "no stable continuity subspan": 1,
+        "stable continuity subspan 0.515s below duration_min_s 4.0": 1,
+        "stable continuity subspan 0.536s below duration_min_s 4.0": 1,
+        "stable continuity subspan 1.030s below duration_min_s 4.0": 1,
+        "stable continuity subspan 1.609s below duration_min_s 4.0": 1,
+        "stable continuity subspan 2.682s below duration_min_s 4.0": 1,
+        "stable continuity subspan 3.090s below duration_min_s 4.0": 1
+      }
+    },
+    "clips_delivered": 2,
+    "clips": [
+      "YpI_w1KIWOs_e0_4093610-4099610.mp4",
+      "p_PxOw22loE_e0_300-6639.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/military-base-20260928T165504Z/data/runs/20260928T165505Z"
+}
