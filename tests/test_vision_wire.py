@@ -40,12 +40,16 @@ def test_scenery_brief_still_rejects_people_as_subject():
     assert "towns or cities as the subject" in prompt
 
 
-def test_shipped_vision_yaml_is_the_codex_login():
+def test_shipped_vision_yaml_is_the_agreed_openrouter_wire():
     wire = load_vision_wire(Path(__file__).resolve().parents[1])
-    assert wire.backend == "codex-login"
-    assert wire.model == "gpt-6-sol"
-    assert "ChatGPT/Codex sign-in" in plain_description(wire)
-    assert "gpt-6-sol" in plain_description(wire)
+    assert wire.backend == "openai-api"
+    assert wire.model == "z-ai/glm-5.3-flash"
+    assert wire.base_url == "https://openrouter.ai/api/v1"
+    assert wire.api_key_env == "OPENROUTER_API_KEY"
+    text = plain_description(wire)
+    assert "openrouter.ai/api/v1" in text
+    assert "z-ai/glm-5.3-flash" in text
+    assert "OPENROUTER_API_KEY" in text
 
 
 def test_openai_api_switch_is_only_a_file_change(tmp_path):

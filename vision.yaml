@@ -3,7 +3,7 @@
 #
 # backend: codex-login
 #   The ChatGPT/Codex sign-in already on this machine. Not a paid API key.
-#   model: the model name that sign-in accepts. Selected for this run: gpt-6-sol.
+#   model: the model name that sign-in accepts.
 #
 # backend: openai-api
 #   A normal API call. model is the model name. base_url is the service
@@ -14,5 +14,10 @@
 #     model: gpt-4.1
 #     base_url: https://api.openai.com/v1
 #     api_key_env: OPENAI_API_KEY
-backend: codex-login
-model: gpt-6-sol
+#
+# Selected for this checkout: OpenRouter GLM 5.3 Flash (pictures and text).
+# The key is read from OPENROUTER_API_KEY, never written here.
+backend: openai-api
+model: z-ai/glm-5.3-flash
+base_url: https://openrouter.ai/api/v1
+api_key_env: OPENROUTER_API_KEY

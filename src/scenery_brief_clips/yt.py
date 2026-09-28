@@ -5,6 +5,7 @@ import json
 import math
 import os
 import re
+import signal
 import subprocess
 import time
 import uuid
@@ -36,6 +37,55 @@ from scenery_brief_clips.eligibility import watch_url
 
 Runner = Callable[..., subprocess.CompletedProcess]
 AnalysisValidator = Callable[[Path, tuple[float, float]], None]
+
+
+def group_kill_runner(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
+    """Run a command as its own process group and kill the WHOLE group on timeout.
+
+    The stock ``subprocess.run`` timeout kills only the direct child (yt-dlp),
+    leaving its ffmpeg grandchildren downloading forever. Each abandoned
+    ffmpeg then competes for bandwidth with the retry that replaced it, which
+    is how a single hung span accumulates a pile of live downloaders on a
+    small host. Starting the child in a fresh process group and killing that
+    group (yt-dlp plus every descendant) on timeout keeps the retry budget
+    honest: one attempt, one process tree, fully reaped.
+    """
+    timeout = kwargs.get("timeout")
+    popen_kwargs = {
+        key: value
+        for key, value in kwargs.items()
+        if key not in {"timeout", "check", "capture_output"}
+    }
+    if kwargs.get("capture_output"):
+        popen_kwargs["stdout"] = subprocess.PIPE
+        popen_kwargs["stderr"] = subprocess.PIPE
+    popen_kwargs.setdefault("stdout", subprocess.PIPE)
+    popen_kwargs.setdefault("stderr", subprocess.PIPE)
+    popen_kwargs["start_new_session"] = True
+    with subprocess.Popen(cmd, **popen_kwargs) as proc:
+        try:
+            out, err = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            # SIGTERM the whole group, escalate to SIGKILL if it lingers.
+            try:
+                os.killpg(proc.pid, signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                pass
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    pass
+                proc.wait()
+            raise
+        return subprocess.CompletedProcess(
+            cmd,
+            proc.returncode,
+            stdout=out.decode("utf-8", errors="replace") if isinstance(out, bytes) else out,
+            stderr=err.decode("utf-8", errors="replace") if isinstance(err, bytes) else err,
+        )
 
 STAGING_SWEEP_AGE_S = 3600.0
 EXPORT_MAX_FILESIZE_BYTES = 1_500_000_000
@@ -540,8 +590,6 @@ _YTDLP_TRANSIENT_MARKERS = (
     "http error 502",
     "http error 503",
     "http error 504",
-    "timed out",
-    "timeout",
     "temporarily unavailable",
     "temporary failure",
     "connection reset",
@@ -585,7 +633,7 @@ class YtDlp:
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
         self.allow_download = allow_download
         self.binary = binary
-        self.runner = runner or subprocess.run
+        self.runner = runner or group_kill_runner
         self.timeout = timeout
         self.analysis_validator = analysis_validator
         self.allow_export = allow_export
@@ -605,6 +653,16 @@ class YtDlp:
             "--download-sections",
             f"*{format_ts(start)}-{format_ts(end)}",
             "--force-keyframes-at-cuts",
+            # Bounded, fast-failing download: the outer retry budget (small,
+            # transient-only) is the only retry loop. Without these flags
+            # yt-dlp retries 10 times per attempt with a 30s socket timeout,
+            # which multiplies one hung span into many.
+            "--retries",
+            "1",
+            "--fragment-retries",
+            "1",
+            "--socket-timeout",
+            "15",
             "--no-warnings",
             "--no-playlist",
             "-o",
@@ -680,6 +738,15 @@ class YtDlp:
             "ffmpeg:-copyts",
             "--max-filesize",
             str(EXPORT_MAX_FILESIZE_BYTES),
+            # Same bounded, fast-failing download policy as analysis: one
+            # internal attempt, short socket timeout; the outer small
+            # transient-only budget is the only retry loop.
+            "--retries",
+            "1",
+            "--fragment-retries",
+            "1",
+            "--socket-timeout",
+            "15",
             "--no-warnings",
             "--no-playlist",
             "-o",
@@ -837,8 +904,14 @@ class YtDlp:
                     text=True,
                     timeout=timeout_s,
                 )
+            except subprocess.TimeoutExpired as exc:
+                # The default runner kills only the yt-dlp parent; its ffmpeg
+                # children survive and pile up. Re-raise without retrying: a
+                # timed-out media fetch is a failure, not a transient error.
+                err = f"download timed out after {timeout_s}s: {exc}"
+                raise RuntimeError(err) from exc
             except Exception as exc:
-                # Preserve runner timeouts / OS errors with their message.
+                # Preserve runner OS errors with their message.
                 err = str(exc).strip() or exc.__class__.__name__
                 errors.append(err)
                 if attempt >= _YTDLP_MAX_ATTEMPTS or not ytdlp_error_is_transient(err):

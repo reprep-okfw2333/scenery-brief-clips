@@ -1,5 +1,19 @@
 # Current issues and resolved regressions
 
+## Fixed on this branch: hung analysis downloads piled up and were retried
+
+Live run `data/runs/20260927T220608Z` (Brazilian military, 16 of 20 exported). Full account: `docs/RUN-20260927T220608Z-brazilian-military.md`.
+
+Three faults, all in `yt.py`, not in the shortfall:
+
+1. A 5-minute download timeout was classified as a temporary network error because the message contained "timed out", so a hang was retried.
+2. The timeout killed only `yt-dlp`. `ffmpeg` children kept running. New tries stacked on top. This host (1.6 GB RAM) filled memory and swap. The job was stopped on purpose.
+3. Analysis calls did not cap `yt-dlp`'s own retry count or socket wait, so one stalled piece could be retried many times inside a single attempt.
+
+The branch stops treating that timeout as retryable, kills the whole download process group, and passes `--retries 1`, `--fragment-retries 1`, and `--socket-timeout 15`. `--force-keyframes-at-cuts` stays, because the analysis copy still has to land near the planned window.
+
+The 16-of-20 result after the fix is a shortfall, not this bug. One later 403 on `BAx_9MNPzts` was a remote refusal; a cache-reusing retry cleared it.
+
 ## Active local runner reliability pass
 
 See docs/IMPROVEMENT_PASS.md and benchmark/improvement/RESULTS.md. Local fixes

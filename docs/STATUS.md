@@ -1,5 +1,9 @@
 # Status (read this first)
 
+## Latest delivery — Brazilian military, 16 of 20 (2026-09-27)
+
+Run `data/runs/20260927T220608Z`. Export verified: 16 clips, 0 failures, shortfall 4. The cutting step hung before a code fix; that hang is recorded and fixed on this branch. Full account: `docs/RUN-20260927T220608Z-brazilian-military.md`. Clips: `out/impressive-epic-brazilian-military-all-branches-a-march-mili/clips/`.
+
 ## Active improvement pass — not yet signed off
 
 Local changes and acceptance criteria: docs/IMPROVEMENT_PASS.md. Observed results:

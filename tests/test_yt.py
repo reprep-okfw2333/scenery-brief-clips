@@ -259,6 +259,11 @@ def test_analysis_args_are_720p_video_only_with_section(tmp_path):
     assert "--skip-download" not in cmd
     assert "--download-sections" in cmd
     assert "--force-keyframes-at-cuts" in cmd
+    # Bounded download policy: fast-fail instead of yt-dlp's default
+    # 10 retries with a 30s socket timeout.
+    assert "--retries" in cmd and cmd[cmd.index("--retries") + 1] == "1"
+    assert "--fragment-retries" in cmd and cmd[cmd.index("--fragment-retries") + 1] == "1"
+    assert "--socket-timeout" in cmd and cmd[cmd.index("--socket-timeout") + 1] == "15"
     assert "*00:00:10.000-00:00:22.500" in cmd
     assert cmd[-1] == "https://www.youtube.com/watch?v=abc123abc12"
     assert str(dest) in cmd
@@ -652,10 +657,19 @@ def test_ytdlp_error_classification_transient_vs_fatal():
     from scenery_brief_clips.yt import ytdlp_error_is_transient
 
     assert ytdlp_error_is_transient("ERROR: Unable to download webpage: HTTP Error 429: Too Many Requests")
-    assert ytdlp_error_is_transient("HTTPSConnectionPool: Read timed out.")
     assert not ytdlp_error_is_transient("ERROR: Private video. Sign in if you've been granted access")
     assert not ytdlp_error_is_transient("ERROR: Video unavailable")
     assert not ytdlp_error_is_transient("HTTP Error 404: Not Found")
+
+
+def test_ytdlp_timeout_is_fatal_not_transient():
+    # A hard download timeout means the media fetch hung; retrying it just
+    # piles up processes. It must NOT be classified as transient.
+    from scenery_brief_clips.yt import ytdlp_error_is_transient
+
+    assert not ytdlp_error_is_transient("download timed out after 300s: TimeoutExpired")
+    assert not ytdlp_error_is_transient("HTTPSConnectionPool: Read timed out.")
+    assert not ytdlp_error_is_transient("URLError: socket timeout")
 
 
 def test_ytdlp_retries_transient_errors(tmp_path, monkeypatch):
