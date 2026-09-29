@@ -18,10 +18,12 @@ Branch: `fix/analysis-download-bounds`. Nothing is merged to `master`
   - 57f29d3 "feat: blend continuity detector": plan steps 3-4.
   - 87f17c3 "feat: loosen the brief form (plan step 5)": step 5 + the
     standalone export/analyze cap fix, Iceland validation record.
-- **Uncommitted, LOCAL ONLY** (owner, 2026-09-29: "do not commit, merge,
-  push ... keep everything local for now"): all work after 87f17c3, i.e.
-  B1 batch baseline, B2 fixes and speedups, B2b YouTube fallback, docs.
-  `git status` lists it. Do not commit/push without the owner asking.
+  - aa315a8 "feat: B2 reliability/speed fixes, YouTube block handling, Jev
+    ranking" and 80c0f68 "benchmark: batch and Jev A/B harness ..." (owner,
+    2026-09-29 evening: "commit and push the local work"): B1 records, B2,
+    B2b, Jev, docs. The Jev judge contact sheets
+    (benchmark/jev_ab/judge/sheets/, third-party frames) stay untracked.
+  Each future commit/push still needs the owner asking.
 
 Read with: `docs/PLAN-PROGRESS-2026-09-28.md` (running log; "Status per
 step", then "Priorities and new order" and the B1/B2/B2b sections at the
@@ -141,7 +143,7 @@ dissolve in the blend detector; on real footage such false alarms only trim).
    Follow-up fix: the brief's cap is recorded in discovery.json and the
    standalone `export`/`analyze` commands apply it (same rule as
    run-pipeline); runs without the record use config alone.
-7. **B1 batch baseline** (uncommitted records; benchmark/RESULTS-2026-09-29-
+7. **B1 batch baseline** (committed 80c0f68; benchmark/RESULTS-2026-09-29-
    batch1.md). `benchmark/batch.sh batch1` runs 8 operator-written briefs
    (benchmark/batch1/, one fixed config) through bench.sh;
    `benchmark/batch_summary.py` tabulates. Result on 87f17c3: 6/8 unattended,
@@ -149,7 +151,7 @@ dissolve in the blend detector; on real footage such false alarms only trim).
    285 model calls. By eye (Sonnet contact-sheet labels, 2 checked by me):
    10 good, 11 acceptable, 5 bad; no cut inside any clip. Time: analyze 27%,
    discover 21%, strip labels 13%, export 12%, tile labels 9%, verify 12%.
-8. **B2 fixes and speedups** (uncommitted, unit-tested; PLAN-PROGRESS "B1
+8. **B2 fixes and speedups** (committed aa315a8, unit-tested; PLAN-PROGRESS "B1
    batch baseline and first B2 fixes", "B2 continued"):
    - Long clips (16-30 s) could never be found (step 5 regression: 9-14 s
      analysis windows). `analysis_plan(min_window_s)`, min_window_s =
@@ -172,7 +174,7 @@ dissolve in the blend detector; on real footage such false alarms only trim).
    - Expected saving ~3-5 min per run (estimate from B1 stage times). First
      live numbers (R09, cold, vs B1; one run each): discover 206 -> 113 s,
      label_strips 174 -> 103 s, verify_export 68 -> 12 s.
-9. **B2b YouTube fallback** (uncommitted; PLAN-PROGRESS "B2b YouTube
+9. **B2b YouTube fallback** (committed aa315a8; PLAN-PROGRESS "B2b YouTube
    fallback"). **NOT YET FUNCTIONAL / OFF** (see the box at the top).
    - Always on: circuit breaker in `YtDlp._run`: after the first refusal the
      process stops contacting YouTube (`YOUTUBE_BLOCKED_EARLIER`), run ends
@@ -183,7 +185,7 @@ dissolve in the blend detector; on real footage such false alarms only trim).
      field `youtube_fallback_used`. Account-free alternatives were tried and
      failed (alternate player clients were refused; js runtime already set).
 
-10. **Jev** (uncommitted; docs/JEV.md, PLAN-PROGRESS "Jev investigation and
+10. **Jev** (committed aa315a8; docs/JEV.md, PLAN-PROGRESS "Jev investigation and
    integration"). Owner asked to investigate TypeSafe's Jev, then to rebuild
    and wire it. All OFF by default:
    - `jev_rank`: discovery scores search hits (title, channel, duration,
@@ -268,7 +270,8 @@ dissolve in the blend detector; on real footage such false alarms only trim).
 - YouTube: circuit breaker always on (refused requests prolong blocks);
   cookies/proxy only as an explicit opt-in used after a refusal. Owner
   (2026-09-29): keep the fallback OFF and documented as not yet functional.
-- Keep all post-87f17c3 work local (owner, 2026-09-29).
+- Post-87f17c3 work was kept local, then committed and pushed on the owner's
+  request (2026-09-29 evening); still not merged.
 - Tried and dropped: lagged/masked residual (signals.py v2) did not separate
   dissolves from motion; first continuity labels were on buggy sheets
   (output-side `-t`); running pytest or two benchmarks concurrently.
@@ -297,8 +300,8 @@ order".
    confirm `youtube_fallback_used: true` and no credential in any run file.
    Note: the project config.yaml is not gitignored; never put a proxy URL
    with a password there.
-3. Owner decisions open: commit/push of the local work (owner said keep
-   local for now); cookies vs proxy vs waiting; B3 design; Jev defaults.
+3. Owner decisions open: merge to master; cookies vs proxy vs waiting; B3
+   design; Jev defaults.
 4. B3 brief profiles (quick/standard), proposed: quick analyzes more sources
    as n_clips grows, lets "uncertain" moments fill a shortfall, labels only
    the best-ranked moments; standard = today's behavior. Not started.

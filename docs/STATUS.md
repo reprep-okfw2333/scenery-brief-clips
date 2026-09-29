@@ -54,7 +54,7 @@ docs/SEARCH_BRIEF.md is the current contract. Operator-agent brief validity
 delivered at 1920x1080, verify ok (benchmark/runs/step5-iceland-*/NOTE.md).
 The standalone `export`/`analyze` commands now also apply the brief's cap
 (recorded in discovery.json).
-B1 batch baseline + B2 + B2b (2026-09-29, working tree, uncommitted, local only): 8 varied
+B1 batch baseline + B2 + B2b (2026-09-29, committed aa315a8, pushed, not merged): 8 varied
 requests, 6/8 unattended, 26/36 clips, 21/26 usable by eye
 (benchmark/RESULTS-2026-09-29-batch1.md). Fixed: long clips (16-30 s) could
 never be found (analysis windows now have a minimum length); a source whose
@@ -64,8 +64,8 @@ runner status `blocked` when YouTube refuses the host (bot check; hit on
 discovery stops at max_rank_videos candidates; verify_export reuses
 verify_review's decodes. B2 speedups NOT measured live (host blocked).
 YouTube fallback (B2b): circuit breaker always on; opt-in cookies/proxy
-fallback is NOT YET FUNCTIONAL (never run live) and OFF. All work after
-87f17c3 is local and uncommitted (owner).
+fallback is NOT YET FUNCTIONAL (never run live) and OFF. All of it is
+committed (aa315a8, 80c0f68) and pushed, not merged.
 
 ## Improvement pass (2026-09-25) — superseded: committed in eedb911
 

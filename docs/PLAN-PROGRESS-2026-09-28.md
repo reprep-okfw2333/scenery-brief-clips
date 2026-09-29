@@ -526,3 +526,14 @@ live if YouTube allows, document as you go.
   footage" in the note criteria; then `benchmark/jev_ab.sh R07 R10 R03`.
   First live numbers for B2: discover 206 -> 113 s, label_strips 174 -> 103 s,
   verify_export 68 -> 12 s (R09, cold, vs B1).
+
+### Local work committed and pushed (2026-09-29, evening)
+
+Owner: "commit and push the local work". Full suite first: 958 passed, 1
+xfailed. Committed on fix/analysis-download-bounds as aa315a8 (src, tests,
+docs: B2, B2b, Jev) and 80c0f68 (benchmark harness, B1/Jev results, run
+records) and pushed; NOT merged. Left untracked: benchmark/jev_ab/judge/
+sheets/ (7 contact sheets of third-party video frames; the repo tracks no
+images). Secret scan before committing: the OpenRouter key appears in no
+file; the only credential-like strings are dummy fixtures in
+tests/test_youtube_fallback.py.
