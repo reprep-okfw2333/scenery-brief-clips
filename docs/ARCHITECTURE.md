@@ -53,15 +53,13 @@ A. Discovery  (built)
 B. Metadata eligibility  (built)
    `yt-dlp -j --skip-download`. Keep if a real format has height >= min_height and aspect in band; the default constraint is ≥720p / 1280×720 when the prompt names no resolution. Explicit prompt resolutions and any stricter config remain gates. Ignore “4K” in titles. Duration is a hint, not a class. Live / upcoming / auth / private are rejects.
 
-B′. Jev metadata gate  (optional, experimental, off by default; docs/JEV_GATE.md)
-   `jev-gate --run-dir RUN` runs after discovery (A+B) and before C / tile review, only when the config has
-   `jev_gate: true`. One request per candidate to `typesafe/jev-1.13` via the OpenRouter decisions endpoint,
-   with the run theme plus cached metadata (no download, no pixels). Rejects only when P(keep) ≤
-   `jev_reject_below` (default 0.40); never auto-keeps, so every survivor still goes through C–E. Survivors are
-   ordered by P(keep). The key is read only from the `OPENROUTER_API_KEY` env var. No key, errors, timeouts, or
-   reaching the per-run cost cap (`jev_max_usd_per_run`) fall back to the rule gate (kept). Cache
-   data/cache/jev/; outputs jev_gate.json + candidates_pre_jev.json; candidates.json is rewritten to the
-   survivors. About $0.07 per 1,000 candidates. Cannot see watermarks; cutoff tuned on train footage only.
+B′. Jev source ranking  (optional, off by default; docs/JEV.md)
+   With `jev_rank: true`, run-pipeline's discovery asks `typesafe/jev-1.13` (OpenRouter decisions endpoint)
+   typed questions about each search hit and the brief (text only), fetches metadata in score order, and
+   rejects a candidate (`jev_reject`) whose full-metadata score is <= `jev_reject_below` (0.35). Kept
+   candidates are ordered by score, so C takes the best first. The manual `jev-gate` command applies the same
+   questions to an already-discovered run. Never auto-keeps; every failure falls back to search order / rules.
+   With `jev_note_check: true`, the vision strip notes are checked too (see E).
 
 C. Storyboard prioritization  (built; vision is external)
    Parse storyboard formats from cached player JSON. Sample tiles; do not download every sheet of an 8-hour film. Save tile JPEGs. Status: promising / uncertain / low / unknown, plus time windows.
@@ -121,9 +119,10 @@ F. Acquire + export  (built 2026-09-22; design + rules in docs/EXPORT.md)
   Planner      ONE text-model call proposing search phrases for a frozen brief.
                Switch in planner.yaml (no secrets). Validated deterministically
                afterward; can be replaced by a frozen --plan file. Not pixels.
-  Jev          optional (off by default) metadata-only reject filter before rank: P(keep) per candidate from
-               typesafe/jev-1.13 via OpenRouter; key only from OPENROUTER_API_KEY. Rejects at P(keep) ≤ 0.40,
-               never auto-keeps, falls back to the rule gate. Not pixels, cannot see watermarks.
+  Jev          optional (off by default) typed text decisions from typesafe/jev-1.13 via OpenRouter: ranks
+               and rejects search hits/candidates from metadata (jev_rank, jev-gate) and checks vision keep
+               notes against the brief (jev_note_check). Key only from OPENROUTER_API_KEY; never auto-keeps;
+               falls back on any failure. Not pixels, cannot see watermarks.
   Vision       tile and strip labels. The model is named in vision.yaml, not hardcoded. Hermes must show that model and get a yes before a run. Not cuts.
   PySceneDetect  cut times only, not “European scenery”.
   ffmpeg       analysis decode, later export and probes.

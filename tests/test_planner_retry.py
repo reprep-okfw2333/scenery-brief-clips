@@ -285,6 +285,9 @@ def test_runner_live_planner_first_reply_valid_single_call(tmp_path, monkeypatch
     assert discovery["plan_provenance"]["model_calls"] == 1
     assert discovery["plan_provenance"]["rejected_attempts"] == []
     assert discovery["export_max_height"] == brief["export_max_height"]
+    from scenery_brief_clips.config import load_project_config
+
+    assert discovery["max_candidates"] == int(load_project_config(root, None).get("max_rank_videos", 10))
 
 
 def test_runner_live_planner_rejected_twice_fails_discover(tmp_path, monkeypatch):

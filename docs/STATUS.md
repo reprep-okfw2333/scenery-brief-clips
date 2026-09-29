@@ -54,6 +54,18 @@ docs/SEARCH_BRIEF.md is the current contract. Operator-agent brief validity
 delivered at 1920x1080, verify ok (benchmark/runs/step5-iceland-*/NOTE.md).
 The standalone `export`/`analyze` commands now also apply the brief's cap
 (recorded in discovery.json).
+B1 batch baseline + B2 + B2b (2026-09-29, working tree, uncommitted, local only): 8 varied
+requests, 6/8 unattended, 26/36 clips, 21/26 usable by eye
+(benchmark/RESULTS-2026-09-29-batch1.md). Fixed: long clips (16-30 s) could
+never be found (analysis windows now have a minimum length); a source whose
+video track ends early failed the whole run (span now `unavailable`). New
+runner status `blocked` when YouTube refuses the host (bot check; hit on
+2026-09-29 after ~10 live runs). Vision labeling runs 4 calls at once;
+discovery stops at max_rank_videos candidates; verify_export reuses
+verify_review's decodes. B2 speedups NOT measured live (host blocked).
+YouTube fallback (B2b): circuit breaker always on; opt-in cookies/proxy
+fallback is NOT YET FUNCTIONAL (never run live) and OFF. All work after
+87f17c3 is local and uncommitted (owner).
 
 ## Improvement pass (2026-09-25) — superseded: committed in eedb911
 
@@ -113,7 +125,7 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 630 passed, 1 xfailed on 2026-09-29 (405 on 2026-09-28, 374 on 2026-09-25; earlier counts missed 29 never-collected tests in tests/test_brief.py). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
+Tests: 797 passed, 1 xfailed on 2026-09-29 (405 on 2026-09-28, 374 on 2026-09-25; earlier counts missed 29 never-collected tests in tests/test_brief.py). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to
@@ -509,27 +521,24 @@ more.
 1. Read this file, then docs/ISSUES.md, docs/ARCHITECTURE.md, docs/ROADMAP.md, docs/VISION.md.
 2. Do not start a new part until the user writes done criteria and says to start. The open problems in ISSUES.md come before new features.
 
-## Experimental: optional Jev metadata gate (off by default)
+## Optional Jev: source ranking, vision-note check, manual gate (off by default)
 
-Full reference: docs/JEV_GATE.md. Added 2026-09-25 on branch exp/jev-gate.
+Full reference: docs/JEV.md. First added 2026-09-25 (branch exp/jev-gate, train-only manual gate);
+rebuilt 2026-09-29 as brief-generic and wired into run-pipeline.
 
-`jev-gate --run-dir RUN [--config CFG]` runs after discovery (`run`/`run-brief`) and before `rank`/tile
-review. It is a no-op unless the config sets `jev_gate: true`. For each metadata-eligible candidate it asks
-TypeSafe Jev (`typesafe/jev-1.13`, OpenRouter decisions endpoint `POST /api/alpha/decisions`) seven typed
-questions about title, description, tags, channel and the run theme. It rejects only candidates with
-P(keep) ≤ `jev_reject_below` (default 0.40) and orders survivors by P(keep). It never auto-keeps:
-`keep_high` (≥ `jev_keep_above`, 0.85) is a label only, and every survivor still goes through rank, tile
-review, analyze and shortlist review. Nothing is downloaded.
-
-- Key: read only from the `OPENROUTER_API_KEY` environment variable; never written to config or artifacts.
-- Fallback to the rule gate (candidate kept, reason recorded): no key, HTTP error, timeout, malformed answer,
-  or the per-run cost cap (`jev_max_usd_per_run`, default 0.25) reached.
-- Artifacts: `jev_gate.json` (per-candidate P(keep), answers, decision, source, cost) and
-  `candidates_pre_jev.json` (original list; re-runs re-gate from it). Cache: `data/cache/jev/<sha256>.json`.
-- Cost: about $0.07 per 1,000 candidates; median latency about 0.18 s per candidate.
-- Offline evaluation (96 hand-labeled train-footage candidates): accuracy 0.74 vs 0.49 for rules only,
-  reject precision 0.97, reject recall 0.60 vs 0.18, AUC 0.88; about 30% fewer tile reviews but only about
-  2–3% less analyze download.
-- Limitations: it cannot detect watermarks; the cutoff and the question wording are tuned on train footage
-  only, with one reviewer's labels; the live A/B was blocked by YouTube's bot check (see docs/ISSUES.md).
-- Tests: tests/test_jev_gate.py (15, stubbed HTTP; no network).
+- `jev_rank: true` (run-pipeline): discovery scores every search hit with `typesafe/jev-1.13` (OpenRouter
+  decisions endpoint) from its flat search fields, fetches metadata in score order, re-scores each kept
+  candidate from full metadata and rejects it (`jev_reject`) when the score (mean of P(usable), P(subject),
+  P(conditions); questions `jev_source_q_v2`) is <= `jev_reject_below` (0.35). discovery.json records
+  `jev_rank`.
+- `jev_note_check: true` (run-pipeline): after strip labels, each vision `keep` note is checked against the
+  brief (`jev_note_q_v1`); P(violation) >= `jev_note_reject_at` (0.70) sets `note_violation: true` in
+  shortlist_scores.json and the shortlist excludes it (`jev note violation`); jev_notes.json records all.
+- `jev-gate` (manual CLI, `jev_gate: true`): the same source questions on discovered candidates, optional
+  `--brief`; schema `jev_gate_v2`.
+- Rejects and reorders only; never auto-keeps. Key only from `OPENROUTER_API_KEY`. No key, errors, timeouts,
+  malformed answers or the cost cap fall back (recorded). Cache data/cache/jev/. Well under $0.01 per run.
+- Evidence: offline evaluation on 184 candidates / 116 notes from 10 briefs (benchmark/jev_eval/README.md):
+  the rank-slot replay goes from 17/50 reference-"no" picks (search order) to 2-3/50; outcome AUC 0.75-0.80,
+  equal to a Sonnet judge on the same metadata. Live A/B: benchmark/RESULTS-2026-09-29-jev.md.
+- Tests: tests/test_jev.py and tests/test_jev_gate.py (stubbed HTTP; no network).

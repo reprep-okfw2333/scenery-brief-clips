@@ -1,5 +1,52 @@
 # Current issues and resolved regressions
 
+## Open (2026-09-29): YouTube refuses the host; fallback NOT YET FUNCTIONAL
+
+After ~10 live runs in a few hours YouTube answered every request from this
+host with "Sign in to confirm you're not a bot" (still refused at the last
+check). Alternate player clients were refused too; it is IP-level. The
+runner now stops with status `blocked`, and a circuit breaker stops further
+requests in the same process. An opt-in cookies/proxy fallback exists in the
+code (config youtube_cookies_file / youtube_proxy) but is NOT YET
+FUNCTIONAL: it has never been run against YouTube, it is off, and no
+cookies or proxy are configured. Live validation needs the owner.
+
+## Fixed (2026-09-29, B2): a source with no video in a span failed the run
+
+A YouTube source can advertise a longer duration than its video track
+(0I1hZCD7sT0: video ends ~129 s of 193 s). A span past the end downloads as
+an empty file and one such span failed the whole run, on every rerun. Now
+the span is recorded `unavailable` (`no_video_in_span`) when every attempt
+comes back with no streams; verify accepts only that exact form, as a
+warning. Other acquisition failures still fail the run.
+
+## Fixed (2026-09-29, B2): long clips could never be found
+
+Since step 5 a brief may ask for up to 30 s clips, but analysis windows were
+still 9-14 s, so a 16-24 s request produced no excerpts. Windows now have a
+minimum length (duration_min + 2 x pad, at least the target), recorded in
+the analysis manifest as `min_window_s`.
+
+## Open (2026-09-29, B1 batch): yield and speed limits
+
+- The number of analyzed sources comes from config (`max_analyze_videos`,
+  default 1) and does not grow with n_clips: 10 requested clips from 5
+  sources gave 8.
+- Every excerpt is labeled even when few clips are needed. (Strip labels
+  were serial, ~9 s each; since B2 they run 4 at a time, not yet measured.)
+- YouTube refused this host after ~10 live runs in a few hours ("Sign in to
+  confirm you're not a bot"), metadata included. The runner now stops with
+  status `blocked` (wait, then rerun); pacing live runs matters. Cookies
+  would bypass it but stay off unless the owner opts in.
+- Discovery sleeps 2 s between requests and fetches metadata serially
+  (~210 s per run). Since B2 it stops once max_rank_videos candidates are
+  kept (the rest were never used); sleeps unchanged because of the YouTube
+  block risk.
+- verify_export re-decoded analysis copies verify_review already decoded.
+  Since B2 the runner reuses those decodes for byte-identical files.
+- For geography "european" the planner's queries do not name European
+  places; searches returned Canadian lakes (3/6 delivered).
+
 ## Mitigated (2026-09-29): legacy continuity gate rejects continuous camera motion
 
 Measured 2026-09-28 on 66 real gate decisions (Brazil run + military
@@ -90,7 +137,7 @@ The former base tile prompt unconditionally rejected people as subjects even whe
 
 `vision_scores.json` stores per-tile labels but not a durable model/backend identity. The CLI reports the active model when it writes scores, and path matching prevents some stale score application, but a future re-label of the same paths with a different model cannot be distinguished from the JSON alone. The current live run used a new run ID and a freshly approved gpt-6-sol wire; no stale-file failure was demonstrated. A provenance schema/migration and policy for manually authored score files require a separate contract; do not claim this has been fixed.
 
-`visual_positives` and `visual_negatives` in constraint JSON are serialized defaults and have no enforcing consumer (the optional, off-by-default Jev gate passes `visual_negatives` to Jev as text context only; see docs/JEV_GATE.md). In particular, the listed `people` negative is not an active rejection gate. The actual vision prompt and review labels determine visual matching. These fields should not be presented as enforced constraints; removing or wiring them requires explicit intended semantics and tests.
+`visual_positives` and `visual_negatives` in constraint JSON are serialized defaults and have no enforcing consumer (the optional, off-by-default Jev gate passes `visual_negatives` to Jev as text context only; see docs/JEV.md). In particular, the listed `people` negative is not an active rejection gate. The actual vision prompt and review labels determine visual matching. These fields should not be presented as enforced constraints; removing or wiring them requires explicit intended semantics and tests.
 
 ## Open: no incremental vision-label progress
 
@@ -102,20 +149,25 @@ that prevents a foreground tool timeout from obscuring the job's fate but does
 not add per-image progress. A future progress mechanism should report completed,
 failed, and total images without changing score-file publication semantics.
 
-## Open: Jev gate is evaluated offline on train footage only
+## Open: Jev ranking and note check are off by default and thinly validated
 
-The optional `jev-gate` (off by default; docs/JEV_GATE.md) was evaluated on 96 hand-labeled train-footage
-candidates labeled by one reviewer (accuracy 0.74 vs 0.49 for rules only; reject precision 0.97; AUC 0.88).
-Not yet shown:
+`jev_rank`, `jev_note_check` and the manual `jev-gate` (docs/JEV.md) were rebuilt brief-generic on
+2026-09-29 and evaluated offline on 184 candidates and 116 vision notes from 10 briefs
+(benchmark/jev_eval/README.md). Open:
 
-- A live A/B run through analyze. The attempt on 2026-09-25 was blocked by YouTube's "Sign in to confirm
-  you're not a bot" check on the test host, and cookies are off by policy.
-- Any theme other than trains. The 0.40 cutoff and the question wording (`jev_gate_q_v1`) are tuned for
-  train footage; P(keep) shifted by up to ±0.1 when the state format changed.
-- Watermark or burned-in text detection. Jev sees metadata only, so tile review and vision stay mandatory.
+- Live A/B: only one paired brief so far (R09; benchmark/RESULTS-2026-09-29-jev.md): Jev 2 usable clips vs 3
+  without. Causes: the source score ignores Jev's own `place: different` answer (fix proposed: reject when the
+  brief names a place and P(place=different) >= 0.5, offline-checked), and an illustration channel passed Jev,
+  vision and the note check (note criteria lack "not real camera footage"). Remaining pairs: `benchmark/jev_ab.sh
+  R07 R10 R03`. Turning either switch on by default is the owner's decision.
+- Thresholds (`jev_reject_below` 0.35, `jev_note_reject_at` 0.70) come from that small set; re-check them on
+  new kinds of footage. Probabilities shift when the question wording or state format changes (bump the
+  question version).
+- Metadata and notes only: no watermark detection, and the note check misses defects the vision note does
+  not mention. Sleep/relaxation videos remain the hardest case for metadata judges.
 
-It never auto-keeps, and every failure path falls back to the rule gate, so the worst case of enabling it is
-a wrongly rejected candidate (in the offline set, 1 of the 38 candidates scoring below 0.5 was a true keep).
+Every failure path falls back (search order, candidate kept, note entry unchanged), so the worst case of
+enabling it is a wrongly rejected candidate or moment.
 
 ## Operational traps, not logic bugs
 

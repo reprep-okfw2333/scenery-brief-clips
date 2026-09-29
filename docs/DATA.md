@@ -6,7 +6,7 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
     src/scenery_brief_clips/  code (adds brief.py, planner.py to the inherited set)
     tests/                 pytest
     scripts/chain_parts123.py
-    docs/                  STATUS, architecture, roadmap, CLI, vision, data, JEV_GATE (optional gate)
+    docs/                  STATUS, architecture, roadmap, CLI, vision, data, JEV (optional Jev ranking and checks)
     config.example.yaml    copy to config.yaml, or pass with --config; flat validated defaults
     tmp/                   yt-dlp / HTTP temp (never host /tmp)
     data/
@@ -14,8 +14,8 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
         metadata/<video_id>.json     Part 1 player JSON
         storyboards/                 Part 2 sheet JPEGs (hashed URLs)
         tiles/<video_id>/            Part 2 sliced tiles for vision
-        jev/<sha256>.json            optional Jev gate answers, keyed by model + question
-                                     version + questions + state (no key stored)
+        jev/<sha256>.json            optional Jev answers (ranking, note check, jev-gate), keyed by
+                                     model + questions + state (no key stored)
         analysis/<video_id>_<start_ms>-<end_ms>_<policy>.mp4
                                             Part 3 validated ≤720p video-only span
         analysis/<...>.mp4.complete.json     schema/policy/video/span/size/SHA-256 marker
@@ -28,13 +28,16 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
       runs/<UTC timestamp>/
         discovery.json               run-brief sidecar (brief_discovery_v1): brief hash,
                                      query plan, planner provenance, counts, stop reason;
-                                     candidates/rejects annotated unverified/metadata_only
+                                     candidates/rejects annotated unverified/metadata_only;
+                                     with jev_rank: `jev_rank` (jev_rank_v1) per-hit and
+                                     per-candidate scores, sources, cost
         constraint.json
-        candidates.json              B keepers (after the optional jev-gate: its survivors, ordered by P(keep))
+        candidates.json              B keepers (with jev_rank or after jev-gate: ordered by Jev score)
         candidates_pre_jev.json      optional; original B keepers, written once by jev-gate (re-runs re-gate from it)
-        jev_gate.json                optional jev-gate report (jev_gate_v1): model, thresholds, counts, cost,
-                                     per-candidate p_keep, answers, decision, fallback source
-        rejected.json                B rejects
+        jev_gate.json                optional jev-gate report (jev_gate_v2; v1 = train questions, p_keep):
+                                     model, thresholds, counts, cost, per-candidate score, answers,
+                                     decision, fallback source
+        rejected.json                B rejects (reason jev_reject when jev_rank rejected it)
         ranked.json                  C after last apply-scores (or rank if unscored)
         ranked_before_vision.json    backup written once by apply-scores
         vision_scores.json           optional; tile labels
@@ -42,7 +45,10 @@ All runtime files stay under the project root. `data/` and `tmp/` are gitignored
         analysis_manifest.json        schema/generation + ranked/constraint/excerpts hashes + settings
         review/                       Part 4 frames + strips per candidate moment (safe-id folders, frame_<t_us>.jpg)
         review.json                   Part 4 packet bound to the excerpts generation
-        shortlist_scores.json         Part 4 labels written by Hermes/a person
+        shortlist_scores.json         Part 4 labels written by Hermes/a person/the vision wire; with
+                                      jev_note_check, keep entries carry note_check {p_violation, source}
+                                      and note_violation (true = excluded, "jev note violation")
+        jev_notes.json                optional jev_note_check report (jev_notes_v1)
         shortlist.json                Part 4 decision: selected, excluded+reasons, counts, shortfall
         export.json                   Part 5 pointer to the published export (theme, manifest path + sha256)
         .pipeline.lock                serializes jev-gate/rank/apply-scores/analyze/shortlist-*/verify/export for this run

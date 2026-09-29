@@ -28,6 +28,19 @@ TILE_LABELS = {"keep", "reject", "uncertain"}
 TILE_LOOKS = {"europe_like", "other_landscape", "not_nature"}
 STRIP_MATCH = {"keep", "reject", "uncertain"}
 STRIP_GEO = {"supported", "uncertain", "conflicting"}
+# Concurrent model calls per labeling stage. The calls are network-bound (a
+# GLM Flash call takes ~9 s), so overlapping them costs no CPU on this host.
+# SCENERY_VISION_WORKERS overrides (1 = the old serial strip labeling).
+DEFAULT_VISION_WORKERS = 4
+
+
+def vision_workers() -> int:
+    raw = os.environ.get("SCENERY_VISION_WORKERS", "")
+    try:
+        value = int(raw) if raw.strip() else DEFAULT_VISION_WORKERS
+    except ValueError:
+        value = DEFAULT_VISION_WORKERS
+    return max(1, min(8, value))
 
 TILE_PROMPT = (
     "Look at this picture. Reply with one JSON object only, no markdown. "
@@ -520,8 +533,8 @@ def label_ranked_tiles(run_dir: str | Path, wire: VisionWire, caller=None) -> di
     scores: dict[str, list] = {}
     failures: list[dict] = []
     pending_rows: list[tuple[str, list[tuple[dict, Future[dict] | None]]]] = []
-    # Two independent I/O-bound model calls can overlap without unbounded bursts.
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    # Independent I/O-bound model calls overlap, bounded by vision_workers().
+    with ThreadPoolExecutor(max_workers=vision_workers()) as pool:
         for row in ranked:
             if not isinstance(row, dict):
                 continue
@@ -574,26 +587,32 @@ def label_review_strips(run_dir: str | Path, wire: VisionWire, caller=None) -> d
     failures: list[dict] = []
     binding = review.get("excerpts_sha256")
     theme = _theme_from_run(run_dir)
-    for moment in review.get("moments") or []:
-        if not isinstance(moment, dict):
-            continue
-        video_id = str(moment.get("video_id") or "")
-        strip = moment.get("strip")
-        if not video_id or not strip:
-            continue
-        strip_path = Path(str(strip))
-        if not strip_path.is_absolute():
-            strip_path = run_dir / strip_path
-        prompt_kind = "strip"
-        try:
-            labeled = _checkpointed_label(run_dir, wire, strip_path, prompt_kind, caller, theme)
-        except VisionWireError as exc:
-            failures.append({"path": str(strip_path), "error": str(exc)})
-            continue
-        if moment.get("continuity_suspect") and not labeled.get("continuity_ok"):
-            labeled["note"] = f"continuity not cleared: {labeled['note']}"
-        entry = {"excerpt_index": int(moment.get("excerpt_index") or 0), **labeled}
-        scores.setdefault(video_id, []).append(entry)
+    pending: list[tuple[dict, str, Path, Future[dict]]] = []
+    with ThreadPoolExecutor(max_workers=vision_workers()) as pool:
+        for moment in review.get("moments") or []:
+            if not isinstance(moment, dict):
+                continue
+            video_id = str(moment.get("video_id") or "")
+            strip = moment.get("strip")
+            if not video_id or not strip:
+                continue
+            strip_path = Path(str(strip))
+            if not strip_path.is_absolute():
+                strip_path = run_dir / strip_path
+            future = pool.submit(_checkpointed_label, run_dir, wire, strip_path, "strip", caller, theme)
+            pending.append((moment, video_id, strip_path, future))
+        # Results are collected in review order, so the output is the same as
+        # serial labeling whatever order the calls finish in.
+        for moment, video_id, strip_path, future in pending:
+            try:
+                labeled = future.result()
+            except VisionWireError as exc:
+                failures.append({"path": str(strip_path), "error": str(exc)})
+                continue
+            if moment.get("continuity_suspect") and not labeled.get("continuity_ok"):
+                labeled["note"] = f"continuity not cleared: {labeled['note']}"
+            entry = {"excerpt_index": int(moment.get("excerpt_index") or 0), **labeled}
+            scores.setdefault(video_id, []).append(entry)
     payload = dict(scores)
     if isinstance(binding, str):
         payload = {"excerpts_sha256": binding, **payload}

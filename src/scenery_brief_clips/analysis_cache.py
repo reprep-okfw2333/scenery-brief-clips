@@ -12,6 +12,9 @@ ANALYSIS_CACHE_POLICY = "v4-copyts-720"
 # under the policy its analysis_manifest recorded (v3 = exact-cut re-encode,
 # local 0 = span start, duration tolerance).
 ACCEPTED_ANALYSIS_POLICIES = (ANALYSIS_CACHE_POLICY, "v3-video-only-720")
+# A span whose every acquisition held no streams: the source has no video
+# there. Recorded as range status "unavailable"; verify accepts only this.
+NO_VIDEO_IN_SPAN = "no_video_in_span"
 ANALYSIS_MARKER_SCHEMA_VERSION = 1
 MEDIA_DURATION_TOLERANCE_S = 3.0
 EXPORT_CACHE_POLICY = "v2-export-cap-copyts"

@@ -112,7 +112,8 @@ def test_label_tiles_uses_the_injected_caller_and_skips_dark(tmp_path):
     assert "dark" in rows[1]["note"]
 
 
-def test_tile_labels_overlap_at_most_two_calls_and_keep_order(tmp_path):
+def test_tile_labels_overlap_at_most_the_worker_count_and_keep_order(tmp_path, monkeypatch):
+    monkeypatch.setenv("SCENERY_VISION_WORKERS", "2")
     _write_wire(tmp_path, "backend: codex-login\nmodel: gpt-6-sol\n")
     run = tmp_path / "run"
     run.mkdir()

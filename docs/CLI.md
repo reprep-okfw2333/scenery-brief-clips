@@ -30,7 +30,7 @@ underlying CLI stopped, so do not launch a duplicate without checking.
 
 `--root` on run/run-brief/rank/jev-gate/analyze/verify/apply-scores/shortlist-review/shortlist-apply/export/vision-show/label-tiles/label-strips sets the project root (default: install location).
 Run-scoped commands (rank, jev-gate, analyze, apply-scores, verify, shortlist-review, shortlist-apply, export) require an existing run dir; a missing `--run-dir` exits 2 with "run dir not found" and creates nothing.
-run/rank/jev-gate/analyze/export load `<root>/config.yaml` when present (run-brief accepts `--config` but does not read it; its limits come from the brief and its own flags); `--config PATH` selects another flat YAML file inside the project. Flags override config. Config cannot loosen prompt geometry, and downloads stay forbidden in the default pipeline (only the export path is gated open, explicitly). `export_max_height` is the export cap: default 720, valid integer range 720..2160. For a run made from a brief, the brief's cap (720 or 1080, recorded in discovery.json) is the requested cap and config may only lower it; run-pipeline, `export` and `analyze` all apply this rule. A run without that record uses config alone.
+run/rank/jev-gate/analyze/export load `<root>/config.yaml` when present (run-brief accepts `--config` but does not read it; its limits come from the brief and its own flags); `--config PATH` selects another flat YAML file inside the project. Flags override config. Config cannot loosen prompt geometry, and downloads stay forbidden in the default pipeline (only the export path is gated open, explicitly). `export_max_height` is the export cap: default 720, valid integer range 720..2160. For a run made from a brief, the brief's cap (720 or 1080, recorded in discovery.json) is the requested cap and config may only lower it; run-pipeline, `export` and `analyze` all apply this rule. A run without that record uses config alone. Optional `youtube_cookies_file` (a cookies.txt outside the project) and `youtube_proxy` (http(s)/socks5 URL) are an opt-in fallback (**NOT YET FUNCTIONAL: never validated against YouTube; off by default**) used only after YouTube refuses the host (bot check); run, run-brief, analyze, run-pipeline and export read them, and an invalid value exits 2.
 
 doctor
   yt-dlp, ffmpeg, ffprobe, node, pillow, scenedetect, tmp/, data/, plus versions (python, yt-dlp, ffmpeg/ffprobe, node) and actionable messages if yt-dlp predates the 2025.11.12 external JS runtime transition or node is missing. allow_download is always false.
@@ -47,13 +47,17 @@ run-pipeline
   missing judgments, and export allowance, and can be resumed with the same
   --run-dir. This command will use the local yt-dlp binary when you run it
   for real. The contract tests do not do that; they substitute fakes.
+  Final statuses: `completed` (exit 0); `paused`/`recovery`/`locked` (exit 0,
+  see how_to_supply); `failed`, `deadline` (budget spent: rerun to resume) and
+  `blocked` (YouTube's bot check refused this host: wait, usually hours, then
+  rerun the same command; do not retry in a loop) exit 1.
 
 jev-gate (optional, experimental, off by default)
   Jev metadata reject filter. Run after run/run-brief (discovery) and before rank/tile review. Does nothing unless the loaded config has `jev_gate: true`; when off it prints `"enabled": false`, exits 0, and leaves candidates.json unchanged.
-  When on, asks `typesafe/jev-1.13` through the OpenRouter decisions endpoint (`POST https://openrouter.ai/api/alpha/decisions`) for P(keep) from cached metadata only (no download, no pictures). Rejects a candidate only when P(keep) ≤ `jev_reject_below` (default 0.40); it never auto-keeps, and survivors still go through rank and tile review, ordered by P(keep).
+  When on, asks `typesafe/jev-1.13` through the OpenRouter decisions endpoint (`POST https://openrouter.ai/api/alpha/decisions`) the generic source questions (`jev_source_q_v2`) about cached metadata only (no download, no pictures) and the brief given with `--brief PATH` (else the run's theme text). Rejects a candidate only when its score (mean of P(usable), P(subject), P(conditions)) is ≤ `jev_reject_below` (default 0.35); it never auto-keeps, and survivors still go through rank and tile review, ordered by score. run-pipeline does not use this command; it ranks inside discovery with `jev_rank: true` (docs/JEV.md).
   The key comes only from the `OPENROUTER_API_KEY` environment variable; never put it in a file. With no key, on HTTP errors, timeouts, or malformed answers, and once `jev_max_usd_per_run` is reached, candidates fall back to the rule gate (kept) and the reason is recorded.
   Caches decisions in data/cache/jev/. Writes jev_gate.json and candidates_pre_jev.json (the original list, written once; re-runs re-gate from it) and rewrites candidates.json to the survivors. If you re-run it after rank, run rank again.
-  Roughly $0.07 per 1,000 candidates. Cannot detect watermarks; the 0.40 cutoff was tuned on train footage only. Exits 2 on invalid config, a missing run dir, or a missing candidates.json. See docs/JEV_GATE.md.
+  About $0.06 per 1,000 candidates. Cannot detect watermarks. Exits 2 on invalid config, an invalid --brief, a missing run dir, or a missing candidates.json. See docs/JEV.md.
 
 rank
   Storyboard sample, save tiles under data/cache/tiles/, write ranked.json (uncertain until scored).

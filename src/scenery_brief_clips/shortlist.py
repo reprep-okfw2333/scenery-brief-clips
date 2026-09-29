@@ -25,6 +25,9 @@ REASON_NO_LABEL = "no label"
 REASON_MATCH_REJECT = "visual match rejected"
 REASON_MATCH_UNCERTAIN = "visual match uncertain"
 REASON_GEO_CONFLICTING = "geographic evidence conflicting"
+# Optional Jev note check (jev_note_check): the vision note itself reports a
+# failure against the brief although the label says keep (docs/JEV.md).
+REASON_NOTE_VIOLATION = "jev note violation"
 REASON_BEYOND = "beyond n_clips"
 REASON_CONTINUITY_SUSPECT_UNCLEARED = "continuity_suspect_uncleared"
 
@@ -138,6 +141,10 @@ def validate_label_payload(payload) -> dict:
                 raise ShortlistInputError(
                     f"shortlist continuity_ok for {video_id} must be a boolean when present"
                 )
+            if "note_violation" in entry and not isinstance(entry.get("note_violation"), bool):
+                raise ShortlistInputError(
+                    f"shortlist note_violation for {video_id} must be a boolean when present"
+                )
     return payload
 
 
@@ -158,6 +165,8 @@ def _exclusion_reason(entry: dict) -> str | None:
         return REASON_MATCH_UNCERTAIN
     if entry["geo"] == "conflicting":
         return REASON_GEO_CONFLICTING
+    if entry.get("note_violation") is True:
+        return REASON_NOTE_VIOLATION
     return None
 
 

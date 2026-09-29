@@ -14,6 +14,7 @@ from scenery_brief_clips.analysis_cache import (
     EXPORT_CACHE_POLICY,
     EXPORT_CAP_MAX,
     EXPORT_CAP_MIN,
+    NO_VIDEO_IN_SPAN,
     analysis_cache_path,
     analysis_marker_path,
     canonical_span_ms,
@@ -163,6 +164,34 @@ def _base_report(run_dir: Path, errors: list[str], warnings: list[str]) -> dict:
     }
 
 
+def _unavailable_problem(outcome: dict, settings: dict | None) -> str | None:
+    """Why an "unavailable" range record is not the exact accepted form, or None.
+
+    Accepted only when every configured acquisition attempt came back with no
+    streams at all (the source has no video in the span); anything else is a
+    failed range.
+    """
+    if outcome.get("reason") != NO_VIDEO_IN_SPAN or outcome.get("stage") != "acquire":
+        return f"its reason is not {NO_VIDEO_IN_SPAN}"
+    attempt_errors = outcome.get("attempt_errors")
+    if not isinstance(attempt_errors, list) or not attempt_errors:
+        return "it records no attempts"
+    try:
+        wanted = int((settings or {}).get("acquisition_attempts"))
+    except (TypeError, ValueError):
+        return "the manifest has no valid acquisition_attempts"
+    if len(attempt_errors) != wanted or outcome.get("attempts") != wanted:
+        return f"it records {len(attempt_errors)} of {wanted} attempts"
+    for item in attempt_errors:
+        if (
+            not isinstance(item, dict)
+            or item.get("stage") != "acquire"
+            or "no_streams" not in str(item.get("error") or "")
+        ):
+            return "an attempt failed for another reason"
+    return None
+
+
 def _validate_settings(manifest: dict, errors: list[str]) -> dict | None:
     settings = manifest.get("settings")
     if not isinstance(settings, dict):
@@ -201,6 +230,10 @@ def _validate_settings(manifest: dict, errors: list[str]) -> dict | None:
     pad_s = _finite_number(settings.get("pad_s"))
     if pad_s is None or pad_s < 0:
         errors.append("manifest setting pad_s must be finite and at least 0")
+    if "min_window_s" in settings:
+        min_window_s = _finite_number(settings.get("min_window_s"))
+        if min_window_s is None or min_window_s < 0:
+            errors.append("manifest setting min_window_s must be finite and at least 0")
     return settings
 
 
@@ -211,6 +244,8 @@ def _expected_rows(ranked: list[dict], settings: dict, errors: list[str]) -> dic
         max_videos = int(settings["max_videos"])
         max_analysis_s = float(settings["max_analysis_s"])
         pad_s = float(settings["pad_s"])
+        # Absent in runs analyzed before windows had a minimum length.
+        min_window_s = float(settings.get("min_window_s", 0.0))
     except (KeyError, TypeError, ValueError):
         return expected
 
@@ -247,6 +282,7 @@ def _expected_rows(ranked: list[dict], settings: dict, errors: list[str]) -> dic
                 windows=item.get("windows") or [],
                 max_analysis_s=max_analysis_s,
                 pad_s=pad_s,
+                min_window_s=min_window_s,
             )
             ranges = [canonical_span_seconds(span) for span in plan.ranges]
         except Exception as exc:
@@ -926,10 +962,17 @@ def verify_run(
     root: str | Path | None = None,
     require_export: bool = False,
     export_probe_fn: ExportProbeFn | None = None,
+    trusted_decodes: dict[str, str] | None = None,
 ) -> dict:
+    """Verify a run. ``trusted_decodes`` maps analysis media paths to the
+    SHA-256 of bytes an earlier verify of this run already strictly decoded
+    (the runner passes verify_review's record to verify_export); media whose
+    hash still matches is not decoded again. The standalone command passes
+    nothing and decodes everything."""
     with exclusive_run_lock(run_dir):
         return _verify_run_locked(
-            run_dir, analysis_dir, probe_fn, decode_fn, root, require_export, export_probe_fn
+            run_dir, analysis_dir, probe_fn, decode_fn, root, require_export, export_probe_fn,
+            trusted_decodes,
         )
 
 
@@ -941,8 +984,12 @@ def _verify_run_locked(
     root: str | Path | None = None,
     require_export: bool = False,
     export_probe_fn: ExportProbeFn | None = None,
+    trusted_decodes: dict[str, str] | None = None,
 ) -> dict:
     run_dir = Path(run_dir)
+    trusted_decodes = trusted_decodes or {}
+    decoded_media: dict[str, str] = {}
+    n_decode_reused = 0
     probe = probe_fn or _default_probe
     decode = decode_fn or _default_decode
     export_probe = export_probe_fn or probe_export_coverage
@@ -1140,7 +1187,13 @@ def _verify_run_locked(
             for outcome in outcomes
             if isinstance(outcome, dict) and outcome.get("status") == "complete"
         ]
-        if Counter(copy_keys) != Counter(completed_keys) or Counter(copy_keys) != Counter(expected_keys):
+        unavailable_keys = [
+            _span_key(outcome.get("span"))
+            for outcome in outcomes
+            if isinstance(outcome, dict) and outcome.get("status") == "unavailable"
+        ]
+        media_keys = Counter(expected_keys) - Counter(unavailable_keys)
+        if Counter(copy_keys) != Counter(completed_keys) or Counter(copy_keys) != media_keys:
             errors.append(f"{video_id} copies do not match completed ranges")
 
         copies_by_key: dict[str, dict] = {}
@@ -1200,6 +1253,15 @@ def _verify_run_locked(
 
         for outcome in outcomes:
             if not isinstance(outcome, dict):
+                continue
+            if outcome.get("status") == "unavailable":
+                problem = _unavailable_problem(outcome, settings)
+                if problem:
+                    errors.append(f"{video_id} range {outcome.get('span')} marked unavailable but {problem}")
+                else:
+                    warnings.append(
+                        f"{video_id} range {outcome.get('span')} unavailable: the source has no video there"
+                    )
                 continue
             if outcome.get("status") != "complete":
                 errors.append(
@@ -1326,10 +1388,18 @@ def _verify_run_locked(
                 errors.append(f"excerpt mapping without marker mapping {path}")
             if duration is None or duration <= 0 or abs(duration - expected_duration) > MEDIA_DURATION_TOLERANCE_S:
                 errors.append(f"media duration does not match span {path}")
+        if reference["sha256"] == actual_hash and trusted_decodes.get(str(path)) == actual_hash:
+            # These exact bytes were strictly decoded by an earlier verify.
+            decoded_media[str(path)] = actual_hash
+            n_decode_reused += 1
+            continue
         try:
             decode(path)
         except Exception as exc:
             errors.append(f"decode failed for {path}: {exc}")
+        else:
+            if reference["sha256"] == actual_hash:
+                decoded_media[str(path)] = actual_hash
 
     shortlist_summary = _check_shortlist(run_dir, excerpts, constraint, manifest, errors)
     export_summary = _check_export(
@@ -1370,6 +1440,8 @@ def _verify_run_locked(
             "n_sources_without_excerpts": n_sources_without_excerpts,
             "shortlist": shortlist_summary,
             "export": export_summary,
+            "decoded_media": decoded_media,
+            "n_decode_reused": n_decode_reused,
         }
     )
     return report

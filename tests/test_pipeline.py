@@ -315,3 +315,49 @@ def test_dry_run_reports_total_metadata_failure(tmp_path):
 
     assert result.candidates == []
     assert result.stopped_reason == "metadata_errors"
+
+
+def _early_stop_setup(tmp_path, n=5):
+    constraint = Constraint(
+        theme_text="alps",
+        n_clips=2,
+        limits=RunLimits(max_search_results=10, max_metadata_fetches=10, sleep_s=0.0),
+    )
+    ids = [f"id{i}{i}{i}{i}{i}{i}{i}{i}{i}" for i in range(1, n + 1)]
+    hits = [{"id": vid, "title": f"T{vid}"} for vid in ids]
+    meta = {vid: _hd_info(vid, f"T{vid}") for vid in ids}
+    # The second hit is live: rejected, so it does not count as a candidate.
+    meta[ids[1]] = {**meta[ids[1]], "live_status": "is_live"}
+    return constraint, ids, FakeYt(hits, meta), MetadataCache(tmp_path / "cache")
+
+
+def test_dry_run_stops_metadata_once_max_candidates_are_kept(tmp_path):
+    constraint, ids, yt, cache = _early_stop_setup(tmp_path)
+    result = run_dry(constraint, yt=yt, cache=cache, sleep_fn=lambda _s: None, max_candidates=2)
+    assert [c.video_id for c in result.candidates] == [ids[0], ids[2]]
+    assert yt.metadata_calls == [ids[0], ids[1], ids[2]]
+    assert result.stopped_reason == "enough_candidates"
+    assert "stop: 2 candidates kept" in result.log_lines
+
+
+def test_dry_run_early_stop_keeps_the_same_leading_candidates(tmp_path):
+    constraint, ids, yt, cache = _early_stop_setup(tmp_path)
+    full = run_dry(constraint, yt=yt, cache=cache, sleep_fn=lambda _s: None)
+    constraint, ids, yt2, cache2 = _early_stop_setup(tmp_path / "b")
+    capped = run_dry(constraint, yt=yt2, cache=cache2, sleep_fn=lambda _s: None, max_candidates=3)
+    assert [c.video_id for c in capped.candidates] == [c.video_id for c in full.candidates][:3]
+    assert full.stopped_reason == "complete"
+
+
+def test_dry_run_without_max_candidates_fetches_every_hit(tmp_path):
+    constraint, ids, yt, cache = _early_stop_setup(tmp_path)
+    result = run_dry(constraint, yt=yt, cache=cache, sleep_fn=lambda _s: None, max_candidates=None)
+    assert yt.metadata_calls == ids
+    assert len(result.candidates) == 4
+
+
+def test_dry_run_max_candidates_above_supply_completes_normally(tmp_path):
+    constraint, ids, yt, cache = _early_stop_setup(tmp_path)
+    result = run_dry(constraint, yt=yt, cache=cache, sleep_fn=lambda _s: None, max_candidates=10)
+    assert result.stopped_reason == "complete"
+    assert len(result.candidates) == 4

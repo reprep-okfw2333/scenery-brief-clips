@@ -12,14 +12,21 @@ from pathlib import Path
 
 from scenery_brief_clips.analysis_cache import (
     ANALYSIS_CACHE_POLICY,
+    NO_VIDEO_IN_SPAN,
     analysis_cache_path,
     analysis_marker_path,
     canonical_span_seconds,
     sha256_file,
 )
-from scenery_brief_clips.analyze import analysis_plan, duration_settings_from_constraint, excerpts_from_scenes
+from scenery_brief_clips.analyze import (
+    analysis_plan,
+    duration_settings_from_constraint,
+    excerpts_from_scenes,
+    min_window_for_durations,
+)
 from scenery_brief_clips.continuity import ContinuitySettings, gate_excerpt
 from scenery_brief_clips.run_lock import exclusive_run_lock
+from scenery_brief_clips.yt import AnalysisSpanEmpty
 
 KEEP_PRIORITIES = {"promising", "uncertain"}
 ANALYSIS_SCHEMA_VERSION = 3
@@ -287,6 +294,7 @@ def _process_span(
     attempt_errors: list[dict] = []
     last_stage = "acquire"
     last_error = "analysis acquisition failed"
+    empty_attempts = 0
 
     for attempt in range(1, acquisition_attempts + 1):
         if deadline is not None and time.monotonic() >= deadline:
@@ -309,6 +317,8 @@ def _process_span(
             last_stage = "acquire"
             last_error = str(exc)
             attempt_errors.append({"attempt": attempt, "stage": last_stage, "error": last_error})
+            if isinstance(exc, AnalysisSpanEmpty):
+                empty_attempts += 1
             continue
 
         try:
@@ -406,6 +416,23 @@ def _process_span(
             },
         }
 
+    if empty_attempts and empty_attempts == len(attempt_errors):
+        # Every attempt came back with no streams at all: the source has no
+        # video here (its track ends early). Not a failure of this run; the
+        # span simply yields nothing. Verify accepts exactly this record.
+        return {
+            "ok": False,
+            "outcome": {
+                "span": list(span),
+                "cache_key": dest.name,
+                "status": "unavailable",
+                "reason": NO_VIDEO_IN_SPAN,
+                "stage": "acquire",
+                "attempts": empty_attempts,
+                "attempt_errors": attempt_errors,
+                "error": last_error,
+            },
+        }
     return {
         "ok": False,
         "outcome": {
@@ -451,6 +478,7 @@ def _analyze_run_locked(
     ranked = json.loads(ranked_bytes)
     constraint = json.loads(constraint_bytes)
     target_s, min_s, max_s = duration_settings_from_constraint(constraint)
+    min_window_s = min_window_for_durations(min_s, target_s, pad_s)
     acquisition_attempts = max(1, int(acquisition_attempts))
     continuity = (continuity_settings or ContinuitySettings()).validated()
     gate_fn = continuity_gate or gate_excerpt
@@ -511,6 +539,7 @@ def _analyze_run_locked(
                 windows=item.get("windows") or [],
                 max_analysis_s=max_analysis_s,
                 pad_s=pad_s,
+                min_window_s=min_window_s,
             )
             canonical_ranges = [canonical_span_seconds(span) for span in plan.ranges]
             timer.add("plan", time.perf_counter() - t0, video_id=video_id)
@@ -669,7 +698,8 @@ def _analyze_run_locked(
 
         completed = sum(1 for outcome in outcomes if outcome["status"] == "complete")
         failed = sum(1 for outcome in outcomes if outcome["status"] == "failed")
-        if completed and not failed:
+        unavailable = sum(1 for outcome in outcomes if outcome["status"] == "unavailable")
+        if (completed or unavailable) and not failed:
             status = "complete"
         elif completed:
             status = "partial"
@@ -705,6 +735,7 @@ def _analyze_run_locked(
         "max_videos": max_videos,
         "max_analysis_s": max_analysis_s,
         "pad_s": pad_s,
+        "min_window_s": min_window_s,
         "min_scene_len_s": min_scene_len_s,
         "target_duration_s": target_s,
         "duration_min_s": min_s,

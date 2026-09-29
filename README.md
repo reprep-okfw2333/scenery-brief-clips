@@ -33,17 +33,15 @@ New pieces (implemented, tested):
                                       path is byte-identical when absent
   run-brief CLI                       brief → plan → metadata-only discovery;
                                       writes discovery.json sidecar
-  jev-gate CLI (experimental)         OPTIONAL, off by default (jev_gate: true
-    src/scenery_brief_clips/jev_gate.py  to enable). Runs after discovery and
-                                      before rank/tile review; asks
-                                      typesafe/jev-1.13 (OpenRouter decisions
-                                      endpoint) for P(keep) from metadata and
-                                      rejects only when P(keep) <= 0.40. Never
-                                      auto-keeps. Key only from the
-                                      OPENROUTER_API_KEY env var; no key, errors,
-                                      timeouts, or the per-run cost cap fall back
-                                      to the rule gate. ~$0.07 per 1,000
-                                      candidates. See docs/JEV_GATE.md.
+  Jev decisions (optional)            OFF by default. typesafe/jev-1.13 via the
+    src/scenery_brief_clips/jev.py      OpenRouter decisions endpoint (text only).
+                                      run-pipeline: jev_rank orders search hits
+                                      and rejects weak candidates in discovery;
+                                      jev_note_check excludes vision keep moments
+                                      whose own note reports a failure. Manual
+                                      CLI: jev-gate. Never auto-keeps; key only
+                                      from OPENROUTER_API_KEY; any failure falls
+                                      back. See docs/JEV.md.
 
 Honest limits (measured, not assumed):
   - The planner only shapes SEARCH QUERIES. It does not and cannot make the
@@ -125,6 +123,6 @@ requires explicit --allow-export. Every yt-dlp call ignores host config.
   docs/SEARCH_BRIEF.md    the Part 7 design this project implements
   docs/ISSUES.md          open problems — read with STATUS
   docs/CLI.md             commands
-  docs/JEV_GATE.md        optional Jev metadata gate (off by default): setup,
-                          config keys, fallbacks, outputs, cost, evaluation, limits
+  docs/JEV.md             optional Jev ranking, note check and manual gate (off by
+                          default): questions, config keys, fallbacks, cost, evidence, limits
   AGENTS.md               rules for agents in this repo

@@ -45,24 +45,38 @@ continuity_max_endpoint_hamming: 22
 continuity_max_adjacent_color: 28.0
 continuity_max_endpoint_color: 35.0
 
-# Optional Jev metadata gate (experimental; off by default). See docs/JEV_GATE.md.
-# Used only by the `jev-gate` command, run after discovery (run/run-brief) and
-# before rank/tile review. It asks typesafe/jev-1.13 via the OpenRouter
-# decisions endpoint for P(keep) from metadata, rejects only when
-# P(keep) <= jev_reject_below, and never auto-keeps. The key is read ONLY from
-# the OPENROUTER_API_KEY environment variable; never put a key in this file.
-# No key, errors/timeouts, or reaching jev_max_usd_per_run fall back to the
-# rule gate (candidate kept). Cache: data/cache/jev/. Outputs: jev_gate.json,
-# candidates_pre_jev.json. Roughly $0.07 per 1,000 candidates. Cannot detect
-# watermarks; the 0.40 cutoff was tuned on train footage only.
+# Optional Jev decisions (off by default). See docs/JEV.md.
+# typesafe/jev-1.13 via the OpenRouter decisions endpoint; text only, no pixels.
+# The key is read ONLY from the OPENROUTER_API_KEY environment variable; never
+# put a key in this file. No key, errors/timeouts, or reaching
+# jev_max_usd_per_run fall back (search order kept, candidate kept, note entry
+# unchanged). Cache: data/cache/jev/. Well under $0.01 per run.
+# run-pipeline: order search hits before metadata fetch and reject candidates
+# whose score (mean of P(usable), P(subject), P(conditions)) <= jev_reject_below
+jev_rank: false
+# run-pipeline: exclude vision keep moments whose own note reports a failure
+jev_note_check: false
+# note violation when P(violation) >= this (0..1)
+jev_note_reject_at: 0.70
+# manual `jev-gate` command (after run/run-brief, before rank); same questions
 jev_gate: false
-# reject when P(keep) <= this (0..1, must be below jev_keep_above)
-jev_reject_below: 0.40
-# informational keep_high label only; never skips rank/tile review
+# reject when score <= this (0..1, must be below jev_keep_above)
+jev_reject_below: 0.35
+# manual gate only: informational keep_high label; never skips rank/tile review
 jev_keep_above: 0.85
 # per-request timeout, seconds
 jev_timeout_s: 20
 # per-run cost cap in USD; once reached, remaining candidates fall back to rules
 jev_max_usd_per_run: 0.25
-# order survivors by P(keep) so rank/analyze caps take the best first
+# manual gate only: order survivors by score so rank/analyze caps take the best first
 jev_order_by_p: true
+
+# NOT YET FUNCTIONAL: implemented and unit-tested only, never run against
+# YouTube. Keep these commented out unless the owner asks for a live test.
+# Opt-in YouTube fallback (owner decision; off by default). Used only after
+# YouTube refuses this host ("Sign in to confirm you're not a bot"), then for
+# the rest of that invocation. The cookies file is a Netscape cookies.txt that
+# must live OUTSIDE this project (it is a credential; use a throwaway account).
+# The proxy is an http(s):// or socks5(h):// URL. Never commit either value.
+# youtube_cookies_file: ~/.config/scenery-brief-clips/youtube-cookies.txt
+# youtube_proxy: socks5h://127.0.0.1:1080

@@ -61,10 +61,37 @@ every step.
 5. DONE, committed and pushed (2026-09-29): brief form loosened per owner
    decisions; live 1080p/Iceland run completed 5/5, verify ok; standalone
    export/analyze now apply the brief's cap. Section "Step 5" below.
-6. TODO: skill = one command (`run-pipeline --live-planner --live-vision` with
-   agreements up front); fix the skill's origin/master check.
-7. TODO (later): real quality signal on review frames (blur/sharpness,
-   text/watermark, wrong species / rendered imagery).
+6. ON HOLD (owner, 2026-09-29: no Hermes/part-6 work yet): skill = one
+   command (`run-pipeline --live-planner --live-vision` with agreements up
+   front); fix the skill's origin/master check.
+7. DEPRIORITIZED (owner, 2026-09-29): quality signals on review frames
+   (blur/sharpness, text/watermark, wrong species / rendered imagery).
+
+### Priorities and new order (owner, 2026-09-29)
+
+Goal: unattended runs from any request (generic to specific) to clips, with
+an AI orchestrator overseeing. Priority now: fast, bug-free, cheap,
+consistent runs. Accepted: sacrificing specific-request enforcement
+(setting/elements/exclusions) and watermark detection, and some imperfect
+clips if most are good. Owner idea: brief/vision profiles by request
+specificity, with the orchestrator offering options and asking questions
+before writing the formal brief. Work order (approved "yes"):
+
+- B1. Batch baseline: 8 varied, mostly generic requests end to end
+  (benchmark/batch1/, benchmark/batch.sh, benchmark/batch_summary.py):
+  unattended completion, clips delivered vs requested, clips good by eye,
+  wall time, model calls. DONE: 6/8 unattended, 26/36 clips, 21/26
+  usable by eye; results benchmark/RESULTS-2026-09-29-batch1.md.
+- B2. Speed/reliability fixes the baseline points to. Candidates: the two
+  verify passes (215 s of 1458 s on Iceland), search sleeps, review-frame
+  extraction, auto-redo of an interrupted stage whose outputs are derived
+  (today it needs file cleanup + --acknowledge-uncertain), and
+  max_analyze_videos defaulting to 1 (an unattended run without a config
+  analyzes one video whatever n_clips is).
+- B3. Brief profiles (quick default, standard; specific later) with the
+  contract doc telling the orchestrator when to offer options and what to
+  ask. Measure with benchmark/brief_eval + the batch.
+- Later: the specific profile and quality signals.
 
 ## Open questions / pending decisions
 
@@ -316,3 +343,186 @@ times: benchmark/runs/step5-iceland-20260929T012602Z/NOTE.md.
 - Contact sheets: all 5 are continuous shots of Icelandic waterfalls. Step 7
   quality gaps again: one clip has a "Beautiful World 4K" watermark and shows
   the fall only as distant mist; vision noted a small watermark on another.
+
+### B1 batch baseline and first B2 fixes (2026-09-29)
+
+B1 (benchmark/RESULTS-2026-09-29-batch1.md): 8 operator-written briefs, one
+fixed config, live, cold. 6/8 completed unattended; 26/36 clips delivered;
+by eye 10 good, 11 acceptable, 5 bad (21/26 usable; no cut inside any
+clip). Completed runs average 17 min; time: analyze 27%, discover 21%,
+strip labels 13%, export 12%, tile labels 9%, verify (both) 12%.
+
+Two failures, both bugs, fixed in the working tree (uncommitted):
+- R04: video 0I1hZCD7sT0's video track ends at ~129 s of an advertised
+  193 s; a span at 151 s downloaded as an empty file (no streams, with or
+  without -copyts; reproduced), and one failed span failed the whole run.
+  Fix: probe_export_coverage raises code `no_streams` for a stream-less
+  file; validate_analysis_media turns it into yt.AnalysisSpanEmpty; when
+  EVERY attempt of a span raises it, the analyzer records the range as
+  status `unavailable`, reason `no_video_in_span` (analysis_cache.
+  NO_VIDEO_IN_SPAN) and the row stays `complete`. verify accepts only that
+  exact form (all configured attempts, all acquire-stage no_streams, no
+  media) as a warning (verify._unavailable_problem). Any other failure still
+  fails the run as before.
+- R11 (step 5 regression): 16-24 s clips but analysis windows of 9-14 s
+  (tile interval + 2 s pad), so no excerpt could exist. Fix:
+  analysis_plan(min_window_s) widens short windows around their centre (kept
+  inside the video); a tight budget keeps fewer, evenly spaced whole windows
+  instead of shrinking all; spread mode uses fewer, longer ranges.
+  min_window_s = max(duration_min + 2*pad, target) (analyze.
+  min_window_for_durations; 8 s for the default 4/6/12 band), recorded in
+  the manifest settings; verify re-derives with settings.get("min_window_s",
+  0), so runs analyzed before keep verifying (checked: Brazil
+  20260927T220608Z --require-export ok; batch1 R07 ok).
+- Tests: tests/test_b2_fixes.py (67, sonnet-high to spec, reviewed). Full
+  suite 697 passed, 1 xfailed.
+- Test-infra trap found: two concurrent pytest sessions share tmp/pytest and
+  break each other (CLAUDE.md rule added).
+
+Other B1 findings still open for B2: max_analyze_videos fixed by config
+(defaults to 1) whatever n_clips (R05 8/10); serial vision calls (~9 s
+each); discover 2 s sleeps and serial metadata; verify_export re-decodes the
+analysis copies verify_review decoded; "european" queries do not name
+European places (R09 3/6).
+
+### B2 continued (2026-09-29, later session)
+
+- Reruns on the fixed code: R04 2/2 verify ok (search drifted; the broken
+  source was not a candidate, so the unavailable path was not exercised
+  live); R11 windows were 20 s as designed but every download hit YouTube's
+  "Sign in to confirm you're not a bot" (host refused after ~10 live runs;
+  metadata lookups too). Live validation paused until the block lifts.
+- New runner status `blocked` (yt.is_youtube_block; discover/analyze/export
+  failures and stage exceptions carrying the marker): tells the orchestrator
+  to wait and rerun the same command instead of reporting a pipeline
+  failure. Cookies stay off (owner opt-in only).
+- Vision: strip labels now concurrent like tiles; both use
+  vision_wire.vision_workers() (default 4, SCENERY_VISION_WORKERS 1..8);
+  results keep review order; runner call counters are locked. Expected
+  saving ~2-3 min per run (tile + strip labels averaged 224 s in B1);
+  NOT measured yet (needs a live run).
+- tests/test_b2_blocked_vision.py (31, sonnet-high to spec); updated
+  test_vision_wire's overlap test to the worker setting. Full suite 728
+  passed, 1 xfailed.
+- Discovery early stop: run_dry(max_candidates) stops metadata fetches once
+  that many candidates are kept; the runner passes max_rank_videos (rank
+  uses only the first N candidates in search order, so downstream inputs are
+  identical). In B1 ~12 of ~17 metadata fetches per run were unused (~70 s
+  and a dozen YouTube requests). Not part of the discover binding, so older
+  runs resume without re-searching; discovery.json records max_candidates.
+  Sleeps kept at 2 s: the YouTube block argues against faster requests.
+- verify_export decode reuse: verify_review records decoded_media {path:
+  sha256}; the runner's verify_export passes it as trusted_decodes, and
+  verify skips only the strict decode of byte-identical media (hash, probe,
+  marker and duration checks still run). Standalone verify decodes all.
+  B1: verify_review averaged 56 s, verify_export 65 s; expected ~50 s saved
+  per run, not measured live yet.
+- Still open for B2: analyzed-source count vs n_clips (fold into B3
+  profiles); "european" queries.
+
+### Checkpoint reported to the owner (2026-09-29)
+
+State: B1 done (6/8 unattended, 26/36 clips, 21/26 usable); B2 fixes done and
+tested (756 passed) but not measured live because YouTube refuses the host
+since ~11:40 UTC. Expected saving from B2 speedups ~3-5 min of a 17 min run
+(estimate from B1 stage times, unmeasured). Open: n_clips-scaled source
+count (B3). Questions put to the owner: (1) cookies as a fallback or wait;
+(2) commit B2 now or after re-measurement; (3) design B3 profiles offline.
+Owner answer: update the docs, then work on the YouTube fallback (B2b).
+Commit timing and B3 not decided.
+
+### B2b YouTube fallback (2026-09-29, owner: "lets work on the youtube fallback")
+
+**STATUS: NOT YET FUNCTIONAL and OFF** (owner, 2026-09-29: keep it off and
+clearly marked). Implemented and unit-tested only; never run against YouTube.
+
+Findings: the block is IP-level. yt-dlp already runs with --js-runtimes node
+(the missing-runtime warning came only from manual commands). Alternate
+player clients (tv_simply; web_safari,mweb) were refused the same way
+(one request each). Without an account, only waiting or another network
+route helps. "sign in to confirm" was already a fatal (non-retried) yt-dlp
+error, but the analyzer still retried every span of every video (~20
+refused requests in R11 after the first).
+
+Built (working tree, uncommitted):
+- Circuit breaker in YtDlp._run: after a refusal, every later call in the
+  process raises YOUTUBE_BLOCKED_EARLIER without contacting YouTube (the
+  message carries the block marker, so the runner reports `blocked`).
+- Opt-in fallback (config youtube_cookies_file / youtube_proxy; off by
+  default; yt.YoutubeFallback, youtube_fallback_from_config): on the first
+  refusal the call is retried once through the fallback and the process keeps
+  using it; if the fallback is refused too, the breaker trips. The cookies
+  file must be outside the project; each call gets a private 0600 copy in the
+  run tmp dir (yt-dlp writes the jar back; 2 analysis workers), deleted
+  after; errors through the fallback path redact the proxy URL and copy path.
+  Wired into run, run-brief, analyze, run-pipeline and export's default
+  downloader; invalid settings exit 2 / ExportError.
+- Runner: result/state `youtube_fallback_used`; the `blocked` instruction
+  says whether a configured fallback was refused too or how to opt in.
+- NOT validated live: needs a cookies file (or proxy) from the owner; the
+  host is still refused.
+- Tests: tests/test_youtube_fallback.py (41; sonnet-high to spec). It found
+  two defects, both fixed: (1) the redacted error was raised `from None`
+  inside the except block, so `__context__` still held the original text
+  with the proxy URL and cookie-copy path; now raised outside the block, no
+  context. (2) a relative youtube_cookies_file resolved against the working
+  directory, not the project root; now root-relative (and then refused as
+  inside the project). Full suite 797 passed, 1 xfailed.
+
+### Session wrap-up (2026-09-29, owner: document everything, keep local)
+
+Owner: "document all work done in this session, including hand off, do not
+commit, merge push or anything like that, keep everything local for now.
+Make sure the youtube fall back is off and it is clearly highlighted it is
+not yet functional." Done: fallback off (no config sets it, no cookies
+file, example lines commented and marked NOT YET FUNCTIONAL in AGENTS.md,
+config.example.yaml, CLI.md, RUNNER.md, STATUS.md, ISSUES.md, HANDOFF.md).
+Nothing committed after 87f17c3. Full suite 797 passed, 1 xfailed. YouTube
+still refused the host at the last check. Next steps: HANDOFF.md.
+
+
+### Jev investigation and integration (2026-09-29, afternoon)
+
+Owner: investigate TypeSafe's Jev (System One decision model) for this
+project; then "yes do that": rebuild it brief-generic, wire it in, test, run
+live if YouTube allows, document as you go.
+
+- Investigation: Jev is text in, calibrated typed answers out (noul / choice /
+  score), no images, no text generation, $0.042/MTok input, ~0.2 s. Fits as a
+  cheap judge over metadata and over the vision model's notes; not a
+  replacement for vision, planner, continuity, export or verify. The old
+  exp/jev-gate (merged in PR #1) had train-only questions, ran after all
+  metadata fetches, and the runner forced it off.
+- Offline evaluation (benchmark/jev_eval/, README there): 184 candidates and
+  116 strip notes from 10 existing runs, blind Sonnet reference labels,
+  observed outcomes for 44 analyzed sources, eye verdicts for 26 clips.
+  $0.05 of Jev calls, 0 errors. Rank-slot replay: search order 17/50
+  reference-"no" picks, Jev 2-3/50. Outcome AUC 0.75-0.80 (reference judge
+  0.745: metadata is the limit). Note check AUC 0.99 vs reference; at 0.70
+  flags 2/5 bad delivered clips, 1/21 good.
+- Question set v2 written from v1's misses (relaxation film vs dark screen),
+  score = mean of P(usable), P(subject), P(conditions) (beat usable alone in
+  every variant). Thresholds: reject <= 0.35 (0 productive lost offline),
+  note violation >= 0.70.
+- YouTube accepted the host again at 14:24 UTC (one check). One flat search
+  confirmed hits carry a ~120-150 character description snippet.
+- Built (uncommitted): src/scenery_brief_clips/jev.py (client, cache, budget,
+  questions, DiscoveryJudge, apply_note_check); run_dry(judge=); runner
+  jev_rank / jev_note_check with Ports.jev_post and bindings that change only
+  when on; shortlist exclusion "jev note violation" via `note_violation` in
+  the labels file (verify reproduces it); jev-gate rebuilt on the same
+  questions (schema jev_gate_v2, --brief); config keys; docs/JEV.md (was
+  JEV_GATE.md), STATUS, ISSUES, RUNNER, CLI, ARCHITECTURE, DATA, ROADMAP,
+  README, AGENTS, config.example.yaml. Bench: BENCH_JEV, BENCH_SEED_METADATA,
+  benchmark/jev_ab.sh (paired live A/B), summary.json "jev" block.
+- Tests: tests/test_jev.py (151) and tests/test_jev_gate.py (25, rewritten),
+  sonnet-high to spec; no src bugs found. Full suite 958 passed, 1 xfailed.
+- Live A/B (benchmark/RESULTS-2026-09-29-jev.md): owner stopped the batch
+  after the R09 pair to free the host. R09: Jev 4 clips / 2 usable vs control
+  3 / 3 (blind judge). Jev fixed ranking (no Idaho/Colorado/Banff sources) but
+  kept a Canadian-looking source it had itself labeled place: different (the
+  score ignores place) and an illustration channel passed every stage. Next:
+  place rule (offline: rejects 14/184, 0 truly on-place) and "not real
+  footage" in the note criteria; then `benchmark/jev_ab.sh R07 R10 R03`.
+  First live numbers for B2: discover 206 -> 113 s, label_strips 174 -> 103 s,
+  verify_export 68 -> 12 s (R09, cold, vs B1).

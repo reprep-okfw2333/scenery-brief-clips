@@ -25,7 +25,20 @@ def run_dry(
     cache: MetadataCache,
     sleep_fn: Callable[[float], None],
     queries: list[str] | None = None,
+    max_candidates: int | None = None,
+    judge=None,
 ) -> DryRunResult:
+    """Search, then fetch metadata in search order until the limits are hit.
+
+    ``max_candidates`` stops metadata fetching once that many candidates are
+    kept: rank only ever uses the first max_rank_videos candidates in this
+    order, so further fetches cost time and YouTube requests for nothing.
+
+    ``judge`` (jev.DiscoveryJudge, optional) reorders the search hits before
+    any metadata fetch, may reject a candidate after its metadata (reason
+    ``jev_reject``; it does not count toward max_candidates), and orders the
+    kept candidates by its score.
+    """
     if constraint.allow_download:
         raise RuntimeError("dry-run refuses allow_download=True")
 
@@ -37,6 +50,7 @@ def run_dry(
     result = DryRunResult(queries=queries)
     ordered_ids: list[str] = []
     titles: dict[str, str] = {}
+    hits_by_id: dict[str, dict] = {}
     remaining = constraint.limits.max_search_results
 
     for query_index, query in enumerate(queries):
@@ -56,14 +70,24 @@ def run_dry(
             if not video_id or video_id in titles:
                 continue
             titles[video_id] = str(hit.get("title") or "")
+            hits_by_id[video_id] = hit
             ordered_ids.append(video_id)
             remaining = constraint.limits.max_search_results - len(ordered_ids)
             if remaining <= 0:
                 break
 
+    if judge is not None and ordered_ids and result.stopped_reason is None:
+        ordered_ids = judge.order_hits(ordered_ids, hits_by_id)
+        result.log_lines.append("jev order: " + " ".join(ordered_ids))
+
     fetches = 0
     metadata_failures = 0
     for video_id in ordered_ids:
+        if max_candidates is not None and len(result.candidates) >= max_candidates:
+            if result.stopped_reason is None:
+                result.stopped_reason = "enough_candidates"
+            result.log_lines.append(f"stop: {max_candidates} candidates kept")
+            break
         info = cache.get(video_id)
         if info is None and fetches >= constraint.limits.max_metadata_fetches:
             if result.stopped_reason is None:
@@ -88,6 +112,8 @@ def run_dry(
             if constraint.limits.sleep_s:
                 sleep_fn(constraint.limits.sleep_s)
         judged = evaluate_metadata(info, constraint)
+        if isinstance(judged, Candidate) and judge is not None and not judge.judge_metadata(video_id, info):
+            judged = Reject(video_id=video_id, title=titles.get(video_id) or info.get("title"), reason="jev_reject")
         if isinstance(judged, Candidate):
             result.candidates.append(judged)
             result.log_lines.append(f"keep {video_id} {judged.reason_kept}")
@@ -101,4 +127,6 @@ def run_dry(
             else:
                 result.stopped_reason = "complete"
 
+    if judge is not None:
+        result.candidates = judge.order_candidates(result.candidates)
     return result

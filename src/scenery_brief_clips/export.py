@@ -69,6 +69,7 @@ from scenery_brief_clips.yt import (
     YtDlp,
     expected_frames,
     probe_export_coverage,
+    youtube_fallback_from_config,
 )
 
 EXPORT_SCHEMA_VERSION = 2
@@ -1028,12 +1029,18 @@ def export_run(
         _cleanup_clip_staging(clips_dir)
 
         previous, previous_ffmpeg = _previous_entries(theme_dir, run_dir.name, _read_pointer(run_dir))
+        if yt is None:
+            try:
+                fallback = youtube_fallback_from_config(root, config)
+            except ValueError as exc:
+                raise ExportError(f"invalid YouTube fallback settings: {exc}") from exc
         yt_client = yt if yt is not None else YtDlp(
             tmp_dir=root / "tmp",
             allow_download=False,
             timeout=60,
             allow_export=True,
             export_cache_dir=export_cache_dir,
+            fallback=fallback,
         )
         ffmpeg_version = _ffmpeg_version()
 

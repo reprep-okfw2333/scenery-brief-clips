@@ -23,7 +23,8 @@ commands, in the only order that produces clips, are:
    Metadata search only. No video. A frozen --plan skips the planner model.
    Without --plan, run-brief makes one planner call.
 4. jev-gate — optional, off unless config says jev_gate: true. The runner
-   does not call this. It stays off even if that config key is true.
+   does not call this command; it has its own Jev switches (jev_rank inside
+   discover, jev_note_check inside label_strips; docs/JEV.md).
 5. rank — storyboard tiles. Needs candidates.json.
 6. vision-show — prints the model named in vision.yaml.
 7. label-tiles --confirm-vision — refuses without that flag. Writes
@@ -64,7 +65,10 @@ The runner calls those entries. It does not reimplement selection. Tests
 substitute fakes at the injection points above. A test must fail if a real
 network, model, download, or media tool is reached without that substitution.
 
-Jev is not in this table on purpose. The runner never calls jev_gate.gate_run.
+Jev: the runner never calls jev_gate.gate_run. With `jev_rank: true` the discover
+stage passes a jev.DiscoveryJudge to pipeline.run_dry, and with `jev_note_check: true`
+the label_strips stage runs jev.apply_note_check on the fresh strip labels. Both use
+the `jev_post=` port; without it no Jev request is made (source `fallback_no_port`).
 
 ## Judgment and approval stops
 
@@ -86,6 +90,17 @@ These are the only reasons the runner stops while the run can still continue:
   failed with stage `deadline`. Rerun the same command with the same
   `--run-dir`: completed stages and cached spans are reused, and the new
   invocation gets a fresh budget.
+- Blocked (added 2026-09-29). YouTube answered "Sign in to confirm you're
+  not a bot" (the host's IP is refused for a while, typically hours) during
+  discover, analyze or export. Status `blocked` (CLI exit 1) with a wait-and-
+  rerun instruction; the failed stage reruns on the next invocation and
+  completed stages are reused. Do not retry in a loop. After the first
+  refusal the process stops contacting YouTube (circuit breaker). With the
+  opt-in fallback configured (NOT YET FUNCTIONAL: unit-tested only, never
+  run live; off by default) (youtube_cookies_file / youtube_proxy) the
+  refused call is retried once through it and the rest of the invocation
+  uses it; the result then carries `youtube_fallback_used: true`, and a
+  `blocked` result says whether the fallback was refused too.
 - Uncertain external outcome. A stage was started and its required files do
   not validate. Stop with a recovery instruction. Do not call that outside
   step again until the operator acknowledges recovery.
@@ -110,14 +125,17 @@ ask again.
 ## What "relevant change" means
 
 This list is the whole rule. Anything not listed does not wipe finished work.
-sleep_s, jev_* keys, and SCENERY_ANALYZE_WORKERS are not selection inputs.
-Jev keys are ignored because the runner never runs that gate.
+sleep_s, jev_gate and the manual-gate jev_* keys, and SCENERY_ANALYZE_WORKERS
+are not selection inputs. jev_rank and jev_note_check (with their thresholds)
+are, and enter the bindings only when switched on (table below).
 
 | Change | Invalidates |
 | --- | --- |
 | brief or frozen plan bytes | discovery and every later stage |
 | max_search_results, max_metadata_fetches, min_width, min_height, aspect_min, aspect_max | discovery and every later stage |
 | max_rank_videos, max_tiles | rank and every later stage |
+| jev_rank on, or jev_reject_below while it is on | discovery and every later stage |
+| jev_note_check on, or jev_note_reject_at while it is on | strip labels (re-read from the vision cache), the shortlist, and export |
 | vision.yaml backend or model | vision agreement, both label files, and every stage that consumed them (apply-scores onward) |
 | max_analyze_videos, max_analysis_s, continuity_* config, SCENERY_DETECT_FRAME_SKIP, SCENERY_CONTINUITY_DECODE_WIDTH | analyze and every later stage |
 | export_max_height | export and export verify only |

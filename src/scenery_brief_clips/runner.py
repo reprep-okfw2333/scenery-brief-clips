@@ -1,7 +1,9 @@
 """One command that walks the existing stages and stops only for a real handoff.
 
 It calls the stage functions already in this package. It does not re-decide
-which clips pass. A frozen plan skips the planner. Jev is never called.
+which clips pass. A frozen plan skips the planner. Jev is called only when
+the config turns on jev_rank (discovery) or jev_note_check (strip notes) and
+the jev_post port is supplied (docs/JEV.md).
 """
 
 from __future__ import annotations
@@ -10,6 +12,7 @@ import fcntl
 import hashlib
 import json
 import os
+import threading
 import time
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -23,6 +26,7 @@ from scenery_brief_clips.brief import (
 from scenery_brief_clips.cli import _brief_constraint_from_brief
 from scenery_brief_clips.config import load_project_config
 from scenery_brief_clips.continuity import DEFAULT_CONTINUITY_DETECTOR, continuity_settings_from_config
+from scenery_brief_clips.jev import API_KEY_ENV, DiscoveryJudge, JevClient, JevSettings, apply_note_check
 from scenery_brief_clips.pipeline import run_dry
 from scenery_brief_clips.pipeline_analyze import analyze_run
 from scenery_brief_clips.rank import rank_run
@@ -31,6 +35,7 @@ from scenery_brief_clips.shortlist import shortlist_apply_run
 from scenery_brief_clips.store import MetadataCache, write_json_atomic, write_run
 from scenery_brief_clips.verify import verify_run
 from scenery_brief_clips.vision import apply_scores_run_detailed
+from scenery_brief_clips.yt import is_youtube_block
 from scenery_brief_clips.vision_wire import (
     label_ranked_tiles,
     label_review_strips,
@@ -114,6 +119,9 @@ class Ports:
     verify_decode: Callable | None = None
     export_probe: Callable | None = None
     clock: Callable[[], float] | None = None
+    # Jev decisions POST (jev.default_post); used only when the config enables
+    # jev_rank or jev_note_check.
+    jev_post: Callable | None = None
 
 
 @dataclass
@@ -122,6 +130,8 @@ class _Counters:
     tokens: int | None = None
     saw_unreported_usage: bool = False
     calls: list[str] = field(default_factory=list)
+    # Labeling calls run concurrently (vision_wire.vision_workers()).
+    lock: threading.Lock = field(default_factory=threading.Lock, repr=False, compare=False)
 
 
 def advance(
@@ -170,7 +180,7 @@ def advance(
             "run_dir": str(run_dir),
             "missing": "another runner holds this run",
             "how_to_supply": "wait until the other runner exits, then resume with the same --run-dir",
-            "jev": _jev_disabled(),
+            "jev": _jev_status(config),
         }
     try:
         return _advance_locked(
@@ -214,7 +224,7 @@ def _advance_locked(**kw) -> dict:
     ports: Ports = kw["ports"]
     clock = kw["clock"]
     state = _load_state(run_dir)
-    state["jev"] = _jev_disabled()
+    state["jev"] = _jev_status(config)
     state.setdefault("completed", {})
     state.setdefault("timing", {"stages": [], "retries": 0, "waiting_for_input_s": 0.0})
     state["vision_model"] = model_id
@@ -280,11 +290,15 @@ def _advance_locked(**kw) -> dict:
         _write_inflight(run_dir, stage, bindings.get(stage))
         try:
             outcome = _run_stage(stage, root, run_dir, kw, ports, wire, counters)
+            _note_fallback(state, ports)
         except Exception as exc:
+            _note_fallback(state, ports)
             _clear_inflight(run_dir)
             _record(state, stage, "failed", clock() - began, counters.model_calls, _tokens(counters))
             state["failed_stage"] = stage
             _save(run_dir, state, clock)
+            if is_youtube_block(exc):
+                return _blocked(state, run_dir, stage, str(exc), ports)
             return _result(state, run_dir, status="failed", stage=stage, error=str(exc))
         elapsed = clock() - began
         if outcome.get("failed"):
@@ -294,6 +308,8 @@ def _advance_locked(**kw) -> dict:
             _save(run_dir, state, clock)
             if outcome.get("deadline"):
                 return _deadline(state, run_dir, clock, stage, deadline_s, saved=True)
+            if outcome.get("blocked"):
+                return _blocked(state, run_dir, stage, outcome.get("error") or f"{stage} failed", ports)
             return _result(
                 state,
                 run_dir,
@@ -371,7 +387,13 @@ def _run_stage(stage, root, run_dir, kw, ports: Ports, wire, counters: _Counters
                 for row in bad
                 for outcome in row.get("ranges") or []
             )
-            return {"failed": True, "deadline": deadline_hit,
+            blocked = any(
+                is_youtube_block(item.get("error"))
+                for row in bad
+                for outcome in row.get("ranges") or []
+                for item in outcome.get("attempt_errors") or []
+            )
+            return {"failed": True, "deadline": deadline_hit, "blocked": blocked,
                     "error": f"analyze failed for {bad[0].get('video_id')}"}
         return {}
     if stage == "verify_review":
@@ -390,7 +412,16 @@ def _run_stage(stage, root, run_dir, kw, ports: Ports, wire, counters: _Counters
         review_run(run_dir)
         return {}
     if stage == "label_strips":
-        return _label(run_dir, wire, ports.strip_caller, counters, kind="strip", judgments=kw["judgments"])
+        outcome = _label(run_dir, wire, ports.strip_caller, counters, kind="strip", judgments=kw["judgments"])
+        captured = (kw["judgments"] or {}).get("strip_scores") is not None
+        settings = JevSettings.from_config(kw["config"])
+        if outcome or captured or not settings.note_check:
+            return outcome
+        scores = json.loads((run_dir / "shortlist_scores.json").read_text(encoding="utf-8"))
+        scores, report = apply_note_check(kw["brief_doc"] or {}, scores, _jev_client(root, settings, ports), settings)
+        write_json_atomic(run_dir / "jev_notes.json", report)
+        write_json_atomic(run_dir / "shortlist_scores.json", scores)
+        return {}
     if stage == "shortlist_apply":
         shortlist_apply_run(run_dir, run_dir / "shortlist_scores.json")
         return {}
@@ -408,7 +439,11 @@ def _run_stage(stage, root, run_dir, kw, ports: Ports, wire, counters: _Counters
             config=kw["config"],
         )
         if (manifest.get("counts") or {}).get("failed"):
-            return {"failed": True, "error": "export recorded a failed moment"}
+            blocked = any(
+                is_youtube_block(entry.get("detail")) or any(map(is_youtube_block, entry.get("attempt_errors") or []))
+                for entry in manifest.get("failed") or []
+            )
+            return {"failed": True, "blocked": blocked, "error": "export recorded a failed moment"}
         return {}
     if stage == "verify_export":
         report = verify_run(
@@ -419,6 +454,7 @@ def _run_stage(stage, root, run_dir, kw, ports: Ports, wire, counters: _Counters
             export_probe_fn=ports.export_probe,
             root=root,
             require_export=True,
+            trusted_decodes=_review_decodes(run_dir),
         )
         write_json_atomic(run_dir / "verify_export.json", report)
         if not report.get("ok"):
@@ -467,15 +503,23 @@ def _discover(root, run_dir, kw, ports: Ports, counters: _Counters) -> dict:
     if constraint.aspect_min > constraint.aspect_max:
         raise ValueError("configured aspect band does not overlap the brief")
     cache = MetadataCache(root / "data" / "cache" / "metadata")
+    jev_settings = JevSettings.from_config(config)
+    judge = DiscoveryJudge(brief, _jev_client(root, jev_settings, ports), jev_settings) if jev_settings.rank else None
     result = run_dry(
         constraint,
         yt=ports.yt,
         cache=cache,
         sleep_fn=ports.sleep_fn or (lambda _seconds: None),
         queries=queries,
+        # Rank uses only the first max_rank_videos candidates. Not part of the
+        # discover binding, so older runs resume without re-searching; a later
+        # rise of max_rank_videos ranks only what discovery kept.
+        max_candidates=int(config.get("max_rank_videos", 10)),
+        judge=judge,
     )
     if result.stopped_reason in {"search_error", "metadata_errors"}:
-        return {"failed": True, "error": result.stopped_reason}
+        blocked = any(is_youtube_block(line) for line in result.log_lines)
+        return {"failed": True, "blocked": blocked, "error": result.stopped_reason}
     log_text = "\n".join(result.log_lines) + ("\n" if result.log_lines else "")
     written = write_run(
         run_dir.parent,
@@ -497,6 +541,7 @@ def _discover(root, run_dir, kw, ports: Ports, counters: _Counters) -> dict:
         "brief_sha256": canonical_json_hash(brief),
         # The requested cap, so standalone `export`/`analyze` apply it too.
         "export_max_height": brief["export_max_height"],
+        "max_candidates": int(config.get("max_rank_videos", 10)),
         "query_plan": plan,
         "plan_provenance": provenance,
         "attempted_queries": result.queries,
@@ -510,10 +555,29 @@ def _discover(root, run_dir, kw, ports: Ports, counters: _Counters) -> dict:
         "candidates": candidates_json,
         "rejected": rejected_json,
     }
+    if judge is not None:
+        discovery["jev_rank"] = judge.report()
     write_json_atomic(run_dir / "discovery.json", discovery)
     write_json_atomic(run_dir / "candidates.json", candidates_json)
     write_json_atomic(run_dir / "rejected.json", rejected_json)
     return {}
+
+
+def _review_decodes(run_dir: Path) -> dict[str, str]:
+    """Analysis media verify_review strictly decoded ({path: sha256}).
+
+    verify_review.json is a completed stage output whose hash the runner
+    re-checks on every invocation, so verify_export may skip decoding bytes
+    it lists (verify re-hashes each file first). Anything unreadable -> {}.
+    """
+    try:
+        report = json.loads((run_dir / "verify_review.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    decoded = report.get("decoded_media") if isinstance(report, dict) and report.get("ok") else None
+    if not isinstance(decoded, dict):
+        return {}
+    return {str(k): v for k, v in decoded.items() if isinstance(v, str) and len(v) == 64}
 
 
 def _label(run_dir, wire, caller, counters: _Counters, *, kind: str, judgments: dict | None) -> dict:
@@ -542,10 +606,12 @@ def _label(run_dir, wire, caller, counters: _Counters, *, kind: str, judgments: 
 
 def _wrap_caller(caller, counters: _Counters, seam: str):
     def wrapped(wire, image_path, prompt):
-        counters.calls.append(seam)
-        counters.model_calls += 1
+        with counters.lock:
+            counters.calls.append(seam)
+            counters.model_calls += 1
         text = caller(wire, image_path, prompt)
-        _note_usage(counters, getattr(caller, "last_usage", None))
+        with counters.lock:
+            _note_usage(counters, getattr(caller, "last_usage", None))
         return text
 
     return wrapped
@@ -655,6 +721,12 @@ def _bindings(brief, plan, config, model_id) -> dict:
         "config": {key: config.get(key) for key in DISCOVERY_KEYS},
     }
     rank = {**discovery, "config": {key: config.get(key) for key in RANK_KEYS}}
+    # Jev enters a binding only when switched on, so runs made without it keep
+    # their bindings and resume without re-searching or relabeling.
+    jev_settings = JevSettings.from_config(config)
+    if jev_settings.rank_binding() is not None:
+        discovery["jev_rank"] = jev_settings.rank_binding()
+        rank["jev_rank"] = jev_settings.rank_binding()
     from scenery_brief_clips.vision_wire import brief_prompt
     vision = {"model": model_id, "tile_prompt": brief_prompt("tile", ""),
               "strip_prompt": brief_prompt("strip", ""), "label_policy": "vision_label_v1"}
@@ -669,6 +741,7 @@ def _bindings(brief, plan, config, model_id) -> dict:
     if detector != "legacy":
         analyze["config"]["continuity_detector"] = detector
     export = {"config": {key: config.get(key) for key in EXPORT_KEYS}}
+    strips = vision if jev_settings.note_binding() is None else {**vision, "jev_note": jev_settings.note_binding()}
     encoded = {
         "discover": _hash(discovery),
         "rank": _hash(rank),
@@ -678,8 +751,8 @@ def _bindings(brief, plan, config, model_id) -> dict:
         "analyze": _hash(analyze),
         "verify_review": _hash(analyze),
         "shortlist_review": _hash(analyze),
-        "label_strips": _hash(vision),
-        "shortlist_apply": _hash(vision),
+        "label_strips": _hash(strips),
+        "shortlist_apply": _hash(strips),
         "agree_export": _hash(export),
         "export": _hash(export),
         "verify_export": _hash(export),
@@ -774,6 +847,37 @@ def _deadline(state, run_dir, clock, stage, deadline_s, saved=False) -> dict:
     )
 
 
+def _note_fallback(state, ports) -> None:
+    """Record in the run state that a YouTube call went through the fallback."""
+    if getattr(ports.yt, "fallback_used", False):
+        state["youtube_fallback_used"] = True
+
+
+def _blocked(state, run_dir, stage, error, ports=None) -> dict:
+    """YouTube refused this host (bot check). Not a pipeline fault: retrying
+    now only prolongs the block."""
+    fallback = getattr(getattr(ports, "yt", None), "fallback", None)
+    if getattr(fallback, "configured", False):
+        advice = ("The configured fallback (youtube_cookies_file / youtube_proxy) was refused "
+                  "too: refresh the cookies or change the proxy, or wait.")
+    else:
+        advice = ("No fallback is configured; the owner may opt in with youtube_cookies_file "
+                  "or youtube_proxy in config.")
+    return _result(
+        state,
+        run_dir,
+        status="blocked",
+        stage=stage,
+        error=error,
+        missing="YouTube is refusing this host (\"Sign in to confirm you're not a bot\")",
+        how_to_supply=(
+            "wait (the block usually lifts within hours), then rerun the same command with "
+            "the same --run-dir; completed stages and cached analysis spans are reused. "
+            + advice
+        ),
+    )
+
+
 def _pause(state, run_dir, clock, **fields) -> dict:
     state["pause_started_at"] = clock()
     _record(state, fields.get("stage") or "paused", "paused", 0.0, 0, None)
@@ -815,14 +919,24 @@ def _result(state, run_dir, **fields) -> dict:
         "how_to_supply": fields.get("how_to_supply"),
         "vision_model": fields.get("vision_model"),
         "error": fields.get("error"),
-        "jev": _jev_disabled(),
+        "jev": state.get("jev") or _jev_status({}),
         "timing": state.get("timing"),
     }
+    if state.get("youtube_fallback_used"):
+        payload["youtube_fallback_used"] = True
     return payload
 
 
-def _jev_disabled() -> dict:
-    return {"enabled": False, "reason": "runner_forces_off"}
+def _jev_status(config) -> dict:
+    settings = JevSettings.from_config(config)
+    if not (settings.rank or settings.note_check):
+        return {"enabled": False, "reason": "config_off"}
+    return {"enabled": True, "rank": settings.rank, "note_check": settings.note_check}
+
+
+def _jev_client(root: Path, settings: JevSettings, ports: Ports) -> JevClient:
+    return JevClient(api_key=os.environ.get(API_KEY_ENV, ""), cache_dir=root / "data" / "cache" / "jev",
+                     settings=settings, post=ports.jev_post)
 
 
 def _load_state(run_dir: Path) -> dict:

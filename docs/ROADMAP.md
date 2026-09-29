@@ -40,12 +40,11 @@ Chain — done, limited
   scripts/chain_parts123.py : run → rank → analyze → verify (5 European-scenery candidates).
   Does not apply vision scores.
 
-Jev metadata gate — experimental, optional, off by default (2026-09-25; docs/JEV_GATE.md)
-  CLI: jev-gate (after run/run-brief, before rank). Config: jev_gate (false), jev_reject_below (0.40),
-  jev_keep_above (0.85, label only), jev_timeout_s (20), jev_max_usd_per_run (0.25), jev_order_by_p (true).
-  typesafe/jev-1.13 via the OpenRouter decisions endpoint; key only from OPENROUTER_API_KEY. Rejects only,
-  never auto-keeps; falls back to the rule gate. Cache data/cache/jev/; outputs jev_gate.json, candidates_pre_jev.json.
-  Not done: live A/B (blocked by YouTube's bot check) and themes other than trains. See docs/ISSUES.md.
+Jev decisions — optional, off by default (2026-09-25 train-only gate; rebuilt brief-generic 2026-09-29; docs/JEV.md)
+  run-pipeline: jev_rank (order search hits, reject low candidates in discovery), jev_note_check (exclude vision
+  keep moments whose note reports a failure). Manual CLI: jev-gate. typesafe/jev-1.13 via the OpenRouter
+  decisions endpoint; key only from OPENROUTER_API_KEY; rejects/reorders only, never auto-keeps; falls back on
+  any failure. Cache data/cache/jev/. Open: defaults stay off until the owner decides (see docs/ISSUES.md).
 
 ## Waiting (Part 5 complete)
 

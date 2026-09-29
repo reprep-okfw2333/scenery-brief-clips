@@ -30,8 +30,9 @@ _FLOAT_KEYS = {
     "continuity_max_adjacent_color",
     "continuity_max_endpoint_color",
 }
-_JEV_FLOAT_KEYS = {"jev_reject_below", "jev_keep_above", "jev_timeout_s", "jev_max_usd_per_run"}
-_JEV_BOOL_KEYS = {"jev_gate", "jev_order_by_p"}
+_JEV_FLOAT_KEYS = {"jev_reject_below", "jev_keep_above", "jev_note_reject_at", "jev_timeout_s", "jev_max_usd_per_run"}
+# jev_rank / jev_note_check: run-pipeline (docs/JEV.md); jev_gate: the manual jev-gate command.
+_JEV_BOOL_KEYS = {"jev_gate", "jev_order_by_p", "jev_rank", "jev_note_check"}
 _ALLOWED_KEYS = {
     *_JEV_FLOAT_KEYS,
     *_JEV_BOOL_KEYS,
@@ -40,6 +41,10 @@ _ALLOWED_KEYS = {
     "export_max_height",
     "continuity_enabled",
     "continuity_detector",
+    # Opt-in YouTube fallback, used only after YouTube refuses the host
+    # (bot check). Never set by default; see yt.YoutubeFallback.
+    "youtube_cookies_file",
+    "youtube_proxy",
     *_INTEGER_KEYS,
     *_FLOAT_KEYS,
 }
@@ -67,6 +72,14 @@ def _validate_config(config: dict) -> dict:
         raise ConfigError("continuity_enabled must be a boolean")
     if "continuity_detector" in config and config.get("continuity_detector") not in ("legacy", "blend"):
         raise ConfigError("continuity_detector must be 'legacy' or 'blend'")
+    if "youtube_cookies_file" in config and (
+        not isinstance(config["youtube_cookies_file"], str) or not config["youtube_cookies_file"].strip()
+    ):
+        raise ConfigError("youtube_cookies_file must be a file path")
+    if "youtube_proxy" in config:
+        proxy = config["youtube_proxy"]
+        if not isinstance(proxy, str) or not proxy.startswith(("http://", "https://", "socks5://", "socks5h://")):
+            raise ConfigError("youtube_proxy must be an http(s):// or socks5(h):// URL")
     if "export_max_height" in config:
         value = config["export_max_height"]
         if (
@@ -113,12 +126,12 @@ def _validate_config(config: dict) -> dict:
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
             raise ConfigError(f"{key} must be a finite number")
         value = float(value)
-        if key in {"jev_reject_below", "jev_keep_above"} and not (0.0 <= value <= 1.0):
+        if key in {"jev_reject_below", "jev_keep_above", "jev_note_reject_at"} and not (0.0 <= value <= 1.0):
             raise ConfigError(f"{key} must be between 0 and 1")
         if key in {"jev_timeout_s", "jev_max_usd_per_run"} and value <= 0:
             raise ConfigError(f"{key} must be greater than 0")
         config[key] = value
-    if config.get("jev_reject_below", 0.40) >= config.get("jev_keep_above", 0.85):
+    if config.get("jev_reject_below", 0.35) >= config.get("jev_keep_above", 0.85):
         raise ConfigError("jev_reject_below must be below jev_keep_above")
 
     aspect_min = config.get("aspect_min")

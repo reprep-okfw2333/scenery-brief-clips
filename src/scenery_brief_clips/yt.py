@@ -8,6 +8,7 @@ import re
 import shutil
 import signal
 import subprocess
+import threading
 import time
 import uuid
 from collections.abc import Callable, Iterator
@@ -131,6 +132,69 @@ class ExportMediaError(RuntimeError):
         self.code = code
 
 
+class AnalysisSpanEmpty(RuntimeError):
+    """The section download succeeded but holds no streams at all.
+
+    Seen when a source's video track ends before its advertised duration
+    (0I1hZCD7sT0: video stops at ~129 s of 193 s) and a span lies past it.
+    The analyzer records such a span as unavailable instead of failing.
+    """
+
+
+# YouTube's anti-bot wall ("Sign in to confirm you're not a bot"). It refuses
+# the host's IP for a while (hours); retrying at once only prolongs it.
+_YOUTUBE_BLOCK_MARKERS = ("confirm you’re not a bot", "confirm you're not a bot")
+
+
+def is_youtube_block(text: object) -> bool:
+    """True when a yt-dlp error says YouTube is refusing this host (bot check)."""
+    return any(marker in str(text) for marker in _YOUTUBE_BLOCK_MARKERS)
+
+
+# Raised without contacting YouTube once it refused this process (the circuit
+# breaker). Carries the block marker so callers classify it as a block.
+YOUTUBE_BLOCKED_EARLIER = (
+    "YouTube refused this host earlier in this process (confirm you're not a bot); "
+    "not contacting it again until the next invocation"
+)
+
+
+@dataclass(frozen=True)
+class YoutubeFallback:
+    """Opt-in route used only after YouTube refuses the host.
+
+    ``cookies_file``: a Netscape cookies.txt outside the project (ideally a
+    throwaway account). ``proxy``: an http(s)/socks5 URL. Both come only from
+    config (youtube_cookies_file / youtube_proxy); neither is ever printed.
+    """
+
+    cookies_file: Path | None = None
+    proxy: str | None = None
+
+    @property
+    def configured(self) -> bool:
+        return self.cookies_file is not None or self.proxy is not None
+
+
+def youtube_fallback_from_config(root: str | Path, config: dict | None) -> YoutubeFallback:
+    """Build the fallback from config; refuses a cookies file inside the project."""
+    config = config or {}
+    cookies = config.get("youtube_cookies_file")
+    cookies_path = None
+    if cookies:
+        # A relative path is relative to the project root (where config.yaml
+        # lives), so it is then refused below as inside the project.
+        cookies_path = (Path(root) / os.path.expanduser(str(cookies))).resolve()
+        if cookies_path.is_relative_to(Path(root).resolve()):
+            raise ValueError(
+                "youtube_cookies_file must live outside the project (it is a credential "
+                "and must never be committed)"
+            )
+        if not cookies_path.is_file():
+            raise ValueError("youtube_cookies_file does not exist or is not a file")
+    return YoutubeFallback(cookies_file=cookies_path, proxy=config.get("youtube_proxy") or None)
+
+
 def analysis_timeout_s(span: tuple[float, float]) -> int:
     """Hard timeout for one analysis span, scaled to its length.
 
@@ -154,6 +218,8 @@ def validate_analysis_media(path: Path, span: tuple[float, float] | None = None)
     try:
         info = probe_export_coverage(Path(path))
     except ExportMediaError as exc:
+        if exc.code == "no_streams":
+            raise AnalysisSpanEmpty(f"analysis media {exc.code}: {exc}") from exc
         raise RuntimeError(f"analysis media {exc.code}: {exc}") from exc
     width, height = int(info["width"]), int(info["height"])
     if width <= 0 or height <= 0:
@@ -270,6 +336,8 @@ def probe_export_coverage(path: Path, window_ms: tuple[int, int] | None = None) 
     except json.JSONDecodeError as exc:
         raise ExportMediaError("probe_failed", f"ffprobe returned invalid JSON: {exc}") from exc
     streams = payload.get("streams") or []
+    if not streams:
+        raise ExportMediaError("no_streams", "acquisition contains no streams (no media at this time in the source)")
     videos = [stream for stream in streams if stream.get("codec_type") == "video"]
     others = [stream for stream in streams if stream.get("codec_type") != "video"]
     if len(videos) != 1 or others:
@@ -644,6 +712,7 @@ class YtDlp:
         analysis_validator: AnalysisValidator = validate_analysis_media,
         allow_export: bool = False,
         export_cache_dir: str | Path | None = None,
+        fallback: YoutubeFallback | None = None,
     ) -> None:
         self.tmp_dir = Path(tmp_dir)
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
@@ -654,6 +723,13 @@ class YtDlp:
         self.analysis_validator = analysis_validator
         self.allow_export = allow_export
         self.export_cache_dir = Path(export_cache_dir) if export_cache_dir is not None else None
+        self.fallback = fallback or YoutubeFallback()
+        # Block state is shared by the analysis worker threads.
+        self._block_lock = threading.Lock()
+        self._blocked = False
+        self._fallback_active = False
+        # True once any call went through the fallback (run provenance).
+        self.fallback_used = False
 
     def download(self, video_id: str) -> None:
         raise DownloadForbidden(
@@ -1036,9 +1112,80 @@ class YtDlp:
         return _parse_ndjson(stdout)
 
     def _run(self, args: list[str], timeout: int | None = None) -> str:
+        """Run yt-dlp with the YouTube block handling.
+
+        After a bot-check refusal the call is retried once through the opt-in
+        fallback (if configured) and later calls keep using it; without a
+        fallback, or if the fallback is refused too, every later call in this
+        process fails at once with YOUTUBE_BLOCKED_EARLIER (circuit breaker),
+        because each refused request can prolong the block.
+        """
+        with self._block_lock:
+            blocked, use_fallback = self._blocked, self._fallback_active
+        if blocked:
+            raise RuntimeError(YOUTUBE_BLOCKED_EARLIER)
+        try:
+            return self._run_attempts(args, timeout, use_fallback)
+        except RuntimeError as exc:
+            if not is_youtube_block(exc):
+                raise
+            with self._block_lock:
+                retry = not use_fallback and self.fallback.configured and not self._blocked
+                if retry:
+                    self._fallback_active = True
+                else:
+                    self._blocked = True
+            if not retry:
+                raise
+        try:
+            return self._run_attempts(args, timeout, True)
+        except RuntimeError as exc:
+            if is_youtube_block(exc):
+                with self._block_lock:
+                    self._blocked = True
+            raise
+
+    def _run_attempts(self, args: list[str], timeout: int | None, use_fallback: bool) -> str:
+        if not use_fallback:
+            return self._run_plain(args, timeout, [])
+        extra: list[str] = []
+        if self.fallback.proxy:
+            extra += ["--proxy", self.fallback.proxy]
+        copy = None
+        try:
+            if self.fallback.cookies_file is not None:
+                # yt-dlp writes the jar back to --cookies; concurrent workers
+                # each get a private copy so the owner's file is never rewritten.
+                copy = self.tmp_dir / f".cookies-{uuid.uuid4().hex}.txt"
+                fd = os.open(copy, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, "wb") as handle:
+                    handle.write(self.fallback.cookies_file.read_bytes())
+                extra += ["--cookies", str(copy)]
+            failure = None
+            try:
+                result = self._run_plain(args, timeout, extra)
+            except RuntimeError as exc:
+                failure = str(exc)
+            if failure is not None:
+                # A timeout message quotes the command line; keep the proxy
+                # (it may hold credentials) and the cookie path out of run
+                # files. Raised outside the except block so the original
+                # exception is not attached as __context__.
+                for secret in (self.fallback.proxy, str(copy) if copy else None):
+                    if secret:
+                        failure = failure.replace(secret, "<redacted>")
+                raise RuntimeError(failure)
+        finally:
+            if copy is not None:
+                copy.unlink(missing_ok=True)
+        with self._block_lock:
+            self.fallback_used = True
+        return result
+
+    def _run_plain(self, args: list[str], timeout: int | None, extra: list[str]) -> str:
         env = os.environ.copy()
         env["TMPDIR"] = str(self.tmp_dir)
-        cmd = [self.binary, "--ignore-config", "--js-runtimes", "node", *args]
+        cmd = [self.binary, "--ignore-config", "--js-runtimes", "node", *extra, *args]
         timeout_s = self.timeout if timeout is None else timeout
         errors: list[str] = []
         for attempt in range(1, _YTDLP_MAX_ATTEMPTS + 1):

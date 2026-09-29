@@ -54,6 +54,12 @@ working on this repo (2026-09-28/29).
 - Blind contact-sheet labels (sub-agent or human) miss short dissolves and
   loop-seam jump cuts. Where a detector and a label disagree, look at every
   frame before trusting either.
+- Never run two pytest processes at once, not even a single test file next to
+  the full suite: tests/conftest.py puts every session's temp files under the
+  shared project `tmp/pytest/`, and one session removes the other's files
+  (seen 2026-09-29: a spurious test_export failure, "source.mp4: No such
+  file"). Tell sub-agents to wait or run their file only when no other pytest
+  is running.
 - pytest collects only classes named `Test*`. A class named `FooTests` is
   silently skipped (tests/test_brief.py lost 29 tests that way until
   2026-09-29). Name new test classes `Test...` or use plain functions.

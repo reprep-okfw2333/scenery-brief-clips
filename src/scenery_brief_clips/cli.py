@@ -21,6 +21,7 @@ from scenery_brief_clips.config import ConfigError, load_project_config
 from scenery_brief_clips.continuity import continuity_settings_from_config
 from scenery_brief_clips.detect import detect_scenes
 from scenery_brief_clips.fetch import cached_fetcher
+from scenery_brief_clips.jev import default_post as jev_default_post
 from scenery_brief_clips.pipeline import run_dry
 from scenery_brief_clips.pipeline_analyze import analyze_run
 from scenery_brief_clips.analyze import ConstraintError
@@ -58,7 +59,7 @@ from scenery_brief_clips.vision_wire import (
     load_vision_wire,
     plain_description,
 )
-from scenery_brief_clips.yt import YtDlp, analysis_timeout_s
+from scenery_brief_clips.yt import YtDlp, analysis_timeout_s, youtube_fallback_from_config
 
 
 def project_root() -> Path:
@@ -275,22 +276,25 @@ def main(argv: list[str] | None = None) -> int:
         "jev-gate",
         help=(
             "Optional, off by default: Jev metadata reject filter after discovery, "
-            "before rank (needs jev_gate: true and OPENROUTER_API_KEY; see docs/JEV_GATE.md)"
+            "before rank (needs jev_gate: true and OPENROUTER_API_KEY; see docs/JEV.md)"
         ),
         description=(
             "Optional Jev metadata gate (off by default; enable with jev_gate: true in config). "
             "Run after run/run-brief and before rank/tile review. Asks typesafe/jev-1.13 via the "
-            "OpenRouter decisions endpoint for P(keep) from cached metadata only; rejects a "
-            "candidate only when P(keep) <= jev_reject_below (default 0.40) and never auto-keeps. "
-            "Reads the key only from the OPENROUTER_API_KEY environment variable. With no key, on "
-            "errors/timeouts, or once jev_max_usd_per_run is reached, candidates fall back to the "
-            "rule gate (kept). Caches in data/cache/jev/; writes jev_gate.json and "
-            "candidates_pre_jev.json and rewrites candidates.json to the survivors. "
-            "Roughly $0.07 per 1,000 candidates. Cannot see watermarks; cutoff tuned on "
-            "train footage only. See docs/JEV_GATE.md."
+            "OpenRouter decisions endpoint the generic source questions (jev_source_q_v2) about "
+            "cached metadata and the brief (--brief, else the run's theme text); rejects a "
+            "candidate only when its score (mean of P(usable), P(subject), P(conditions)) is <= "
+            "jev_reject_below (default 0.35) and never auto-keeps. Reads the key only from the "
+            "OPENROUTER_API_KEY environment variable. With no key, on errors/timeouts, or once "
+            "jev_max_usd_per_run is reached, candidates fall back to the rule gate (kept). Caches "
+            "in data/cache/jev/; writes jev_gate.json and candidates_pre_jev.json and rewrites "
+            "candidates.json to the survivors. About $0.06 per 1,000 candidates. Cannot see "
+            "watermarks. run-pipeline ranks inside discovery instead (jev_rank). See docs/JEV.md."
         ),
     )
     p_jg.add_argument("--run-dir", type=Path, required=True, help="Existing run dir with candidates.json")
+    p_jg.add_argument("--brief", type=Path, default=None,
+                      help="The search brief the run was made from (default: the run's theme text)")
     p_jg.add_argument("--root", type=Path, default=None, help="Project root (default: install location)")
     p_jg.add_argument(
         "--config",
@@ -463,7 +467,10 @@ def _cmd_run(args: argparse.Namespace) -> int:
         limits = replace(limits, sleep_s=float(sleep_s))
     constraint = replace(constraint, allow_download=False, limits=limits)
 
-    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False)
+    fallback = _youtube_fallback(root, None, config)
+    if fallback is None:
+        return 2
+    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False, fallback=fallback)
     cache = MetadataCache(root / "data" / "cache" / "metadata")
     result = run_dry(constraint, yt=yt, cache=cache, sleep_fn=time.sleep)
     log_text = "\n".join(result.log_lines) + ("\n" if result.log_lines else "")
@@ -536,6 +543,17 @@ def _load_json_file(path: Path, label: str):
         return None
 
 
+def _youtube_fallback(root: Path, config_path, config: dict | None = None):
+    """The opt-in YouTube fallback from config, or None after printing why it is invalid."""
+    try:
+        if config is None:
+            config = load_project_config(root, Path(config_path) if config_path else None)
+        return youtube_fallback_from_config(root, config)
+    except (ConfigError, ValueError) as exc:
+        print(f"invalid YouTube fallback settings: {exc}", file=sys.stderr)
+        return None
+
+
 def _cmd_run_brief(args: argparse.Namespace) -> int:
     root = Path(args.root) if args.root else project_root()
     brief_path = Path(args.brief)
@@ -601,7 +619,10 @@ def _cmd_run_brief(args: argparse.Namespace) -> int:
     )
     tmp_dir = root / "tmp"
     tmp_dir.mkdir(parents=True, exist_ok=True)
-    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False)
+    fallback = _youtube_fallback(root, args.config)
+    if fallback is None:
+        return 2
+    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False, fallback=fallback)
     cache = MetadataCache(root / "data" / "cache" / "metadata")
     result = run_dry(constraint, yt=yt, cache=cache, sleep_fn=time.sleep, queries=queries)
     log_text = "\n".join(result.log_lines) + ("\n" if result.log_lines else "")
@@ -734,11 +755,19 @@ def _cmd_jev_gate(args: argparse.Namespace) -> int:
         print(f"missing candidates.json in {run_dir}", file=sys.stderr)
         return 2
     settings = JevGateSettings.from_config(config)
+    brief = None
+    if args.brief is not None:
+        try:
+            brief = validate_brief(json.loads(Path(args.brief).read_text(encoding="utf-8")))
+        except (OSError, ValueError, BriefValidationError) as exc:
+            print(f"invalid brief: {exc}", file=sys.stderr)
+            return 2
     result = gate_run(
         run_dir,
         metadata_cache=root / "data" / "cache" / "metadata",
         jev_cache=root / "data" / "cache" / "jev",
         settings=settings,
+        brief=brief,
     )
     if not result.get("enabled"):
         result["note"] = "jev_gate is off (set jev_gate: true in config); candidates.json unchanged"
@@ -774,7 +803,10 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     if not (run_dir / "ranked.json").is_file():
         print(f"missing ranked.json in {run_dir}", file=sys.stderr)
         return 2
-    yt = YtDlp(tmp_dir=root / "tmp", allow_download=False)
+    fallback = _youtube_fallback(root, None, config)
+    if fallback is None:
+        return 2
+    yt = YtDlp(tmp_dir=root / "tmp", allow_download=False, fallback=fallback)
 
     def fetch_span(video_id, dest, span, format_id=None):
         return yt.fetch_analysis(
@@ -1173,7 +1205,16 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
     root = Path(args.root) if args.root else project_root()
     tmp_dir = root / "tmp"
     tmp_dir.mkdir(parents=True, exist_ok=True)
-    yt = YtDlp(tmp_dir=tmp_dir, allow_download=False, allow_export=True, export_cache_dir=root / "data" / "cache" / "export")
+    fallback = _youtube_fallback(root, args.config)
+    if fallback is None:
+        return 2
+    yt = YtDlp(
+        tmp_dir=tmp_dir,
+        allow_download=False,
+        allow_export=True,
+        export_cache_dir=root / "data" / "cache" / "export",
+        fallback=fallback,
+    )
 
     def fetch_span(video_id, dest, span, format_id=None):
         return yt.fetch_analysis(
@@ -1211,6 +1252,7 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
             prefetch_spans=yt.prefetch_analysis,
             detect_fn=detect_scenes,
             invalidate_span=yt.invalidate_analysis,
+            jev_post=jev_default_post,
         ),
     )
     print(json.dumps(result, indent=2))

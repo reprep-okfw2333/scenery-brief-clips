@@ -1,25 +1,35 @@
 # HANDOFF (sessions of 2026-09-28 and 2026-09-29)
 
-Branch: `fix/analysis-download-bounds`, everything committed and pushed to
-origin (owner, 2026-09-29: "commit everything and push but not merge").
-Nothing is merged to `master` (master = eedb911); do not merge without the
-owner asking.
+> **YouTube fallback: NOT YET FUNCTIONAL, OFF.** The opt-in cookies/proxy
+> fallback (config `youtube_cookies_file` / `youtube_proxy`) is implemented
+> and unit-tested only; it has NEVER been exercised against YouTube. No
+> config on this host sets it and no cookies file exists. Do not rely on it
+> or describe it as working until a live run with owner-supplied cookies or
+> proxy proves it. The always-on part (circuit breaker + status `blocked`)
+> is also unit-tested only.
 
-- Plan steps 1-2, the benchmark harness, export preset, verify
-  compatibility: ba4779d and earlier.
-- Plan step 3 (the `blend` continuity detector, now the default) and plan
-  step 4 (planner prompt v2, retry, `run-pipeline --live-planner`), bench.sh
-  options, evaluation data: the "feat: blend continuity detector" commit.
-- Plan step 5 (brief form loosened per owner decisions, validated live:
-  Iceland 1080p 5/5, verify ok) plus the standalone export/analyze cap fix:
-  the "feat: loosen the brief form (plan step 5)" commit.
+Branch: `fix/analysis-download-bounds`. Nothing is merged to `master`
+(master = eedb911).
 
-Read with: `docs/PLAN-PROGRESS-2026-09-28.md` (running log; "Status per step"
-after the ground rules and harness sections), `benchmark/RESULTS-2026-09-28.md` and
-`benchmark/RESULTS-2026-09-29-step4.md` (all numbers),
-`benchmark/continuity_eval/README.md` (gate evaluation), and
-`docs/HANDOFF-2026-09-28.md` (the earlier review whose "Recommended plan" these
-sessions work through). Project rules: AGENTS.md, CLAUDE.md.
+- **Committed and pushed** (owner, 2026-09-29: "commit everything and push
+  but not merge"):
+  - ba4779d and earlier: plan steps 1-2, benchmark harness, export preset,
+    verify compatibility.
+  - 57f29d3 "feat: blend continuity detector": plan steps 3-4.
+  - 87f17c3 "feat: loosen the brief form (plan step 5)": step 5 + the
+    standalone export/analyze cap fix, Iceland validation record.
+- **Uncommitted, LOCAL ONLY** (owner, 2026-09-29: "do not commit, merge,
+  push ... keep everything local for now"): all work after 87f17c3, i.e.
+  B1 batch baseline, B2 fixes and speedups, B2b YouTube fallback, docs.
+  `git status` lists it. Do not commit/push without the owner asking.
+
+Read with: `docs/PLAN-PROGRESS-2026-09-28.md` (running log; "Status per
+step", then "Priorities and new order" and the B1/B2/B2b sections at the
+end), `benchmark/RESULTS-2026-09-29-batch1.md` (batch numbers and clip
+judgement), `benchmark/RESULTS-2026-09-28.md`,
+`benchmark/RESULTS-2026-09-29-step4.md`, `benchmark/continuity_eval/README.md`
+and `docs/HANDOFF-2026-09-28.md` (the earlier review whose "Recommended plan"
+these sessions started from). Project rules: AGENTS.md, CLAUDE.md.
 
 ## Goal
 
@@ -32,13 +42,28 @@ Session goal (owner): work through the "Recommended plan" in
 and quality, and no babysitting. After each step: tests, a fixed benchmark,
 compare timings AND yield, report honestly. Host: 1 CPU, 1.6 GB RAM.
 
+Owner priorities (2026-09-29, later): the system should run unattended,
+overseen by an AI orchestrator, from any request (generic "horses grazing" to
+specific scenes, with or without a place) to individual clips. Current
+priority: fast, bug-free, cheap, consistent runs. Accepted: sacrificing
+specific-request enforcement (setting/elements/exclusions) and watermark
+detection, and some imperfect clips if most are good. Idea from the owner:
+brief/vision profiles by request specificity, with the orchestrator offering
+options and asking questions before writing the formal brief (B3, not
+started). No Hermes/skill (plan step 6) work for now.
+
 ## State: done and working
 
-Tests: `.venv/bin/python -m pytest tests/ -q` gives 630 passed, 1 xfailed on
-the current working tree (about 6 min): 465 at the step 3-4 commit, plus 30
+Tests: `.venv/bin/python -m pytest tests/ -q` gives 958 passed, 1 xfailed on
+the current working tree (about 7 min; 797 before the Jev work, +161 in
+tests/test_jev.py and the rewritten tests/test_jev_gate.py): 465 at the step 3-4 commit, plus 30
 tests in tests/test_brief.py that pytest never collected before (class names),
 plus 112 step-5 tests, plus 23 for the brief export cap in standalone
-commands (tests/test_export_cap_request.py). The xfail is a known limitation (synthetic fast zoom flags a
+commands (tests/test_export_cap_request.py), plus 67 + 31 + 24 + 4 for B2
+(tests/test_b2_fixes.py, tests/test_b2_blocked_vision.py,
+tests/test_b2_verify_reuse.py, early-stop tests in tests/test_pipeline.py),
+plus 41 for the YouTube fallback (tests/test_youtube_fallback.py). Never run two
+pytest processes at once (shared tmp/pytest). The xfail is a known limitation (synthetic fast zoom flags a
 dissolve in the blend detector; on real footage such false alarms only trim).
 
 1. **Benchmark harness** `benchmark/bench.sh <label> [seed_run_dir]`: fresh
@@ -116,8 +141,80 @@ dissolve in the blend detector; on real footage such false alarms only trim).
    Follow-up fix: the brief's cap is recorded in discovery.json and the
    standalone `export`/`analyze` commands apply it (same rule as
    run-pipeline); runs without the record use config alone.
+7. **B1 batch baseline** (uncommitted records; benchmark/RESULTS-2026-09-29-
+   batch1.md). `benchmark/batch.sh batch1` runs 8 operator-written briefs
+   (benchmark/batch1/, one fixed config) through bench.sh;
+   `benchmark/batch_summary.py` tabulates. Result on 87f17c3: 6/8 unattended,
+   26/36 clips, verify ok on every completed run, ~17 min per completed run,
+   285 model calls. By eye (Sonnet contact-sheet labels, 2 checked by me):
+   10 good, 11 acceptable, 5 bad; no cut inside any clip. Time: analyze 27%,
+   discover 21%, strip labels 13%, export 12%, tile labels 9%, verify 12%.
+8. **B2 fixes and speedups** (uncommitted, unit-tested; PLAN-PROGRESS "B1
+   batch baseline and first B2 fixes", "B2 continued"):
+   - Long clips (16-30 s) could never be found (step 5 regression: 9-14 s
+     analysis windows). `analysis_plan(min_window_s)`, min_window_s =
+     max(duration_min + 2*pad, target), recorded in the analysis manifest;
+     verify reads it with default 0, so older runs still verify (Brazil run
+     and batch runs checked). Live rerun of R11 showed 20 s windows.
+   - A source whose video track ends early (0I1hZCD7sT0: video stops ~129 s
+     of 193 s) failed the whole run. Such spans (every attempt returns a
+     stream-less file) are now `unavailable` / `no_video_in_span`; verify
+     accepts only that exact form, as a warning. Not exercised live (search
+     drifted on the rerun).
+   - Runner status `blocked` for YouTube's bot check (discover, analyze,
+     export, stage exceptions).
+   - Vision labels: tiles and strips run 4 calls at once
+     (`SCENERY_VISION_WORKERS`, 1..8), results in review order.
+   - Discovery stops fetching metadata once max_rank_videos candidates are
+     kept (rank only uses those); discovery.json records max_candidates.
+   - verify_export reuses verify_review's strict decode of byte-identical
+     analysis media (runner path only; standalone verify decodes all).
+   - Expected saving ~3-5 min per run (estimate from B1 stage times). First
+     live numbers (R09, cold, vs B1; one run each): discover 206 -> 113 s,
+     label_strips 174 -> 103 s, verify_export 68 -> 12 s.
+9. **B2b YouTube fallback** (uncommitted; PLAN-PROGRESS "B2b YouTube
+   fallback"). **NOT YET FUNCTIONAL / OFF** (see the box at the top).
+   - Always on: circuit breaker in `YtDlp._run`: after the first refusal the
+     process stops contacting YouTube (`YOUTUBE_BLOCKED_EARLIER`), run ends
+     `blocked`. Before, R11 made ~20 more refused requests after the first.
+   - Opt-in, off by default, never validated live: `youtube_cookies_file`
+     (Netscape cookies.txt outside the project; per-call private 0600 copy)
+     and `youtube_proxy`; used only after a refusal; redacted errors; result
+     field `youtube_fallback_used`. Account-free alternatives were tried and
+     failed (alternate player clients were refused; js runtime already set).
+
+10. **Jev** (uncommitted; docs/JEV.md, PLAN-PROGRESS "Jev investigation and
+   integration"). Owner asked to investigate TypeSafe's Jev, then to rebuild
+   and wire it. All OFF by default:
+   - `jev_rank`: discovery scores search hits (title, channel, duration,
+     views, snippet) and fetches metadata in score order; rejects a
+     candidate at score <= 0.35 after its metadata (`jev_reject`).
+   - `jev_note_check`: vision keep notes that report a failure are excluded
+     ("jev note violation"; flag stored in shortlist_scores.json so verify
+     reproduces it).
+   - `jev-gate` rebuilt on the same brief-generic questions (--brief).
+   - Offline (benchmark/jev_eval/): rank-slot replay 17/50 -> 2-3/50
+     reference-"no" picks. Live (benchmark/RESULTS-2026-09-29-jev.md), one
+     pair only (owner stopped the rest to free the host): R09 Jev 2 usable
+     vs 3 without. The score ignores Jev's own place answer, and an
+     illustration channel passed every stage.
 
 ## Caveats and known gaps
+
+- **YouTube accepted the host again** at 14:24 UTC 2026-09-29 (it had
+  refused it from ~11:40 after ~10 live runs in a few hours). 2 more live
+  runs followed (Jev A/B, 14:47-15:18). Keep checking rarely with ONE
+  `yt-dlp --ignore-config --skip-download --print id <url>` call and pace
+  live runs.
+- **The YouTube fallback is not yet functional** (never run live); the
+  unavailable-span path is unit-tested only.
+- Pacing: ~10 live runs in a few hours triggered the block. Space live
+  batches out; do not lower discovery's 2 s sleep.
+- Remaining B1 gaps: the analyzed-source count does not grow with n_clips
+  (R05 8/10; `max_analyze_videos` defaults to 1 with no config); "european"
+  queries do not name European places (R09 3/6); every excerpt is labeled
+  even when few clips are needed; 1080p export costs ~92 s per clip.
+- Never run two pytest processes at once (shared tmp/pytest; CLAUDE.md).
 
 - The blend dissolve thresholds have thin margins (weakest dissolve score
   1.42 vs strongest continuous 1.24 on the tuning set) and the held-out set had
@@ -160,21 +257,54 @@ dissolve in the blend detector; on real footage such false alarms only trim).
   requiring vision to confirm a place would collapse yield (most scenery is
   not recognizable) and overclaim. 4K and vertical stay unsupported; the
   contract tells the operator to ask.
+- Owner priorities (2026-09-29): unattended fast/cheap/bug-free runs first;
+  specific enforcement and watermarks deprioritized; no Hermes work yet.
+- Min analysis window: widen and keep fewer whole windows rather than let
+  every window shrink below a clip; old runs verify via default 0.
+- Unavailable spans: accepted only for the exact proven signature (every
+  attempt stream-less); every other acquisition failure still fails the run.
+- Discovery early stop without changing the discover binding, so older runs
+  resume without re-searching.
+- YouTube: circuit breaker always on (refused requests prolong blocks);
+  cookies/proxy only as an explicit opt-in used after a refusal. Owner
+  (2026-09-29): keep the fallback OFF and documented as not yet functional.
+- Keep all post-87f17c3 work local (owner, 2026-09-29).
 - Tried and dropped: lagged/masked residual (signals.py v2) did not separate
   dissolves from motion; first continuity labels were on buggy sheets
   (output-side `-t`); running pytest or two benchmarks concurrently.
 
 ## Next steps, in order
 
-1. Ask the owner whether to merge the branch to master (not approved yet).
-2. SKILL.md step 5 still says "Ignore that file's 'not implemented' header"
-   (harmless; fix with step 6). The owner said to leave Hermes/step-6 work
-   alone for now (2026-09-29).
-3. Plan step 6: make the Hermes skill one command (`run-pipeline --brief B
-   --live-planner --vision-agree --live-vision --allow-export`), with the
-   agreements asked up front; fix the skill's origin/master check.
-4. Plan step 7: quality signals on review frames (sharpness, watermark/text,
-   rendered imagery, subject species).
+Owner priorities (2026-09-29): fast, bug-free, cheap, unattended runs first;
+specific-request enforcement and watermarks deprioritized; no Hermes/step-6
+work for now. Use a Sonnet sub-agent for repetitive work and keep docs
+current with every change. Full order: PLAN-PROGRESS "Priorities and new
+order".
+
+1. Jev follow-up (if the owner wants it): add the place rule (reject when the
+   brief names a place and P(place=different) >= 0.5; offline it rejects
+   14/184, 12 reference-no, 2 unsure, none truly on-place) and "not real
+   camera footage (painting, illustration, render)" to the note criteria
+   (bump jev_note_q_v1). Then run the remaining pairs,
+   `benchmark/jev_ab.sh R07 R10 R03` (~2 h, spaced; C arms reuse J's plan
+   and metadata), judge the clips blind, and decide defaults.
+   Also rerun `benchmark/batch.sh batch1` (or a subset, spaced out) to
+   measure B2 fully against B1.
+2. YouTube fallback: stays OFF and not functional until the owner decides.
+   To validate: owner supplies a throwaway-account cookies.txt outside the
+   repo (e.g. ~/.config/scenery-brief-clips/youtube-cookies.txt, chmod 600)
+   or a proxy; set it in a NON-committed config; run one blocked request;
+   confirm `youtube_fallback_used: true` and no credential in any run file.
+   Note: the project config.yaml is not gitignored; never put a proxy URL
+   with a password there.
+3. Owner decisions open: commit/push of the local work (owner said keep
+   local for now); cookies vs proxy vs waiting; B3 design; Jev defaults.
+4. B3 brief profiles (quick/standard), proposed: quick analyzes more sources
+   as n_clips grows, lets "uncertain" moments fill a shortfall, labels only
+   the best-ranked moments; standard = today's behavior. Not started.
+5. Plan step 6 (Hermes skill) on hold; plan step 7 (quality signals)
+   deprioritized.
+6. Merge to master only when the owner asks.
 
 ## Commands
 
@@ -186,6 +316,10 @@ benchmark/bench.sh stepN-ocean $PWD/tmp/bench/baseline-20260928T154614Z/data/run
 BENCH_INPUTS=military benchmark/bench.sh stepN-military $(ls -d $PWD/tmp/bench/military-base-*/data/runs/*)
 BENCH_INPUTS=step4-reddeer BENCH_LIVE_PLANNER=1 benchmark/bench.sh reddeer   # cold, one command, live
 BENCH_INPUTS=heldout-horses BENCH_NO_EXPORT=1 benchmark/bench.sh horses       # live, stops before export
+benchmark/batch.sh batch1 [R01 R03 ...]       # sequential live batch -> benchmark/runs/batch1-index-*.tsv
+.venv/bin/python benchmark/batch_summary.py benchmark/runs/batch1-index-<utc>.tsv --out summary.json
+# is YouTube accepting the host? ONE call, rarely:
+yt-dlp --ignore-config --js-runtimes node --skip-download --print id https://www.youtube.com/watch?v=Lc4Bn1v8iZk
 # Live runs cost real yt-dlp traffic and model calls (small). The owner
 # approved them for benchmarking with the GLM wire; ask before new kinds of spend.
 # one full run from a brief, no plan file
