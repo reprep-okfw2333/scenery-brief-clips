@@ -1,0 +1,12 @@
+{
+ "step2c-military-20260928T190619Z__YpI_w1KIWOs__5460.810": {
+  "label": "transition",
+  "by": "orchestrator (Opus) 2026-09-28",
+  "note": "Sheet thumb 8 is a double exposure (grandstand over trucks): cross-dissolve; Sonnet label said continuous"
+ },
+ "20260927T220608Z__BAx_9MNPzts__2605.349": {
+  "label": "transition",
+  "by": "sonnet-high blind 4fps audit (A19), confirmed by orchestrator 2026-09-28",
+  "note": "Window starts mid cross-dissolve (close-up ghosted over wide shot, ~0.25 s in); current gate trimmed it out (start +1.07 s)"
+ }
+}

@@ -39,6 +39,7 @@ _ALLOWED_KEYS = {
     "allow_export",
     "export_max_height",
     "continuity_enabled",
+    "continuity_detector",
     *_INTEGER_KEYS,
     *_FLOAT_KEYS,
 }
@@ -64,6 +65,8 @@ def _validate_config(config: dict) -> dict:
         raise ConfigError("allow_export must be a boolean")
     if "continuity_enabled" in config and not isinstance(config.get("continuity_enabled"), bool):
         raise ConfigError("continuity_enabled must be a boolean")
+    if "continuity_detector" in config and config.get("continuity_detector") not in ("legacy", "blend"):
+        raise ConfigError("continuity_detector must be 'legacy' or 'blend'")
     if "export_max_height" in config:
         value = config["export_max_height"]
         if (

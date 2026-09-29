@@ -1,15 +1,23 @@
 # Current issues and resolved regressions
 
-## Open (top yield problem): continuity gate rejects continuous camera motion
+## Mitigated (2026-09-29): legacy continuity gate rejects continuous camera motion
 
 Measured 2026-09-28 on 66 real gate decisions (Brazil run + military
-benchmark), blind-labeled from contact sheets: the gate misses 0 of 14 real
-transitions but flags 36 of 52 continuous single shots (26 rejected outright),
-mostly pans/tracking over marching troops, which is the requested footage.
-In the military benchmark PySceneDetect found no cut in any span, yet 7 of 10
-were rejected. A motion-compensated residual spike rule flags 3/52 but misses
-3/14 (cross-dissolves). No gate change has been made; see HANDOFF.md and
-benchmark/continuity_eval/. Do not loosen thresholds without this evaluation.
+benchmark), blind-labeled from contact sheets, two labels corrected after
+frame checks (50 continuous / 16 transitions): the legacy gate keeps 0 of 16
+transitions but rejects 25 and trims 9 of 50 continuous single shots, mostly
+pans/tracking over marching troops, which is the requested footage.
+
+Fix: `continuity_detector: blend`, the default since 2026-09-29 (owner
+approved; `legacy` still selectable; src/scenery_brief_clips/continuity_blend.py). Replayed through the
+product code: 0/16 transitions kept, 2/50 continuous rejected (one whip pan,
+same window in two runs), 2/50 trimmed. Held-out live run (horses, 22 windows,
+never used for tuning): blend 0 errors; legacy kept 3 loop-seam jump cuts and
+trimmed 1 continuous shot. Seeded military: candidate excerpts 3 -> 7, still
+2/2 delivered. Cost: gate ~+35-90% worker time (+13-16 s per benchmark run),
+analyze wall within noise. Margins on the dissolve thresholds are thin and the
+held-out set had only hard cuts (no dissolves): watch the first new-theme
+runs for dissolves that slip through. Numbers: benchmark/continuity_eval/, benchmark/RESULTS-2026-09-28.md.
 
 ## Fixed on this branch: hung analysis downloads piled up and were retried
 
@@ -25,7 +33,7 @@ The branch stops treating that timeout as retryable, kills the whole download pr
 
 The 16-of-20 result after the fix is a shortfall, not this bug. One later 403 on `BAx_9MNPzts` was a remote refusal; a cache-reusing retry cleared it.
 
-## Active local runner reliability pass
+## Runner reliability pass (2026-09-23/25) — superseded: committed in eedb911
 
 See docs/IMPROVEMENT_PASS.md and benchmark/improvement/RESULTS.md. Local fixes
 cover changed-output reuse, interrupted-stage promotion, cached final-verifier
@@ -42,8 +50,8 @@ With the owner's approval, analysis copies are now stream-copied copyts
 sections (one yt-dlp call per video) and export adopts them when the rendition
 and coverage match; see docs/EXPORT.md amendment and
 benchmark/RESULTS-2026-09-28.md. The paragraph below is the history. Latency
-still varies on this host; the export encode (x264 medium, one thread) is now
-the largest single export cost.
+still varies on this host; the export encode (now x264 `faster`, recipe
+x264-crf17-faster-v1, one thread) is the largest single export cost.
 
 ## Open (history): latency varies and duplicate acquisition remains
 

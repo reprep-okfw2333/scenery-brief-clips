@@ -1,0 +1,20 @@
+ AGENTS.md                             |   2 +-
+ HANDOFF.md                            |  29 +++----
+ benchmark/RESULTS-2026-09-28.md       |  26 +++++++
+ benchmark/bench.sh                    |  23 +++++-
+ config.example.yaml                   |   6 ++
+ docs/ARCHITECTURE.md                  |   2 +-
+ docs/CLI.md                           |   4 +-
+ docs/ISSUES.md                        |  24 ++++--
+ docs/PLAN-PROGRESS-2026-09-28.md      |  87 +++++++++++++++++++++
+ docs/RUNNER.md                        |  19 +++--
+ docs/STATUS.md                        |   6 ++
+ src/scenery_brief_clips/brief.py      |  52 ++++++++-----
+ src/scenery_brief_clips/cli.py        |  17 +++++
+ src/scenery_brief_clips/config.py     |   3 +
+ src/scenery_brief_clips/continuity.py | 140 ++++++++++++++++++++++++++++++++++
+ src/scenery_brief_clips/planner.py    |  71 +++++++++++------
+ src/scenery_brief_clips/runner.py     |  24 ++++--
+ tests/test_continuity.py              |   8 +-
+ tests/test_planner.py                 |   5 +-
+ 19 files changed, 461 insertions(+), 87 deletions(-)

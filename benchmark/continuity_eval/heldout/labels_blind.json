@@ -1,0 +1,156 @@
+{
+ "H00": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static wide shot of grazing horses, only animal motion."
+ },
+ "H01": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Mountain meadow with captions stepping through; same shot."
+ },
+ "H02": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Painted countryside with subtle drift; single shot."
+ },
+ "H03": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Handheld/zoomed view of horses among gorse; continuous."
+ },
+ "H04": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static wide shot; a horse walks in from the right edge."
+ },
+ "H05": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Mountain meadow with captions; one brief brightness dip at 14 but same scene."
+ },
+ "H06": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Overhead drone view of a single horse on grass; continuous."
+ },
+ "H07": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Painted countryside, subtle drift; single shot."
+ },
+ "H08": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static wide shot of horses; small bird passes, continuous."
+ },
+ "H09": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static wide shot of grazing horses."
+ },
+ "H10": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static shot of two horses in a field."
+ },
+ "H11": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static shot of horses on a hillside."
+ },
+ "H12": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Backlit sunset horse grazing with lens flare; one continuous shot."
+ },
+ "H13": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Side view of a chestnut horse grazing; continuous."
+ },
+ "H14": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Mountain meadow with captions; gradual darkening of foreground frames 10-15 but same scene, no ghosting."
+ },
+ "H15": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Static wide shot of grazing horses."
+ },
+ "H16": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Handheld view of horses among heather; continuous."
+ },
+ "H17": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Painted countryside with slight light rays changing; single shot."
+ },
+ "H18": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Painted countryside, subtle drift; single shot."
+ },
+ "H19": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Painted countryside with slight light rays changing; single shot."
+ },
+ "H20": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Painted countryside, subtle drift; single shot."
+ },
+ "H21": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Mountain meadow with captions; brightness dip at 14-15 but same scene, no double exposure."
+ }
+}

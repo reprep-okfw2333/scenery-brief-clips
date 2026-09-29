@@ -17,7 +17,10 @@ User explicitly approved a bounded live benchmark: two 720p ocean-wave clips; vi
 
 Bound initial search to 6 hits / 6 metadata fetches, rank at most 2 sources and 4 tiles each, analyze at most 2 sources with 60 seconds per source. Retain honest shortfalls. Network refusal must be recorded rather than bypassed or hidden. A repeated benchmark is not a controlled speed comparison unless input sets and cache conditions match.
 
-## Implemented; verification in progress
+> Superseded: this pass was committed in eedb911 (2026-09-25). Kept as history;
+> current state is in HANDOFF.md and docs/STATUS.md.
+
+## Implemented; verification in progress (as of 2026-09-25)
 
 - Reproduced changed discovery bytes and interrupted-stage promotion as unsafe reuse. Completed stages now record SHA-256 output checkpoints and state is saved after each stage. Missing/changed outputs require an explicit recovery acknowledgment; interrupted external stages are not promoted based on file existence. Recovery clears dependent completion records.
 - Reproduced corrupt exported media being reported complete from a cached verifier report. Final export verification now executes on every resume; no repeat model calls or re-encodes are needed for unchanged outputs.

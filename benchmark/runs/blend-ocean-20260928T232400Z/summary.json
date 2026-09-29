@@ -1,0 +1,68 @@
+{
+  "label": "blend-ocean-20260928T232400Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "5:03.68",
+  "max_rss_mb_main_process": 191.9,
+  "stage_sum_s": 302.83,
+  "stages_s": {
+    "discover": 0.0,
+    "rank": 0.0,
+    "agree_vision": 0.0,
+    "label_tiles": 0.0,
+    "apply_scores": 0.0,
+    "analyze": 83.87,
+    "verify_review": 17.78,
+    "shortlist_review": 25.21,
+    "label_strips": 85.27,
+    "shortlist_apply": 0.01,
+    "agree_export": 0.01,
+    "export": 64.31,
+    "verify_export": 26.37
+  },
+  "model_calls": 5,
+  "yield": {
+    "candidates": 4,
+    "candidate_ids": [
+      "vPhg6sc1Mk4",
+      "-U5_GOl4Uhc",
+      "wqH_2z21zEc",
+      "DEmO758Llbc"
+    ],
+    "ranked": 2,
+    "tile_labels": {
+      "keep": 7,
+      "reject": 1
+    },
+    "analyzed_sources": 2,
+    "analysis_ranges": 7,
+    "analysis_seconds_planned": 55.84,
+    "excerpts": 5,
+    "sources_without_excerpts": 0,
+    "continuity_rejected": 0,
+    "shortlist_counts": {
+      "n_candidates": 5,
+      "n_selected": 2,
+      "n_excluded": 3,
+      "n_excluded_by_reason": {
+        "beyond n_clips": 1,
+        "duplicate of vPhg6sc1Mk4:0": 2
+      },
+      "n_sources_without_moments": 0,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 0,
+      "n_continuity_rejected_upstream_by_reason": {}
+    },
+    "clips_delivered": 2,
+    "clips": [
+      "-U5_GOl4Uhc_e0_16645-21010.mp4",
+      "vPhg6sc1Mk4_e0_300-11694.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/blend-ocean-20260928T232400Z/data/runs/seeded"
+}

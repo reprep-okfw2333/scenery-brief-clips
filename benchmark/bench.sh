@@ -29,9 +29,16 @@ cp "$proj/vision.yaml" "$proj/planner.yaml" "$root/"
 # Inputs must live inside the project root (config.py refuses outside paths).
 # BENCH_INPUTS picks the frozen input set (default: the ocean-wave pair).
 inputs="$proj/benchmark/${BENCH_INPUTS:-improvement}"
-cp "$inputs/brief.json" "$inputs/plan.json" "$root/"
+cp "$inputs/brief.json" "$root/"
+[ -f "$inputs/plan.json" ] && cp "$inputs/plan.json" "$root/"
 cp "$inputs/config.yaml" "$root/config.yaml"
+# BENCH_DETECTOR=blend|legacy overrides continuity_detector without editing the inputs.
+if [ -n "${BENCH_DETECTOR:-}" ]; then
+  sed -i '/^continuity_detector:/d' "$root/config.yaml"
+  echo "continuity_detector: $BENCH_DETECTOR" >> "$root/config.yaml"
+fi
 echo "BENCH_INPUTS=${BENCH_INPUTS:-improvement}" > "$out/inputs.txt"
+echo "BENCH_DETECTOR=${BENCH_DETECTOR:-}" >> "$out/inputs.txt"
 
 if [ -z "${OPENROUTER_API_KEY:-}" ] && [ -f "$HOME/.hermes/.env" ]; then
   OPENROUTER_API_KEY="$(grep -E '^OPENROUTER_API_KEY=' "$HOME/.hermes/.env" | tail -1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//')"
@@ -72,13 +79,23 @@ PY
   run_dir_args=(--run-dir "$run_dir")
 fi
 
+# BENCH_NO_EXPORT=1 stops before export (the runner waits at agree_export).
+export_args=(--allow-export)
+[ "${BENCH_NO_EXPORT:-0}" = "1" ] && export_args=()
+echo "BENCH_NO_EXPORT=${BENCH_NO_EXPORT:-0}" >> "$out/env.txt"
+# BENCH_LIVE_PLANNER=1 ignores the frozen plan and plans with planner.yaml
+# (not with a seed: seeded runs reuse discovery).
+plan_args=(--plan "$root/plan.json")
+[ "${BENCH_LIVE_PLANNER:-0}" = "1" ] && plan_args=(--live-planner)
+echo "BENCH_LIVE_PLANNER=${BENCH_LIVE_PLANNER:-0}" >> "$out/env.txt"
+
 set +e
 /usr/bin/time -v -o "$out/time.txt" \
   "$proj/.venv/bin/scenery-brief-clips" run-pipeline \
     --root "$root" "${run_dir_args[@]}" \
-    --brief "$root/brief.json" --plan "$root/plan.json" --config "$root/config.yaml" \
+    --brief "$root/brief.json" "${plan_args[@]}" --config "$root/config.yaml" \
     --theme "bench-$label" \
-    --vision-agree --live-vision --allow-export \
+    --vision-agree --live-vision "${export_args[@]}" \
     > "$out/result.json" 2> "$out/stderr.txt"
 rc=$?
 set -e

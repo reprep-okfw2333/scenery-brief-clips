@@ -22,7 +22,7 @@ from scenery_brief_clips.brief import (
 )
 from scenery_brief_clips.cli import _brief_constraint_from_brief
 from scenery_brief_clips.config import load_project_config
-from scenery_brief_clips.continuity import continuity_settings_from_config
+from scenery_brief_clips.continuity import DEFAULT_CONTINUITY_DETECTOR, continuity_settings_from_config
 from scenery_brief_clips.pipeline import run_dry
 from scenery_brief_clips.pipeline_analyze import analyze_run
 from scenery_brief_clips.rank import rank_run
@@ -106,6 +106,7 @@ class Ports:
     detect_fn: Callable | None = None
     invalidate_span: Callable | None = None
     planner_caller: Callable | None = None
+    planner_wire: Any = None  # PlannerWire for planner_caller (recorded in provenance)
     prefetch_spans: Callable | None = None
     tile_caller: Callable | None = None
     strip_caller: Callable | None = None
@@ -418,14 +419,19 @@ def _discover(root, run_dir, kw, ports: Ports, counters: _Counters) -> dict:
     brief = kw["brief_doc"]
     plan = kw["plan_doc"]
     if plan is None:
-        from scenery_brief_clips.planner import plan_queries
+        from scenery_brief_clips.planner import PlannerError, plan_queries
 
         if ports.planner_caller is None:
             return {"failed": True, "error": "planner caller missing"}
         counters.calls.append("planner")
-        counters.model_calls += 1
+        try:
+            plan, provenance = plan_queries(brief, ports.planner_wire, caller=ports.planner_caller)
+        except PlannerError as exc:
+            counters.model_calls += exc.model_calls
+            counters.saw_unreported_usage = True
+            return {"failed": True, "error": str(exc)}
+        counters.model_calls += provenance["model_calls"]
         _note_usage(counters, getattr(ports.planner_caller, "last_usage", None))
-        plan, provenance = plan_queries(brief, None, caller=ports.planner_caller)
     else:
         provenance = {
             "schema_version": "brief_plan_provenance_v1",
@@ -563,8 +569,8 @@ def _handoff(stage, state, kw, ports: Ports, wire) -> dict | None:
         return {
             "status": "paused",
             "stage": stage,
-            "missing": "a frozen plan or a planner caller",
-            "how_to_supply": "pass --plan PLAN.json, or supply a planner caller. The live planner wire is not called.",
+            "missing": "a frozen plan or the live planner",
+            "how_to_supply": "pass --plan PLAN.json, or --live-planner to call the planner named in planner.yaml.",
         }
     if stage == "rank" and ports.rank_fetcher is None:
         return {
@@ -642,6 +648,12 @@ def _bindings(brief, plan, config, model_id) -> dict:
         "config": {key: config.get(key) for key in ANALYZE_KEYS},
         "env": {key: os.environ.get(key) for key in ANALYZE_ENV},
     }
+    # Bound only when the effective detector is not legacy: runs with an explicit
+    # legacy config keep their old analyze binding, while runs analyzed before
+    # blend became the default are re-analyzed on resume.
+    detector = config.get("continuity_detector", DEFAULT_CONTINUITY_DETECTOR)
+    if detector != "legacy":
+        analyze["config"]["continuity_detector"] = detector
     export = {"config": {key: config.get(key) for key in EXPORT_KEYS}}
     encoded = {
         "discover": _hash(discovery),

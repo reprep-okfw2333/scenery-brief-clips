@@ -1,0 +1,70 @@
+{
+  "label": "heldout-horses-20260928T233348Z",
+  "exit_code": "0",
+  "status": "paused",
+  "stage": "agree_export",
+  "error": null,
+  "missing": "export allowance",
+  "wall_clock": "11:26.23",
+  "max_rss_mb_main_process": 283.7,
+  "stage_sum_s": 684.43,
+  "stages_s": {
+    "discover": 63.9,
+    "rank": 6.4,
+    "agree_vision": 0.0,
+    "label_tiles": 30.34,
+    "apply_scores": 0.01,
+    "analyze": 351.65,
+    "verify_review": 64.53,
+    "shortlist_review": 91.53,
+    "label_strips": 76.05,
+    "shortlist_apply": 0.02,
+    "agree_export": 0.0
+  },
+  "model_calls": 42,
+  "yield": {
+    "candidates": 4,
+    "candidate_ids": [
+      "3bEGggqaIxc",
+      "xRK6O1zKims",
+      "U4qjIADZArM",
+      "ihjNvS6a3ko"
+    ],
+    "ranked": 4,
+    "tile_labels": {
+      "keep": 23,
+      "reject": 1
+    },
+    "analyzed_sources": 4,
+    "analysis_ranges": 23,
+    "analysis_seconds_planned": 253.62,
+    "excerpts": 19,
+    "sources_without_excerpts": 0,
+    "continuity_rejected": 3,
+    "shortlist_counts": {
+      "n_candidates": 19,
+      "n_selected": 3,
+      "n_excluded": 16,
+      "n_excluded_by_reason": {
+        "beyond n_clips": 5,
+        "duplicate of 3bEGggqaIxc:0": 4,
+        "duplicate of 3bEGggqaIxc:4": 1,
+        "duplicate of ihjNvS6a3ko:0": 5,
+        "visual match rejected": 1
+      },
+      "n_sources_without_moments": 0,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 3,
+      "n_continuity_rejected_upstream_by_reason": {
+        "stable continuity subspan 2.333s below duration_min_s 4.0": 1,
+        "stable continuity subspan 3.000s below duration_min_s 4.0": 1,
+        "stable continuity subspan 3.167s below duration_min_s 4.0": 1
+      }
+    },
+    "clips_delivered": 0,
+    "clips": [],
+    "verify_export_ok": null,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z"
+}

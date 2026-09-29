@@ -12,12 +12,17 @@ Jev gate is documented in docs/JEV_GATE.md.
 
 - CLI: `.venv/bin/scenery-brief-clips ...` (uv is often not on PATH).
 - Two discovery paths: legacy `run --dry-run --prompt` (unchanged behavior)
-  and new `run-brief --brief <path> --dry-run [--plan <path>]`. The planner
-  model is named in planner.yaml, mirroring vision.yaml's no-secrets rules.
-  `--plan` skips the model call. Do not put a key in planner.yaml or vision.yaml.
-- The planner makes ONE bounded call proposing search phrases; the app
-  validates the plan deterministically afterward. There is no fallback search
-  that broadens the brief; validation failures and empty plans stop fail-closed.
+  and new `run-brief --brief <path> --dry-run [--plan <path>]`. The one-command
+  runner `run-pipeline --brief <path>` takes `--plan <path>` or `--live-planner`.
+  The planner model is named in planner.yaml, mirroring vision.yaml's
+  no-secrets rules. `--plan` skips the model call. Do not put a key in
+  planner.yaml or vision.yaml.
+- The planner makes one bounded call proposing search phrases (prompt v2
+  states the validator's exact-subject rule); the app validates the plan
+  deterministically. A reply that is not JSON or fails validation gets ONE
+  corrective retry with the rejection text; network/auth errors are not
+  retried. There is no fallback search that broadens the brief; a second
+  rejection or an empty plan stops fail-closed.
 - Provenance rule: search hits are leads, never verified clips. Every run-brief
   result is visual_status=unverified / acceptance_level=metadata_only. Do not
   present candidates as on-brief clips; downstream visual stages are unchanged
@@ -25,7 +30,7 @@ Jev gate is documented in docs/JEV_GATE.md.
   delivering files remains mandatory.
 - Temps: project `tmp/` only. Never host /tmp for media.
 - Part 2: rank saves tiles. Picture labels come from the model named in vision.yaml (`vision-show`, then `label-tiles --confirm-vision`). Show that model and get a yes before a run. Dark tiles are reject and are not sent.
-- Part 3: selected-window ≤720p video-only, time-capped; spans analyze concurrently (default 2 workers; 4 swapped this 1.6 GB host). Each span download has a hard timeout of 90 s + 10 s per span second (max 300 s). run-pipeline stops with status `deadline` once `run_deadline_s` (config, default 10800) is spent; rerun the same command to resume. Continuity gate trims/rejects mid-excerpt dissolves (default decode width 160). Scene detect defaults to frame_skip=1. Legacy serial/full-frame: SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0. Span/policy cache keys + validated SHA-256 markers; never YtDlp.download(). IDs may start with `-`; use watch URLs.
+- Part 3: selected-window ≤720p video-only, time-capped; spans analyze concurrently (default 2 workers; 4 swapped this 1.6 GB host). Each span download has a hard timeout of 90 s + 10 s per span second (max 300 s). run-pipeline stops with status `deadline` once `run_deadline_s` (config, default 10800) is spent; rerun the same command to resume. Continuity gate trims/rejects mid-excerpt cuts and dissolves: default detector `blend` (motion-tolerant, 6 fps; continuity_blend.py), `continuity_detector: legacy` restores the old dHash/mean-RGB thresholds (decode width 160). Scene detect defaults to frame_skip=1. Legacy serial/full-frame: SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0. Span/policy cache keys + validated SHA-256 markers; never YtDlp.download(). IDs may start with `-`; use watch URLs.
 - Every yt-dlp call uses `--ignore-config`. Search/metadata use --skip-download. Analysis uses --download-sections as stream copy with `-copyts` (no `--force-keyframes-at-cuts`, no re-encode), one yt-dlp call per video for all its spans. It pins the export rendition when that is ≤720p (so export can adopt the same file), else only `bv`/`wv` selectors with `[height<=720]`, preferring AVC/H.264. Local time 0 of an analysis copy is its first packet PTS (marker `first_pts_ms`, range `mapping_k_s`), not the span start.
 - Cookies off unless the user opts in.
 - Do not silently lower resolution, aspect, or N.
@@ -42,7 +47,7 @@ Jev gate is documented in docs/JEV_GATE.md.
 - run-brief can NEVER fetch video, call vision, or export. Its limit flags only tighten the brief's own search_limits (final = min).
 - Metadata cache is reusable; prompt-specific files stay in the run dir.
 - `verify` is run-scoped and fail-closed: input/output hashes, exact plan/range/copy reconciliation, completion markers, probe, duration, and strict decode. The verifier checks file integrity, not scene fidelity.
-- Tests: `.venv/bin/python -m pytest tests/ -q` (405 passing as of 2026-09-28). Prefer fixtures over live YouTube.
+- Tests: `.venv/bin/python -m pytest tests/ -q` (465 passed, 1 xfailed as of 2026-09-29; about 6 min on this host). Prefer fixtures over live YouTube.
 - Expected environment: Linux + Python 3.14. Run/export locks use fcntl (not available on native Windows).
 - Shortlist: `continuity_suspect` + keep without `continuity_ok:` / `continuity_ok: true` → exclude `continuity_suspect_uncleared`.
 - Export preserves approved shortlist intervals (no continuity re-trim).

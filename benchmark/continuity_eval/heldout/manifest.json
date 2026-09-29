@@ -1,0 +1,507 @@
+[
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__0.300",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_0-11995_v4-copyts-720.mp4",
+  "k_s": 0.0,
+  "start_s": 0.3,
+  "end_s": 11.694999999999999,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 5,
+   "endpoint_hamming": 11,
+   "max_adjacent_color": 1.203,
+   "endpoint_color": 1.539,
+   "samples": 68,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__0.300.jpg"
+ },
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__5778.997",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_5775000-5788995_v4-copyts-720.mp4",
+  "k_s": 5770.24,
+  "start_s": 5778.9974999999995,
+  "end_s": 5784.9974999999995,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 4,
+   "endpoint_hamming": 2,
+   "max_adjacent_color": 0.281,
+   "endpoint_color": 0.555,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__5778.997.jpg"
+ },
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__11555.998",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_11552000-11565995_v4-copyts-720.mp4",
+  "k_s": 11550.72,
+  "start_s": 11555.997500000001,
+  "end_s": 11561.997500000001,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 4,
+   "endpoint_hamming": 6,
+   "max_adjacent_color": 0.645,
+   "endpoint_color": 0.473,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__11555.998.jpg"
+ },
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__17323.003",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_17319005-17333000_v4-copyts-720.mp4",
+  "k_s": 17315.84,
+  "start_s": 17323.002500000002,
+  "end_s": 17329.002500000002,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 3,
+   "endpoint_hamming": 6,
+   "max_adjacent_color": 0.344,
+   "endpoint_color": 0.383,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__17323.003.jpg"
+ },
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__23096.305",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_23096005-23110000_v4-copyts-720.mp4",
+  "k_s": 23091.2,
+  "start_s": 23096.305,
+  "end_s": 23101.06,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 4,
+   "endpoint_hamming": 8,
+   "max_adjacent_color": 0.605,
+   "endpoint_color": 0.676,
+   "samples": 28,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__23096.305.jpg"
+ },
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__23101.660",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_23096005-23110000_v4-copyts-720.mp4",
+  "k_s": 23091.2,
+  "start_s": 23101.66,
+  "end_s": 23109.7,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 4,
+   "endpoint_hamming": 10,
+   "max_adjacent_color": 0.48,
+   "endpoint_color": 0.129,
+   "samples": 48,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__23101.660.jpg"
+ },
+ {
+  "id": "20260928T233350Z__3bEGggqaIxc__28873.305",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "3bEGggqaIxc",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/3bEGggqaIxc_28873005-28885000_v4-copyts-720.mp4",
+  "k_s": 28871.68,
+  "start_s": 28873.305,
+  "end_s": 28884.7,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 4,
+   "endpoint_hamming": 5,
+   "max_adjacent_color": 1.125,
+   "endpoint_color": 0.164,
+   "samples": 68,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__3bEGggqaIxc__28873.305.jpg"
+ },
+ {
+  "id": "20260928T233350Z__xRK6O1zKims__0.300",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "xRK6O1zKims",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/xRK6O1zKims_0-11964_v4-copyts-720.mp4",
+  "k_s": 0.0,
+  "start_s": 0.3,
+  "end_s": 11.664,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 8,
+   "endpoint_hamming": 25,
+   "max_adjacent_color": 3.863,
+   "endpoint_color": 16.984,
+   "samples": 68,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__xRK6O1zKims__0.300.jpg"
+ },
+ {
+  "id": "20260928T233350Z__xRK6O1zKims__818.989",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "xRK6O1zKims",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/xRK6O1zKims_815007-828971_v4-copyts-720.mp4",
+  "k_s": 811.9,
+  "start_s": 818.989,
+  "end_s": 824.989,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 7,
+   "endpoint_hamming": 10,
+   "max_adjacent_color": 1.867,
+   "endpoint_color": 0.773,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__xRK6O1zKims__818.989.jpg"
+ },
+ {
+  "id": "20260928T233350Z__xRK6O1zKims__1635.997",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "xRK6O1zKims",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/xRK6O1zKims_1632015-1645978_v4-copyts-720.mp4",
+  "k_s": 1629.5,
+  "start_s": 1635.9965000000002,
+  "end_s": 1641.9965000000002,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 2,
+   "endpoint_hamming": 2,
+   "max_adjacent_color": 0.195,
+   "endpoint_color": 0.566,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__xRK6O1zKims__1635.997.jpg"
+ },
+ {
+  "id": "20260928T233350Z__xRK6O1zKims__2453.003",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "xRK6O1zKims",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/xRK6O1zKims_2449022-2462985_v4-copyts-720.mp4",
+  "k_s": 2447.066,
+  "start_s": 2453.0035,
+  "end_s": 2459.0035,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 1,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.688,
+   "endpoint_color": 0.992,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__xRK6O1zKims__2453.003.jpg"
+ },
+ {
+  "id": "20260928T233350Z__xRK6O1zKims__3270.011",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "xRK6O1zKims",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/xRK6O1zKims_3266029-3279993_v4-copyts-720.mp4",
+  "k_s": 3264.666,
+  "start_s": 3270.011,
+  "end_s": 3276.011,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 6,
+   "endpoint_hamming": 2,
+   "max_adjacent_color": 0.688,
+   "endpoint_color": 1.16,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__xRK6O1zKims__3270.011.jpg"
+ },
+ {
+  "id": "20260928T233350Z__U4qjIADZArM__16.104",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "U4qjIADZArM",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/U4qjIADZArM_15804-20793_v4-copyts-720.mp4",
+  "k_s": 12.0,
+  "start_s": 16.104,
+  "end_s": 20.493,
+  "gate_action": "reject",
+  "gate_reason": "stable continuity subspan 2.333s below duration_min_s 4.0",
+  "gate_meta": {
+   "start_s": 16.104,
+   "end_s": 20.493,
+   "reason": "stable continuity subspan 2.333s below duration_min_s 4.0",
+   "max_adjacent_hamming": 15,
+   "endpoint_hamming": 12,
+   "max_adjacent_color": 11.219,
+   "endpoint_color": 8.742,
+   "samples": 26,
+   "detector": "blend-v1",
+   "events": [
+    {
+     "kind": "cut",
+     "t_s": 18.737
+    }
+   ]
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__U4qjIADZArM__16.104.jpg"
+ },
+ {
+  "id": "20260928T233350Z__U4qjIADZArM__33.909",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "U4qjIADZArM",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/U4qjIADZArM_33609-38598_v4-copyts-720.mp4",
+  "k_s": 30.0,
+  "start_s": 33.909,
+  "end_s": 38.298,
+  "gate_action": "reject",
+  "gate_reason": "stable continuity subspan 3.167s below duration_min_s 4.0",
+  "gate_meta": {
+   "start_s": 33.909,
+   "end_s": 38.298,
+   "reason": "stable continuity subspan 3.167s below duration_min_s 4.0",
+   "max_adjacent_hamming": 15,
+   "endpoint_hamming": 10,
+   "max_adjacent_color": 11.445,
+   "endpoint_color": 8.176,
+   "samples": 26,
+   "detector": "blend-v1",
+   "events": [
+    {
+     "kind": "cut",
+     "t_s": 37.376
+    }
+   ]
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__U4qjIADZArM__33.909.jpg"
+ },
+ {
+  "id": "20260928T233350Z__U4qjIADZArM__52.702",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "U4qjIADZArM",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/U4qjIADZArM_52402-57391_v4-copyts-720.mp4",
+  "k_s": 48.0,
+  "start_s": 52.702,
+  "end_s": 57.091,
+  "gate_action": "reject",
+  "gate_reason": "stable continuity subspan 3.000s below duration_min_s 4.0",
+  "gate_meta": {
+   "start_s": 52.702,
+   "end_s": 57.091,
+   "reason": "stable continuity subspan 3.000s below duration_min_s 4.0",
+   "max_adjacent_hamming": 15,
+   "endpoint_hamming": 9,
+   "max_adjacent_color": 11.203,
+   "endpoint_color": 7.809,
+   "samples": 26,
+   "detector": "blend-v1",
+   "events": [
+    {
+     "kind": "cut",
+     "t_s": 56.002
+    }
+   ]
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__U4qjIADZArM__52.702.jpg"
+ },
+ {
+  "id": "20260928T233350Z__U4qjIADZArM__70.507",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "U4qjIADZArM",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/U4qjIADZArM_70207-75196_v4-copyts-720.mp4",
+  "k_s": 66.0,
+  "start_s": 70.50699999999999,
+  "end_s": 74.896,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 5,
+   "endpoint_hamming": 9,
+   "max_adjacent_color": 1.367,
+   "endpoint_color": 5.52,
+   "samples": 26,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__U4qjIADZArM__70.507.jpg"
+ },
+ {
+  "id": "20260928T233350Z__ihjNvS6a3ko__0.300",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "ihjNvS6a3ko",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/ihjNvS6a3ko_0-11983_v4-copyts-720.mp4",
+  "k_s": 0.0,
+  "start_s": 0.3,
+  "end_s": 11.683,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 0,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.098,
+   "endpoint_color": 0.281,
+   "samples": 68,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__ihjNvS6a3ko__0.300.jpg"
+ },
+ {
+  "id": "20260928T233350Z__ihjNvS6a3ko__2268.195",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "ihjNvS6a3ko",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/ihjNvS6a3ko_2264203-2278187_v4-copyts-720.mp4",
+  "k_s": 2260.0,
+  "start_s": 2268.1949999999997,
+  "end_s": 2274.1949999999997,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 0,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.109,
+   "endpoint_color": 0.051,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__ihjNvS6a3ko__2268.195.jpg"
+ },
+ {
+  "id": "20260928T233350Z__ihjNvS6a3ko__4534.399",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "ihjNvS6a3ko",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/ihjNvS6a3ko_4530407-4544390_v4-copyts-720.mp4",
+  "k_s": 4530.0,
+  "start_s": 4534.3985,
+  "end_s": 4540.3985,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 0,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.113,
+   "endpoint_color": 0.059,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__ihjNvS6a3ko__4534.399.jpg"
+ },
+ {
+  "id": "20260928T233350Z__ihjNvS6a3ko__6800.601",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "ihjNvS6a3ko",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/ihjNvS6a3ko_6796610-6810593_v4-copyts-720.mp4",
+  "k_s": 6795.0,
+  "start_s": 6800.6015,
+  "end_s": 6806.6015,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 0,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.121,
+   "endpoint_color": 0.062,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__ihjNvS6a3ko__6800.601.jpg"
+ },
+ {
+  "id": "20260928T233350Z__ihjNvS6a3ko__9066.805",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "ihjNvS6a3ko",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/ihjNvS6a3ko_9062813-9076797_v4-copyts-720.mp4",
+  "k_s": 9060.0,
+  "start_s": 9066.805,
+  "end_s": 9072.805,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 0,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.113,
+   "endpoint_color": 0.035,
+   "samples": 36,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__ihjNvS6a3ko__9066.805.jpg"
+ },
+ {
+  "id": "20260928T233350Z__ihjNvS6a3ko__11329.317",
+  "run": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "ihjNvS6a3ko",
+  "path": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/heldout-horses-20260928T233348Z/data/cache/analysis/ihjNvS6a3ko_11329017-11341000_v4-copyts-720.mp4",
+  "k_s": 11325.0,
+  "start_s": 11329.317,
+  "end_s": 11340.666666666668,
+  "gate_action": "keep",
+  "gate_reason": null,
+  "gate_meta": {
+   "action": "keep",
+   "max_adjacent_hamming": 0,
+   "endpoint_hamming": 0,
+   "max_adjacent_color": 0.121,
+   "endpoint_color": 0.016,
+   "samples": 68,
+   "detector": "blend-v1",
+   "events": []
+  },
+  "sheet": "tmp/continuity_heldout/20260928T233350Z__ihjNvS6a3ko__11329.317.jpg"
+ }
+]

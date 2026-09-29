@@ -2,11 +2,17 @@
 
 The project rules live in AGENTS.md. Read it first, then HANDOFF.md and
 docs/PLAN-PROGRESS-2026-09-28.md. Below are permanent rules learned while
-working on this repo (2026-09-28).
+working on this repo (2026-09-28/29).
 
 ## Working rules
 
 - Do not commit, merge or push unless the owner asks.
+- The owner wants the main agent to orchestrate and hand repetitive or costly
+  work (blind labeling, writing a test file to a spec, doc audits) to a
+  Sonnet sub-agent at high effort. On this host that is the user-level
+  `sonnet-high` agent (`~/.claude/agents/sonnet-high.md`, not in the repo);
+  elsewhere use an equivalent. Tell it to run only its own test file (1 CPU
+  host) and verify what it returns.
 - Model wire: vision.yaml and planner.yaml use `openai-api` / `z-ai/glm-5.3-flash`
   on OpenRouter (owner's choice). The key is `OPENROUTER_API_KEY`, kept in
   `~/.hermes/.env`. Load it into a process only; never print it or write it
@@ -38,8 +44,18 @@ working on this repo (2026-09-28).
   verify. Check this on a real old run, e.g.
   `verify --run-dir data/runs/20260927T220608Z --require-export`.
 - The continuity gate is a quality safeguard. Change it only with numbers from
-  the labeled set in `benchmark/continuity_eval/` and owner approval.
+  the labeled set in `benchmark/continuity_eval/` and owner approval. Default
+  detector is `blend` (2026-09-29); `continuity_detector: legacy` restores the
+  old gate. Confirm gate numbers by replaying the PRODUCT code
+  (`benchmark/continuity_eval/replay_product.py`), not only exploratory
+  scripts.
+- OpenCV 5.0 `phaseCorrelate(a, b, window)` multiplies the window into `a` and
+  `b` in place. Pass copies when the arrays are reused.
+- Blind contact-sheet labels (sub-agent or human) miss short dissolves and
+  loop-seam jump cuts. Where a detector and a label disagree, look at every
+  frame before trusting either.
 - ffmpeg contact sheets: put `-t` BEFORE `-i`. With the `tile` filter, an
   output `-t` does not stop input reading.
-- Runtime modules load at process start (only planner and jev load lazily), so
-  editing src/ while a benchmark runs does not change that run.
+- Most runtime modules load at process start, but some load lazily inside
+  functions: continuity_blend (first continuity scan), jev, and the runner's
+  planner import. Do not edit src/ while a benchmark runs.

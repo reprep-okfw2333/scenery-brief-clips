@@ -1,0 +1,14 @@
+{
+  "version": "search_queries_v1",
+  "brief_sha256": "1e022d61fbc1b6e5ec814c017e62beaffd7e6a3da95441dd65cab5308fa6773c",
+  "queries": [
+    {
+      "query": "horses grazing in a meadow",
+      "strategy": "exact"
+    },
+    {
+      "query": "horses grazing cinematic 4k",
+      "strategy": "context"
+    }
+  ]
+}

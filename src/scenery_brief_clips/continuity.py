@@ -6,6 +6,10 @@ the longest stable subspan that still meets duration_min_s, or reject.
 
 Stability uses dHash Hamming (structure) OR mean-RGB distance (colour), so
 flat-colour cuts and textured scene changes both fail closed.
+
+The default detector is "blend" (continuity_blend.py): a motion-tolerant
+cut/dissolve test. `continuity_detector: legacy` restores the threshold test
+described above, unchanged.
 """
 
 from __future__ import annotations
@@ -29,6 +33,8 @@ DEFAULT_CONTINUITY_MAX_ENDPOINT_COLOR = 35.0
 DEFAULT_REVIEW_CONTINUITY_SUSPECT_HAMMING = 22
 DEFAULT_REVIEW_CONTINUITY_SUSPECT_COLOR = 35.0
 _SAMPLE_EDGE_INSET_S = 0.05
+CONTINUITY_DETECTORS = ("legacy", "blend")
+DEFAULT_CONTINUITY_DETECTOR = "blend"
 
 
 @dataclass(frozen=True)
@@ -39,6 +45,7 @@ class ContinuitySettings:
     max_endpoint_hamming: int = DEFAULT_CONTINUITY_MAX_ENDPOINT_HAMMING
     max_adjacent_color: float = DEFAULT_CONTINUITY_MAX_ADJACENT_COLOR
     max_endpoint_color: float = DEFAULT_CONTINUITY_MAX_ENDPOINT_COLOR
+    detector: str = DEFAULT_CONTINUITY_DETECTOR
 
     def validated(self) -> ContinuitySettings:
         if not isinstance(self.enabled, bool):
@@ -59,6 +66,8 @@ class ContinuitySettings:
             value = float(value)
             if not math.isfinite(value) or value < 0 or value > 255:
                 raise ConstraintError(f"{name} must be a finite number in 0..255")
+        if self.detector not in CONTINUITY_DETECTORS:
+            raise ConstraintError(f"continuity_detector must be one of {', '.join(CONTINUITY_DETECTORS)}")
         return ContinuitySettings(
             enabled=self.enabled,
             sample_fps=fps,
@@ -66,9 +75,13 @@ class ContinuitySettings:
             max_endpoint_hamming=int(self.max_endpoint_hamming),
             max_adjacent_color=float(self.max_adjacent_color),
             max_endpoint_color=float(self.max_endpoint_color),
+            detector=self.detector,
         )
 
     def as_manifest(self) -> dict:
+        # The detector key appears only when it is not legacy, so manifests of
+        # legacy runs (and the analyze-stage reuse checks built on them) are unchanged.
+        extra = {} if self.detector == "legacy" else {"continuity_detector": self.detector}
         return {
             "continuity_enabled": self.enabled,
             "continuity_sample_fps": self.sample_fps,
@@ -76,6 +89,7 @@ class ContinuitySettings:
             "continuity_max_endpoint_hamming": self.max_endpoint_hamming,
             "continuity_max_adjacent_color": self.max_adjacent_color,
             "continuity_max_endpoint_color": self.max_endpoint_color,
+            **extra,
         }
 
 
@@ -98,6 +112,13 @@ class ContinuityDecision:
     samples: int
     original_start_s: float
     original_end_s: float
+    detector: str | None = None  # set by the blend detector only
+    events: tuple = ()  # blend: ({"kind", "t_s"}, ...) inside the window
+
+    def _detector_meta(self) -> dict:
+        if self.detector is None:
+            return {}
+        return {"detector": self.detector, "events": [dict(ev) for ev in self.events]}
 
     def as_excerpt_meta(self) -> dict:
         meta = {
@@ -111,6 +132,7 @@ class ContinuityDecision:
         if self.action == "trim":
             meta["original_start_s"] = self.original_start_s
             meta["original_end_s"] = self.original_end_s
+        meta.update(self._detector_meta())
         return meta
 
     def as_reject_record(self) -> dict:
@@ -123,6 +145,7 @@ class ContinuityDecision:
             "max_adjacent_color": round(self.max_adjacent_color, 3),
             "endpoint_color": round(self.endpoint_color, 3),
             "samples": self.samples,
+            **self._detector_meta(),
         }
 
 
@@ -287,6 +310,36 @@ def decide_from_samples(
         max_adjacent_color=max_adjacent_color,
         max_endpoint_color=max_endpoint_color,
     )
+    return _decision_for_span(
+        start_s=original_start,
+        end_s=original_end,
+        times=times,
+        features=features,
+        span=span,
+        target_s=target_s,
+        min_s=min_s,
+        max_s=max_s,
+    )
+
+
+def _decision_for_span(
+    *,
+    start_s: float,
+    end_s: float,
+    times: list[float],
+    features: list[FrameFeatures],
+    span: tuple[int, int] | None,
+    target_s: float,
+    min_s: float,
+    max_s: float,
+    detector: str | None = None,
+    events: tuple = (),
+) -> ContinuityDecision:
+    """Reject, or trim to the stable span ``span`` (inclusive sample indices)."""
+    max_adj_h, end_h, max_adj_c, end_c = window_distances(features)
+    original_start = float(start_s)
+    original_end = float(end_s)
+    extra = {"detector": detector, "events": events}
     if span is None:
         return ContinuityDecision(
             action="reject",
@@ -300,6 +353,7 @@ def decide_from_samples(
             samples=len(features),
             original_start_s=original_start,
             original_end_s=original_end,
+            **extra,
         )
 
     i, j = span
@@ -319,6 +373,7 @@ def decide_from_samples(
             samples=len(features),
             original_start_s=original_start,
             original_end_s=original_end,
+            **extra,
         )
 
     if stable_len <= max_s:
@@ -349,6 +404,7 @@ def decide_from_samples(
         samples=len(features),
         original_start_s=original_start,
         original_end_s=original_end,
+        **extra,
     )
 
 
@@ -459,6 +515,17 @@ def gate_excerpt(
     local_end = float(excerpt.end_s) - offset
     if local_end <= local_start:
         raise ConstraintError("excerpt falls outside analysis span for continuity scan")
+    if settings.detector == "blend":
+        return _gate_blend(
+            excerpt,
+            video_path=video_path,
+            offset=offset,
+            local_start=local_start,
+            local_end=local_end,
+            target_s=target_s,
+            min_s=min_s,
+            max_s=max_s,
+        )
     local_times, features = sample_features_from_video(
         video_path,
         local_start,
@@ -478,6 +545,78 @@ def gate_excerpt(
         max_endpoint_hamming=settings.max_endpoint_hamming,
         max_adjacent_color=settings.max_adjacent_color,
         max_endpoint_color=settings.max_endpoint_color,
+    )
+
+
+def _gate_blend(
+    excerpt: Excerpt,
+    *,
+    video_path: str | Path,
+    offset: float,
+    local_start: float,
+    local_end: float,
+    target_s: float,
+    min_s: float,
+    max_s: float,
+) -> ContinuityDecision:
+    """continuity_detector=blend: keep the longest run of window frames with no cut/dissolve."""
+    import cv2
+
+    from scenery_brief_clips import continuity_blend as cb
+
+    validate_duration_settings(target_s=target_s, min_s=min_s, max_s=max_s)
+    scan = cb.read_scan(video_path, local_start, local_end)
+    first, last = scan.first, scan.last
+    if last - first < 1:
+        raise ConstraintError("continuity scan requires at least two samples")
+    events = cb.detect_events(scan.frames, first, last)
+    source_times = [t + offset for t in scan.times]
+    step = 1.0 / cb.SCAN_FPS
+    event_meta = tuple(
+        {
+            "kind": ev.kind,
+            "t_s": round(source_times[ev.index] + (step / 2.0 if ev.kind == "cut" else 0.0), 3),
+        }
+        for ev in sorted(events, key=lambda e: (e.index, e.kind))
+    )
+    times = source_times[first : last + 1]
+    features = [
+        features_from_image(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
+        for frame in scan.frames[first : last + 1]
+    ]
+    if not events:
+        max_adj_h, end_h, max_adj_c, end_c = window_distances(features)
+        return ContinuityDecision(
+            action="keep",
+            start_s=float(excerpt.start_s),
+            end_s=float(excerpt.end_s),
+            reason=None,
+            max_adjacent_hamming=max_adj_h,
+            endpoint_hamming=end_h,
+            max_adjacent_color=max_adj_c,
+            endpoint_color=end_c,
+            samples=len(features),
+            original_start_s=float(excerpt.start_s),
+            original_end_s=float(excerpt.end_s),
+            detector=cb.DETECTOR_NAME,
+            events=event_meta,
+        )
+    span = None
+    for i, j in cb.clean_runs(first, last, events):
+        length = source_times[j] - source_times[i]
+        if span is None or length > span[0] + 1e-9:  # ties keep the earlier run, as legacy does
+            span = (length, i - first, j - first)
+    return _decision_for_span(
+        start_s=excerpt.start_s,
+        end_s=excerpt.end_s,
+        times=times,
+        features=features,
+        span=None if span is None else (span[1], span[2]),
+        target_s=target_s,
+        min_s=min_s,
+        max_s=max_s,
+        detector=cb.DETECTOR_NAME,
+        events=event_meta,
     )
 
 
@@ -510,4 +649,5 @@ def continuity_settings_from_config(config: dict | None) -> ContinuitySettings:
                 DEFAULT_CONTINUITY_MAX_ENDPOINT_COLOR,
             )
         ),
+        detector=str(config.get("continuity_detector", DEFAULT_CONTINUITY_DETECTOR)),
     ).validated()

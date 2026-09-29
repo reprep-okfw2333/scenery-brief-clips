@@ -1,0 +1,74 @@
+{
+  "label": "blend-military-20260928T231249Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "5:46.92",
+  "max_rss_mb_main_process": 190.0,
+  "stage_sum_s": 345.38,
+  "stages_s": {
+    "discover": 0.0,
+    "rank": 0.0,
+    "agree_vision": 0.0,
+    "label_tiles": 0.0,
+    "apply_scores": 0.0,
+    "analyze": 159.65,
+    "verify_review": 29.05,
+    "shortlist_review": 31.07,
+    "label_strips": 50.22,
+    "shortlist_apply": 0.01,
+    "agree_export": 0.0,
+    "export": 44.6,
+    "verify_export": 30.78
+  },
+  "model_calls": 7,
+  "yield": {
+    "candidates": 6,
+    "candidate_ids": [
+      "p_PxOw22loE",
+      "YpI_w1KIWOs",
+      "5r00-o3YP8U",
+      "X1qd_tm91uY",
+      "5UUadakWxK8",
+      "BAx_9MNPzts"
+    ],
+    "ranked": 3,
+    "tile_labels": {
+      "keep": 15,
+      "reject": 2,
+      "uncertain": 1
+    },
+    "analyzed_sources": 3,
+    "analysis_ranges": 10,
+    "analysis_seconds_planned": 105.55,
+    "excerpts": 7,
+    "sources_without_excerpts": 1,
+    "continuity_rejected": 3,
+    "shortlist_counts": {
+      "n_candidates": 7,
+      "n_selected": 2,
+      "n_excluded": 5,
+      "n_excluded_by_reason": {
+        "beyond n_clips": 5
+      },
+      "n_sources_without_moments": 1,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 3,
+      "n_continuity_rejected_upstream_by_reason": {
+        "stable continuity subspan 2.667s below duration_min_s 4.0": 1,
+        "stable continuity subspan 3.500s below duration_min_s 4.0": 1,
+        "stable continuity subspan 3.833s below duration_min_s 4.0": 1
+      }
+    },
+    "clips_delivered": 2,
+    "clips": [
+      "YpI_w1KIWOs_e0_2737940-2742273.mp4",
+      "p_PxOw22loE_e0_300-6639.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/blend-military-20260928T231249Z/data/runs/seeded"
+}

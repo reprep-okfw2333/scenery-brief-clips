@@ -1,0 +1,388 @@
+[
+ {
+  "brief": "Brazilian_military",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian military personnel marching in a parade",
+   "Brazilian military marching in a street parade",
+   "Brazilian military marching in a parade compilation"
+  ],
+  "elapsed_s": 69.1
+ },
+ {
+  "brief": "Brazilian_military",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian military parade footage",
+   "Brazilian military soldiers marching parade compilation",
+   "Brazilian military parade outdoor ceremony"
+  ],
+  "elapsed_s": 3.7
+ },
+ {
+  "brief": "Brazilian_military",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian military parade marching footage",
+   "Brazilian military parade soldiers marching",
+   "Brazilian military parade compilation"
+  ],
+  "elapsed_s": 3.6
+ },
+ {
+  "brief": "alpacas",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing on a mountain hillside",
+   "alpacas grazing hillside pasture",
+   "alpacas grazing hillside compilation"
+  ],
+  "elapsed_s": 3.6
+ },
+ {
+  "brief": "alpacas",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing on hillside pasture",
+   "alpacas grazing hillside countryside footage",
+   "alpacas grazing hillside compilation"
+  ],
+  "elapsed_s": 4.3
+ },
+ {
+  "brief": "alpacas",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing on a hillside 4k",
+   "alpacas grazing on a hillside stock footage",
+   "alpacas grazing hillside compilation"
+  ],
+  "elapsed_s": 16.2
+ },
+ {
+  "brief": "goose",
+  "trial": 0,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "goose flying over a lake",
+   "goose flying over lake footage",
+   "goose flying over lake at sunset",
+   "goose flying over lake compilation"
+  ],
+  "elapsed_s": 6.5
+ },
+ {
+  "brief": "goose",
+  "trial": 1,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "goose flying over a lake",
+   "gooses flying over lake footage",
+   "goose in flight over lake 4k",
+   "gooses flying over lake compilation"
+  ],
+  "elapsed_s": 13.0
+ },
+ {
+  "brief": "goose",
+  "trial": 2,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "goose flying over a lake",
+   "goose flying over lake aerial footage",
+   "goose flying over lake at sunset",
+   "goose flying over lake compilation"
+  ],
+  "elapsed_s": 5.5
+ },
+ {
+  "brief": "horses",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "horses grazing in a meadow",
+   "horses grazing in a pasture",
+   "horses grazing meadow 4k nature footage",
+   "horses grazing compilation"
+  ],
+  "elapsed_s": 3.5
+ },
+ {
+  "brief": "horses",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "horses grazing in a meadow",
+   "horses grazing in a pasture",
+   "horses grazing in a meadow at sunset",
+   "horses grazing in a meadow compilation"
+  ],
+  "elapsed_s": 4.3
+ },
+ {
+  "brief": "horses",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "horses grazing in a meadow",
+   "horses grazing in a pasture",
+   "horses grazing in a summer meadow 4k",
+   "horses grazing compilation"
+  ],
+  "elapsed_s": 3.2
+ },
+ {
+  "brief": "lighthouse",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves crashing",
+   "lighthouse storm compilation",
+   "lighthouse heavy storm rough sea"
+  ],
+  "elapsed_s": 3.1
+ },
+ {
+  "brief": "lighthouse",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves crashing",
+   "lighthouse in storm and rain",
+   "lighthouse storm footage compilation"
+  ],
+  "elapsed_s": 5.3
+ },
+ {
+  "brief": "lighthouse",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves crashing",
+   "lighthouse storm compilation",
+   "lighthouse in storm at sea footage"
+  ],
+  "elapsed_s": 3.8
+ },
+ {
+  "brief": "ocean_waves",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves crashing on rocks slow motion",
+   "ocean waves hitting rocks on the coast",
+   "ocean waves crashing on rocks compilation"
+  ],
+  "elapsed_s": 3.3
+ },
+ {
+  "brief": "ocean_waves",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves crashing on rocks slow motion",
+   "ocean waves crashing on rocks compilation",
+   "ocean waves hitting rocks coastal footage"
+  ],
+  "elapsed_s": 2.8
+ },
+ {
+  "brief": "ocean_waves",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves crashing on rocks slow motion",
+   "ocean waves hitting rocks along the coast",
+   "ocean waves crashing on rocks compilation"
+  ],
+  "elapsed_s": 9.1
+ },
+ {
+  "brief": "red_deer",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "red deer walking through a misty forest",
+   "red deer walking in foggy forest",
+   "red deer stag walking misty woodland morning",
+   "red deer walking misty forest compilation"
+  ],
+  "elapsed_s": 6.2
+ },
+ {
+  "brief": "red_deer",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "red deer walking through misty forest",
+   "red deer walking in misty forest morning fog",
+   "red deer walking through foggy woodland trees",
+   "red deer misty forest walking compilation"
+  ],
+  "elapsed_s": 6.3
+ },
+ {
+  "brief": "red_deer",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "red deer walking through a misty forest",
+   "red deer in misty forest fog footage",
+   "red deer stag walking foggy woodland morning",
+   "red deer misty forest compilation long video"
+  ],
+  "elapsed_s": 2.6
+ },
+ {
+  "brief": "tram",
+  "trial": 0,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "tram climbing a steep street in Lisbon",
+   "trams going uphill on steep Lisbon streets",
+   "tram riding up a steep hill street Lisbon",
+   "Lisbon tram steep street footage compilation"
+  ],
+  "elapsed_s": 3.2
+ },
+ {
+  "brief": "tram",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "tram climbing a steep street in Lisbon",
+   "Lisbon tram going up steep hill street",
+   "vintage tram climbing steep Lisbon street",
+   "Lisbon tram steep street footage compilation"
+  ],
+  "elapsed_s": 3.8
+ },
+ {
+  "brief": "tram",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "tram climbing a steep street in Lisbon",
+   "tram going up a steep Lisbon hill",
+   "historic tram climbing a steep street in Lisbon",
+   "Lisbon tram climbing steep streets compilation"
+  ],
+  "elapsed_s": 7.8
+ },
+ {
+  "brief": "wolf",
+  "trial": 0,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "wolf running through snow",
+   "wolf pack running through deep snow",
+   "wolf running through snow winter wildlife footage 4k",
+   "wolf running in snow compilation"
+  ],
+  "elapsed_s": 12.4
+ },
+ {
+  "brief": "wolf",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "wolf running through snow",
+   "wolf running in deep snow winter forest",
+   "wild wolf sprinting through snow",
+   "wolf running through snow compilation longplay"
+  ],
+  "elapsed_s": 12.6
+ },
+ {
+  "brief": "wolf",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "wolf running through snow",
+   "wolf running in deep snow",
+   "wolf pack running through snow winter",
+   "wolf running through snow compilation"
+  ],
+  "elapsed_s": 11.7
+ }
+]

@@ -1,0 +1,779 @@
+[
+ {
+  "variant": "v1",
+  "brief": "Brazilian_military",
+  "trial": 0,
+  "elapsed_s": 25.7,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian armed forces parade marching",
+   "Brazil military parade troops marching footage",
+   "Brazilian military parade compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "Brazilian_military",
+  "trial": 1,
+  "elapsed_s": 21.7,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian armed forces soldiers marching parade",
+   "Brazil military parade troops marching ceremony",
+   "Brazilian military parade compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "Brazilian_military",
+  "trial": 2,
+  "elapsed_s": 19.3,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "Brazilian military marching in parade",
+   "Brazilian Armed Forces parade march",
+   "desfile militar Forças Armadas do Brasil",
+   "Brazilian military parade compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "alpacas",
+  "trial": 0,
+  "elapsed_s": 82.4,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpaca grazing on a hillside",
+   "alpacas on a hillside pasture",
+   "alpacas grazing compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "alpacas",
+  "trial": 1,
+  "elapsed_s": 3.6,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing on hillside pasture",
+   "alpacas grazing nature footage",
+   "alpacas grazing compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "alpacas",
+  "trial": 2,
+  "elapsed_s": 4.7,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpaca grazing hillside footage",
+   "alpacas grazing on a mountain slope",
+   "alpacas grazing compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "goose",
+  "trial": 0,
+  "elapsed_s": 16.0,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "goose flying over a lake",
+   "geese flying over lake",
+   "flock of geese flying across a lake",
+   "geese flying over lake compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "goose",
+  "trial": 1,
+  "elapsed_s": 6.8,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "goose flying over lake",
+   "geese flying over lake",
+   "goose in flight lake water footage",
+   "geese flying compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "goose",
+  "trial": 2,
+  "elapsed_s": 5.4,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[0].query does not preserve a named subject",
+  "queries": [
+   "geese flying over lake",
+   "goose flying low over lake",
+   "wild geese flying across lake footage",
+   "geese flying compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "horses",
+  "trial": 0,
+  "elapsed_s": 3.9,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "horses grazing in a meadow",
+   "horse grazing in pasture",
+   "horses eating grass meadow field",
+   "horses grazing compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "horses",
+  "trial": 1,
+  "elapsed_s": 9.2,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "horses grazing in a meadow",
+   "horse grazing meadow footage",
+   "horses grazing pasture 4k",
+   "horses grazing compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "horses",
+  "trial": 2,
+  "elapsed_s": 7.3,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "horses grazing in a meadow",
+   "horse grazing in meadow 4k nature footage",
+   "horses eating grass in field relaxing",
+   "horses grazing meadow compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "lighthouse",
+  "trial": 0,
+  "elapsed_s": 5.3,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "lighthouse in storm",
+   "lighthouse storm waves crashing",
+   "lighthouse in storm footage",
+   "lighthouse storm compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "lighthouse",
+  "trial": 1,
+  "elapsed_s": 14.7,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "lighthouse in storm",
+   "lighthouse storm waves crashing",
+   "lighthouse in a storm compilation",
+   "storm waves hitting lighthouse"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "lighthouse",
+  "trial": 2,
+  "elapsed_s": 3.1,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves footage",
+   "lighthouses in storms",
+   "lighthouse storm compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "ocean_waves",
+  "trial": 0,
+  "elapsed_s": 101.9,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[3].query does not preserve a named subject",
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves crashing against rocks",
+   "ocean waves crashing on rocky shore",
+   "waves crashing on rocks compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "ocean_waves",
+  "trial": 1,
+  "elapsed_s": 41.8,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "ocean waves crashing on rocks",
+   "waves crashing against rocks",
+   "ocean waves hitting rocky shore",
+   "ocean waves crashing on rocks compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "ocean_waves",
+  "trial": 2,
+  "elapsed_s": 0.9,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "ocean waves crashing on rocks",
+   "waves crashing against rocks footage",
+   "sea waves hitting rocky shore",
+   "ocean waves rocks compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "red_deer",
+  "trial": 0,
+  "elapsed_s": 5.0,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "red deer walking through misty forest",
+   "red deer stag walking foggy woodland",
+   "red deer in misty forest footage",
+   "red deer forest compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "red_deer",
+  "trial": 1,
+  "elapsed_s": 5.6,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[3].query does not preserve a named subject",
+  "queries": [
+   "red deer walking through misty forest",
+   "red deer stag walking in foggy woods",
+   "red deer forest morning mist wildlife footage",
+   "deer in forest compilation fog"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "red_deer",
+  "trial": 2,
+  "elapsed_s": 7.2,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[3].query does not preserve a named subject",
+  "queries": [
+   "red deer walking through misty forest",
+   "red deer stag foggy forest walking",
+   "red deer woodland morning mist wildlife footage",
+   "deer in forest compilation fog"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "tram",
+  "trial": 0,
+  "elapsed_s": 6.4,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "tram climbing steep street Lisbon",
+   "Lisbon tram going uphill",
+   "Lisbon tram steep hill street",
+   "Lisbon trams compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "tram",
+  "trial": 1,
+  "elapsed_s": 6.1,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "tram climbing steep street Lisbon",
+   "Lisbon tram 28 hilly street footage",
+   "Lisbon tram going up hill 4k",
+   "Lisbon tram compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "tram",
+  "trial": 2,
+  "elapsed_s": 5.1,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "tram climbing steep street Lisbon",
+   "Lisbon tram going up hill",
+   "Lisbon tram 28 steep street footage",
+   "Lisbon trams compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "wolf",
+  "trial": 0,
+  "elapsed_s": 4.5,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "wolf running through snow",
+   "wolves running in snow",
+   "wolf pack running snow winter footage",
+   "wolves in snow compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "wolf",
+  "trial": 1,
+  "elapsed_s": 2.5,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "wolf running through snow",
+   "wolves running in snow",
+   "wolf pack running snow footage",
+   "wolves in snow compilation"
+  ]
+ },
+ {
+  "variant": "v1",
+  "brief": "wolf",
+  "trial": 2,
+  "elapsed_s": 2.5,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "wolf running through snow",
+   "wolves running in deep snow",
+   "wolf pack snow footage",
+   "wolves in snow compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "Brazilian_military",
+  "trial": 0,
+  "elapsed_s": 6.0,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian military parade marching footage",
+   "Brazilian military parade compilation",
+   "Brazilian military parade 4k"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "Brazilian_military",
+  "trial": 1,
+  "elapsed_s": 4.7,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian military parade footage",
+   "Brazilian military soldiers on parade",
+   "Brazilian military parade compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "Brazilian_military",
+  "trial": 2,
+  "elapsed_s": 5.5,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "Brazilian military marching in a parade",
+   "Brazilian military parade footage",
+   "Brazilian military parade compilation",
+   "Brazilian military soldiers marching parade"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "alpacas",
+  "trial": 0,
+  "elapsed_s": 7.1,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing hillside pasture",
+   "alpacas grazing on hillside 4k",
+   "alpacas grazing compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "alpacas",
+  "trial": 1,
+  "elapsed_s": 4.9,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing on hillside pasture",
+   "alpacas grazing mountain slope meadow",
+   "alpacas grazing hillside compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "alpacas",
+  "trial": 2,
+  "elapsed_s": 7.2,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "alpacas grazing on a hillside",
+   "alpacas grazing on a hillside pasture",
+   "alpacas grazing hillside meadow sunny",
+   "alpacas grazing hillside compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "goose",
+  "trial": 0,
+  "elapsed_s": 7.5,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "goose flying over a lake",
+   "goose in flight over lake water",
+   "flying goose lake footage",
+   "goose flying over lake compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "goose",
+  "trial": 1,
+  "elapsed_s": 3.9,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[1].query does not preserve a named subject",
+  "queries": [
+   "goose flying over a lake",
+   "geese flying over lake",
+   "goose flying over lake at sunset",
+   "geese flying over lake compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "goose",
+  "trial": 2,
+  "elapsed_s": 4.0,
+  "ok": false,
+  "code": "subject_mismatch",
+  "error": "queries[0].query does not preserve a named subject",
+  "queries": [
+   "geese flying over a lake",
+   "goose flock flying over lake footage",
+   "wild geese flying over a lake in flight",
+   "geese flying over lake compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "horses",
+  "trial": 0,
+  "elapsed_s": 4.2,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "horses grazing in a meadow",
+   "horses grazing in a pasture",
+   "horses grazing in a meadow scenic footage",
+   "horses grazing meadow compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "horses",
+  "trial": 1,
+  "elapsed_s": 4.3,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "horses grazing in a meadow",
+   "horses grazing in a pasture",
+   "horses grazing meadow 4k",
+   "horses grazing meadow compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "horses",
+  "trial": 2,
+  "elapsed_s": 3.1,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "horses grazing in a meadow",
+   "horses grazing in a pasture",
+   "horses grazing in a meadow 4k",
+   "horses grazing meadow compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "lighthouse",
+  "trial": 0,
+  "elapsed_s": 4.7,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves crashing",
+   "lighthouse in storm compilation",
+   "lighthouse stormy sea footage"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "lighthouse",
+  "trial": 1,
+  "elapsed_s": 3.4,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves crashing coast",
+   "lighthouse during stormy weather sea",
+   "storm lighthouse footage compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "lighthouse",
+  "trial": 2,
+  "elapsed_s": 12.5,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "lighthouse in a storm",
+   "lighthouse storm waves crashing",
+   "lighthouse in stormy sea coast",
+   "lighthouse storm compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "ocean_waves",
+  "trial": 0,
+  "elapsed_s": 16.5,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves breaking on rocks",
+   "ocean waves crashing on rocks slow motion",
+   "ocean waves crashing on rocks compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "ocean_waves",
+  "trial": 1,
+  "elapsed_s": 99.6,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves breaking on rocks",
+   "ocean waves crashing on rocks storm",
+   "ocean waves crashing on rocks compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "ocean_waves",
+  "trial": 2,
+  "elapsed_s": 21.6,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "ocean waves crashing on rocks",
+   "ocean waves breaking on rocks",
+   "ocean waves crashing on rocks at sunset",
+   "ocean waves crashing on rocks compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "red_deer",
+  "trial": 0,
+  "elapsed_s": 29.4,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "red deer walking through a misty forest",
+   "red deer moving through foggy woodland",
+   "red deer walking in forest mist at dawn",
+   "red deer misty forest compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "red_deer",
+  "trial": 1,
+  "elapsed_s": 26.8,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "red deer walking through a misty forest",
+   "red deer walking in misty woods",
+   "red deer walking through foggy forest at dawn",
+   "red deer walking misty forest compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "red_deer",
+  "trial": 2,
+  "elapsed_s": 28.0,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "red deer walking through a misty forest",
+   "red deer walking in foggy woodland",
+   "red deer walking through misty forest at dawn",
+   "red deer walking in misty forest compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "tram",
+  "trial": 0,
+  "elapsed_s": 29.0,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "tram climbing a steep street in Lisbon",
+   "tram ascending a steep Lisbon street",
+   "tram climbing steep street Lisbon Alfama",
+   "tram climbing steep streets Lisbon compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "tram",
+  "trial": 1,
+  "elapsed_s": 9.8,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "tram climbing a steep street in Lisbon",
+   "tram going up steep Lisbon hill street",
+   "tram climbing steep street Lisbon golden hour",
+   "Lisbon tram steep street compilation footage"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "tram",
+  "trial": 2,
+  "elapsed_s": 37.2,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "tram climbing a steep street in Lisbon",
+   "tram ascending steep Lisbon street",
+   "tram climbing steep cobbled street Lisbon old town",
+   "Lisbon tram compilation climbing steep streets"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "wolf",
+  "trial": 0,
+  "elapsed_s": 51.1,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "wolf running through snow",
+   "wolf sprinting through deep snow",
+   "wolf running through snow winter wildlife footage",
+   "wolf running through snow compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "wolf",
+  "trial": 1,
+  "elapsed_s": 19.8,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "wolf running through snow",
+   "wolf running through snow in winter forest",
+   "wolf sprinting across snowy field",
+   "wolf pack running through snow compilation"
+  ]
+ },
+ {
+  "variant": "v2",
+  "brief": "wolf",
+  "trial": 2,
+  "elapsed_s": 14.0,
+  "ok": true,
+  "code": "ok",
+  "queries": [
+   "wolf running through snow",
+   "wolf sprinting through deep snow",
+   "wild wolf running through snow in winter forest",
+   "wolf running through snow compilation"
+  ]
+ }
+]

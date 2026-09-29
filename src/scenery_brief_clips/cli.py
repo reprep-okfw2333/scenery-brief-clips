@@ -26,6 +26,7 @@ from scenery_brief_clips.pipeline_analyze import analyze_run
 from scenery_brief_clips.analyze import ConstraintError
 from scenery_brief_clips.planner import (
     PlannerError,
+    call_wired_planner,
     load_planner_wire,
     plan_queries,
 )
@@ -355,6 +356,12 @@ def main(argv: list[str] | None = None) -> int:
     p_pipe.add_argument("--plan", type=Path, default=None)
     p_pipe.add_argument("--run-dir", type=Path, default=None)
     p_pipe.add_argument("--vision-agree", action="store_true")
+    p_pipe.add_argument(
+        "--live-planner",
+        action="store_true",
+        help="without --plan, plan search phrases with the model in planner.yaml (one call, one retry on a rejected plan)",
+    )
+    p_pipe.add_argument("--planner-config", type=Path, default=None)
     p_pipe.add_argument("--live-vision", action="store_true",
                         help="Use the configured vision wire after model agreement")
     p_pipe.add_argument("--allow-export", action="store_true")
@@ -1152,6 +1159,14 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
             video_id, dest, span, timeout=analysis_timeout_s(span), format_id=format_id
         )
 
+    planner_wire = None
+    if args.live_planner and args.plan is None:
+        try:
+            planner_wire = load_planner_wire(root, args.planner_config)
+        except PlannerError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+
     result = advance(
         root,
         brief=args.brief,
@@ -1168,6 +1183,8 @@ def _cmd_run_pipeline(args: argparse.Namespace) -> int:
             sleep_fn=time.sleep,
             tile_caller=call_wired_vision if args.live_vision else None,
             strip_caller=call_wired_vision if args.live_vision else None,
+            planner_caller=call_wired_planner if planner_wire is not None else None,
+            planner_wire=planner_wire,
             rank_fetcher=cached_fetcher(root / "data" / "cache" / "storyboards"),
             fetch_span=fetch_span,
             prefetch_spans=yt.prefetch_analysis,

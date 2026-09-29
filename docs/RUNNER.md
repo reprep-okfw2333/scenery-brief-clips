@@ -1,9 +1,10 @@
 # Pipeline runner
 
-This file was written before the runner existed. It records the stages already
-in the code, the outside systems they touch, and the judgment stops a person
-must still make. The runner chains those stages. It does not replace their
-rules.
+The one-command runner is `run-pipeline` (see "Entry" and "Limits" below).
+The first sections were written before the runner existed and describe the
+stages it chains, the outside systems they touch, and the judgment stops a
+person must still make; "What a person has to walk today" is history. The
+runner does not replace the stages' rules.
 
 Baseline before any runner edit, in this checkout, from commit 2ce67cc:
 
@@ -93,8 +94,13 @@ These are the only reasons the runner stops while the run can still continue:
   stage can take the stage lock without deadlocking the runner.
 
 A frozen plan makes zero planner calls. Without a plan, the runner calls the
-planner only if an injected planner caller is supplied. Otherwise it stops
-and asks for a plan file. It does not call the live planner wire.
+planner only when a planner caller is supplied: `run-pipeline --live-planner`
+wires the model named in planner.yaml (planner prompt v2 states the
+validator's exact-subject rule; a reply that is not JSON or fails validation
+is retried once with the rejection text; network/auth errors are not
+retried). discovery.json records the plan and its provenance (model,
+model_calls, rejected_attempts). Otherwise the runner stops and asks for
+--plan or --live-planner.
 
 Captured judgments and approvals are saved in the run directory and reused
 on resume when their binding still matches. A changed vision model cancels
@@ -168,18 +174,20 @@ cost saving.
 ## Entry
 
     .venv/bin/scenery-brief-clips run-pipeline --brief BRIEF.json --plan PLAN.json
+    .venv/bin/scenery-brief-clips run-pipeline --brief BRIEF.json --live-planner
 
 Resume with the same command plus --run-dir. Optional flags: --vision-agree,
---allow-export, --judgments FILE, --acknowledge-uncertain STAGE, --config,
---root, --theme.
+--live-vision, --live-planner, --planner-config, --allow-export,
+--judgments FILE, --acknowledge-uncertain STAGE, --config, --root, --theme.
 
 The in-process function is scenery_brief_clips.runner.advance. The CLI calls
-that function. Tests call it too, with fakes passed in. The CLI does not
-construct a live model caller. Missing judgments pause.
+that function. Tests call it too, with fakes passed in. The CLI constructs
+live model callers only when asked (--live-vision, --live-planner). Missing
+judgments pause.
 
-## Not this milestone
+## Limits
 
-No live YouTube search, live vision call, live export, or claim that fake
-tests measured speed or token savings. Scene exclusions stay recorded
-context, not new visual gates. Quality, continuity, and shortfall rules are
-unchanged.
+The CLI wires live YouTube search, live vision (--live-vision), the live
+planner (--live-planner) and export (--allow-export) only when asked. Fake
+tests do not measure speed or token savings; benchmark/bench.sh does. Scene
+exclusions stay recorded context, not visual gates.

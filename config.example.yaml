@@ -28,11 +28,17 @@ max_analyze_videos: 1
 # still meets duration_min_s, or reject the excerpt. Fail-closed and deterministic.
 #
 # Analyze concurrency and decode defaults are env vars (not YAML keys):
-#   SCENERY_ANALYZE_WORKERS=4          # parallel spans; set 1 for serial legacy
+#   SCENERY_ANALYZE_WORKERS=2          # parallel spans (default 2; 4 swaps this 1.6 GB host); 1 = serial
 #   SCENERY_DETECT_FRAME_SKIP=1        # PySceneDetect frame skip; set 0 for every frame
 #   SCENERY_CONTINUITY_DECODE_WIDTH=160  # px width before dHash/mean-RGB; set 0 for full frame
 #   SCENERY_ANALYZE_PROFILE=/path.json # optional phase timings dump
 continuity_enabled: true
+# Detector: "blend" (default since 2026-09-29): 6 fps motion-compensated cut
+# test + cross-dissolve blend fit, tolerant of pans and marching crowds
+# (src/scenery_brief_clips/continuity_blend.py; numbers in
+# benchmark/continuity_eval/). "legacy" restores the dHash/mean-RGB threshold
+# gate; the sample_fps/hamming/color keys below apply only to legacy.
+continuity_detector: blend
 continuity_sample_fps: 2.0
 continuity_max_adjacent_hamming: 18
 continuity_max_endpoint_hamming: 22

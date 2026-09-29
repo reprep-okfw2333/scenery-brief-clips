@@ -65,16 +65,21 @@ Honest limits (measured, not assumed):
 
 ## Quick start
 
-  cd /root/projects/scenery-brief-clips
+  cd /root/github-checkouts/reprep-okfw2333/scenery-brief-clips
   .venv/bin/scenery-brief-clips doctor
   .venv/bin/python -m pytest tests/ -q
 
   .venv/bin/scenery-brief-clips explain-prompt "3 clips of ocean waves, 720p, 16:9"
 
   # New structured path (metadata-only discovery; no video download):
-  .venv/bin/scenery-brief-clips run-brief --brief examples/alpaca-brief.json --dry-run
+  # (example briefs: benchmark/{improvement,military,heldout-horses,step4-reddeer}/brief.json)
+  .venv/bin/scenery-brief-clips run-brief --brief benchmark/step4-reddeer/brief.json --dry-run
   #   ...or with a frozen plan file instead of a live planner call:
   .venv/bin/scenery-brief-clips run-brief --brief brief.json --dry-run --plan plan.json
+
+  # One command, brief to verified clips (live planner + live vision + export):
+  .venv/bin/scenery-brief-clips run-pipeline --brief BRIEF.json --live-planner \
+      --vision-agree --live-vision --allow-export --theme NAME
 
   # Legacy prompt path (unchanged):
   .venv/bin/scenery-brief-clips run --dry-run --prompt "Beautiful natural european scenery, 720p, 16:9, 20 individual clips"
@@ -95,10 +100,10 @@ culture). --plan skips the model call entirely and uses a pre-validated plan.
 ## Tests
 
   .venv/bin/python -m pytest tests/ -q
-Last recorded full-suite run: 358 passed on 2026-09-25 (309 inherited + 32
-brief/planner/run-brief + 2 analyze env-default + 15 Jev gate tests; all
-offline, the Jev endpoint is stubbed). The run-brief path was additionally smoke-tested
-live end-to-end with a frozen plan (metadata-only; 6 candidates; no download).
+Last recorded full-suite run: 465 passed, 1 xfailed on 2026-09-29 (all
+offline; model endpoints are stubbed). History: 358 passed on 2026-09-25, when
+the run-brief path was also smoke-tested live with a frozen plan
+(metadata-only; 6 candidates; no download).
 
 ## Requires
 

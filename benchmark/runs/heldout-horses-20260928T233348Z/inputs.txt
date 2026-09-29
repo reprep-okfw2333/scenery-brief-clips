@@ -1,0 +1,2 @@
+BENCH_INPUTS=heldout-horses
+BENCH_DETECTOR=

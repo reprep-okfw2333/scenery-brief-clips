@@ -1,0 +1,2 @@
+BENCH_INPUTS=improvement
+BENCH_DETECTOR=legacy

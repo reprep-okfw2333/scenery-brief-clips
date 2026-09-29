@@ -1,0 +1,121 @@
+[
+ {
+  "brief": "goose",
+  "trial": 0,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "goose flying over a lake",
+   "goose flying over lake at sunset",
+   "goose in flight over calm lake water",
+   "goose flying over lake compilation"
+  ],
+  "elapsed_s": 7.9
+ },
+ {
+  "brief": "goose",
+  "trial": 1,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "goose flying over a lake",
+   "goose flying over lake footage",
+   "wild goose flying over lake at sunset",
+   "goose flying over lake compilation"
+  ],
+  "elapsed_s": 5.9
+ },
+ {
+  "brief": "goose",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "goose flying over a lake",
+   "goose flying over a lake at sunrise",
+   "goose in flight over a calm lake aerial footage"
+  ],
+  "elapsed_s": 6.2
+ },
+ {
+  "brief": "goose",
+  "trial": 3,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "goose flying over a lake",
+   "goose flying over lake footage",
+   "goose flying over lake at sunset",
+   "goose flying over lake compilation"
+  ],
+  "elapsed_s": 6.8
+ },
+ {
+  "brief": "wolf",
+  "trial": 0,
+  "ok": true,
+  "calls": 2,
+  "rejected": [
+   "subject_mismatch"
+  ],
+  "queries": [
+   "wolf running through snow",
+   "wolf sprinting through snow winter",
+   "wolf running through deep snow in forest",
+   "wolf running through snow compilation"
+  ],
+  "elapsed_s": 14.6
+ },
+ {
+  "brief": "wolf",
+  "trial": 1,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "wolf running through snow",
+   "wolf running in deep snow winter",
+   "wolf pack running through snowy forest",
+   "wolf running through snow compilation"
+  ],
+  "elapsed_s": 4.6
+ },
+ {
+  "brief": "wolf",
+  "trial": 2,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "wolf running through snow",
+   "wolf running in deep snow winter",
+   "wolf pack running through snow",
+   "wolf running through snow compilation"
+  ],
+  "elapsed_s": 5.7
+ },
+ {
+  "brief": "wolf",
+  "trial": 3,
+  "ok": true,
+  "calls": 1,
+  "rejected": [],
+  "queries": [
+   "wolf running through snow",
+   "wolf running through snow winter footage",
+   "wolf pack running through deep snow",
+   "wolf running through snow compilation"
+  ],
+  "elapsed_s": 3.8
+ }
+]

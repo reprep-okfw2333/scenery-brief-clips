@@ -1,0 +1,73 @@
+{
+  "label": "step4-reddeer-20260929T003207Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "5:27.43",
+  "max_rss_mb_main_process": 273.4,
+  "stage_sum_s": 325.9,
+  "stages_s": {
+    "discover": 111.49,
+    "rank": 1.4,
+    "agree_vision": 0.0,
+    "label_tiles": 70.93,
+    "apply_scores": 0.02,
+    "analyze": 57.82,
+    "verify_review": 8.89,
+    "shortlist_review": 12.63,
+    "label_strips": 18.62,
+    "shortlist_apply": 0.01,
+    "agree_export": 0.0,
+    "export": 32.72,
+    "verify_export": 11.37
+  },
+  "model_calls": 28,
+  "yield": {
+    "candidates": 9,
+    "candidate_ids": [
+      "g1nLXABEYSM",
+      "zfTTwVZazAo",
+      "d7iNPctM-Qg",
+      "tzmbt0Lm-a0",
+      "mI93bL7qQEA",
+      "eW5PJb3_4jw",
+      "2EtFJf8-As0",
+      "TsxiGDPkrmM",
+      "gceb483xZq0"
+    ],
+    "ranked": 4,
+    "tile_labels": {
+      "keep": 19,
+      "uncertain": 4,
+      "reject": 1
+    },
+    "analyzed_sources": 4,
+    "analysis_ranges": 5,
+    "analysis_seconds_planned": 48.88,
+    "excerpts": 3,
+    "sources_without_excerpts": 1,
+    "continuity_rejected": 0,
+    "shortlist_counts": {
+      "n_candidates": 3,
+      "n_selected": 2,
+      "n_excluded": 1,
+      "n_excluded_by_reason": {
+        "visual match uncertain": 1
+      },
+      "n_sources_without_moments": 1,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 0,
+      "n_continuity_rejected_upstream_by_reason": {}
+    },
+    "clips_delivered": 2,
+    "clips": [
+      "d7iNPctM-Qg_e0_6500-12500.mp4",
+      "zfTTwVZazAo_e0_300-9700.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/step4-reddeer-20260929T003207Z/data/runs/20260929T003209Z"
+}

@@ -43,7 +43,7 @@ def test_plan_queries_valid_plan_round_trip():
     assert view["brief_sha256"] == canonical_json_hash(brief)
     assert "search_view_json" not in instruction  # the user message is the JSON only
     assert provenance["schema_version"] == "brief_plan_provenance_v1"
-    assert provenance["instruction_version"] == "search_query_planner_v1"
+    assert provenance["instruction_version"] == "search_query_planner_v2"
     assert provenance["instruction_version"] == PLANNER_INSTRUCTION_VERSION
     assert provenance["backend"] == "codex-login"
     assert provenance["model"] == "gpt-test"
@@ -71,8 +71,9 @@ def test_plan_queries_provenance_has_no_secrets():
     assert "base_url" not in provenance
     assert set(provenance) == {
         "schema_version", "instruction_version", "backend", "model",
-        "elapsed_s", "plan_sha256",
+        "elapsed_s", "plan_sha256", "model_calls", "rejected_attempts",
     }
+    assert provenance["model_calls"] == 1 and provenance["rejected_attempts"] == []
 
 
 def test_plan_queries_wrong_hash_is_a_planner_error():

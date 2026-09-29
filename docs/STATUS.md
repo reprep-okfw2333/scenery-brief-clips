@@ -1,7 +1,10 @@
 # Status (read this first)
 
-Latest session (2026-09-28): see HANDOFF.md in the project root for what was
-done, results, and next steps. Running log: docs/PLAN-PROGRESS-2026-09-28.md.
+Latest sessions (2026-09-28/29): see HANDOFF.md in the project root for the
+current state, results, and next steps. Running log:
+docs/PLAN-PROGRESS-2026-09-28.md. Plan steps 1-2 are committed (ba4779d);
+steps 3-4 (blend continuity default, live planner) are committed locally in
+the "feat: blend continuity detector" commit, not pushed.
 
 ## Latest delivery — Brazilian military, 16 of 20 (2026-09-27)
 
@@ -30,8 +33,20 @@ analysis cache policy it recorded (v4 or v3); the Brazil run still verifies.
 Step 3 evaluated but not built: the keep-ratio gate is contradicted by the
 Brazil data, and the yield loss is continuity-gate false rejects on camera
 motion (see docs/ISSUES.md). Full suite 405 passed.
+Step 3 (in the "feat: blend continuity detector" commit): continuity detector `blend`, the DEFAULT since
+2026-09-29 (owner approved; `continuity_detector: legacy` restores the old gate): motion-compensated cut
+test + cross-dissolve blend fit at 6 fps. Labeled set: legacy rejects 25/50
+continuous shots, blend 2/50, both keep 0/16 transitions. Held-out horses run:
+blend 0 errors, legacy kept 3 jump cuts. Military benchmark excerpts 3 -> 7.
+See docs/ISSUES.md. Full suite 436 passed, 1 xfailed.
+Step 4 (in the "feat: blend continuity detector" commit, 2026-09-29): planner prompt v2 states the validator's
+exact-subject rule; a rejected reply is retried once with the error;
+`run-pipeline --live-planner` plans with planner.yaml. Live first-attempt
+validity 8/27 -> 25/27, 27/27 with retry. First one-command live run on a new
+theme (red deer): completed 2/2, verify ok, 5:27. Full suite 465 passed,
+1 xfailed. benchmark/RESULTS-2026-09-29-step4.md.
 
-## Active improvement pass — not yet signed off
+## Improvement pass (2026-09-25) — superseded: committed in eedb911
 
 Local changes and acceptance criteria: docs/IMPROVEMENT_PASS.md. Observed results:
 benchmark/improvement/RESULTS.md. A live automatic run exported 2/2 720p clips
@@ -89,7 +104,7 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 405 passed on 2026-09-28 (374 on 2026-09-25). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
+Tests: 465 passed, 1 xfailed on 2026-09-29 (405 on 2026-09-28, 374 on 2026-09-25). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to
@@ -474,8 +489,9 @@ recorded context, not enforced visual gates.
 
 The implemented Part 7A/7B/7C above covers brief validation, the bounded
 planner, and the run-brief discovery path (see the implemented section for
-evidence). Still design-only: a live planner-model run from this project, and
-any future work making brief exclusions enforceable by the vision stages.
+evidence). The live planner now runs from this project (`run-pipeline
+--live-planner`, 2026-09-29). Still design-only: making brief exclusions
+enforceable by the vision stages.
 docs/SEARCH_BRIEF.md keeps the full contract; obtain agreement before coding
 more.
 

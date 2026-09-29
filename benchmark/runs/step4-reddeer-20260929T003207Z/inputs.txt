@@ -1,0 +1,2 @@
+BENCH_INPUTS=step4-reddeer
+BENCH_DETECTOR=

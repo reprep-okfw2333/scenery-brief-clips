@@ -1,0 +1,247 @@
+{
+ "A00": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Marching soldiers, handheld tracking; a soldier passes close to camera."
+ },
+ "A01": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Marching cadets on wet road, continuous side tracking."
+ },
+ "A02": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Slow pan across parade ground with flag and buildings shifting continuously."
+ },
+ "A03": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Pan and zoom from armored vehicle to marching group; shared fence and vehicle move continuously."
+ },
+ "A04": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Pan right following marching column, flag enters continuously."
+ },
+ "A05": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Firefighters marching, single handheld shot with spectators."
+ },
+ "A06": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Fast pan then zoom on marching cadets; crowd and road continuous."
+ },
+ "A07": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Police marching, one handheld shot."
+ },
+ "A08": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Long slow pan/zoom across marching white uniforms."
+ },
+ "A09": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Artillery firing with smoke plume, one fixed shot."
+ },
+ "A10": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Whip pan left across parade ground, flag and building shift about 70px per frame."
+ },
+ "A11": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Handheld shot of spectators in stands, pans, hair passes lens, then turns to parade ground."
+ },
+ "A12": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Marching soldiers saluting, one continuous shot with slight zoom out."
+ },
+ "A13": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Marching soldiers with pan and tilt; flag enters."
+ },
+ "A14": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Street parade, handheld shot with flags passing."
+ },
+ "A15": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Parade ground with spectators in foreground, static shot."
+ },
+ "A16": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Military jeep passing crowd, handheld tracking."
+ },
+ "A17": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Same window as A11: spectators in stands, handheld pan, continuous."
+ },
+ "A18": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Parade ground with pan right revealing flag and dome."
+ },
+ "A19": {
+  "label": "transition",
+  "at_frame": 1,
+  "kind": "dissolve",
+  "confidence": "high",
+  "note": "Frame 0 shows close-up soldiers with staffs; frame 1 shows their ghost fading over a wide street scene, then the wide shot continues."
+ },
+ "A20": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Marching with flags, pan with zoom, standing soldier enters right."
+ },
+ "A21": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Fast pan right across parade ground; tree and flag shift continuously."
+ },
+ "A22": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Band marching down street, slow tracking."
+ },
+ "A23": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Marching paras, camera zooms/pans away to empty wet road then back; white building shared."
+ },
+ "A24": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "medium",
+  "note": "Drum corps marching then pan right along stand to empty road; continuous."
+ },
+ "A25": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Soldiers marching on wet road, tracking shot."
+ },
+ "A26": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Police with shields and flags marching, camera pulls back gradually."
+ },
+ "A27": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Marching column on parade ground, pan right, standing soldier enters right."
+ },
+ "A28": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Soldiers with flag on wet road, tracking."
+ },
+ "A29": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Generated still image of soldier by river with slight zoom."
+ },
+ "A30": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Pan then zoom in on marching troops; phone-holder in frame moves."
+ },
+ "A31": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Zoom out on marching troops, gradual across frames 5-9."
+ },
+ "A32": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Still image of vehicle and soldiers, static."
+ },
+ "A33": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Jeep passing crowd with sailors marching, camera zooms in."
+ },
+ "A34": {
+  "label": "continuous",
+  "at_frame": null,
+  "kind": null,
+  "confidence": "high",
+  "note": "Motorcycles passing on parade ground, pan right."
+ }
+}

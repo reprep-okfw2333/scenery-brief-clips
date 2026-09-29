@@ -1,0 +1,91 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "three 720p cinematic clips of horses grazing in a meadow",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "horses",
+        "min_visible": 1
+      }
+    ],
+    "setting": null,
+    "action": "grazing in a meadow",
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "horses grazing",
+  "geography": null,
+  "n_clips": 3,
+  "clip_duration_s": {
+    "min": 4,
+    "target": 6,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 10,
+    "max_metadata_fetches": 10,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_clarification",
+      "quote": "three 720p cinematic clips of horses grazing in a meadow"
+    },
+    "scene.setting": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.action": {
+      "origin": "user_clarification",
+      "quote": "three 720p cinematic clips of horses grazing in a meadow"
+    },
+    "scene.required_other": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.excluded": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "geography": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "n_clips": {
+      "origin": "user_clarification",
+      "quote": "three 720p cinematic clips of horses grazing in a meadow"
+    },
+    "clip_duration_s": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "source_geometry": {
+      "origin": "user_clarification",
+      "quote": "three 720p cinematic clips of horses grazing in a meadow"
+    },
+    "export_max_height": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "delivery": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "search_limits": {
+      "origin": "project_default",
+      "quote": null
+    }
+  }
+}

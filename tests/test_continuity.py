@@ -141,7 +141,7 @@ def test_gate_excerpt_on_stable_fixture_keeps():
         target_s=6.0,
         min_s=4.0,
         max_s=12.0,
-        settings=ContinuitySettings(),
+        settings=ContinuitySettings(detector="legacy"),
     )
     assert decision.action == "keep"
     assert decision.start_s == 0.5
@@ -158,7 +158,7 @@ def test_gate_excerpt_on_hard_cut_fixture_trims_or_rejects():
         target_s=6.0,
         min_s=4.0,
         max_s=12.0,
-        settings=ContinuitySettings(),
+        settings=ContinuitySettings(detector="legacy"),
     )
     assert decision.action in {"trim", "reject"}
     if decision.action == "trim":
@@ -176,7 +176,7 @@ def test_gate_excerpt_late_cut_trims_away_tail():
         target_s=6.0,
         min_s=3.5,
         max_s=12.0,
-        settings=ContinuitySettings(),
+        settings=ContinuitySettings(detector="legacy"),
     )
     assert decision.action == "trim"
     assert decision.end_s - decision.start_s >= 3.5
@@ -237,7 +237,7 @@ def test_analyze_run_continuity_gate_rejects_cut_window(tmp_path):
         fetch_span=fetch,
         detect_fn=detect,
         max_videos=1,
-        continuity_settings=ContinuitySettings(),
+        continuity_settings=ContinuitySettings(detector="legacy"),
     )
     assert len(rows) == 1
     assert rows[0]["status"] == "complete"

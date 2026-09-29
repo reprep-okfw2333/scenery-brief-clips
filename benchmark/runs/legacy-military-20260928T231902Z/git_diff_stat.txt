@@ -1,0 +1,8 @@
+ benchmark/bench.sh                    |  13 +++-
+ config.example.yaml                   |   6 ++
+ docs/ARCHITECTURE.md                  |   2 +-
+ docs/PLAN-PROGRESS-2026-09-28.md      |  67 +++++++++++++++++
+ src/scenery_brief_clips/config.py     |   3 +
+ src/scenery_brief_clips/continuity.py | 138 ++++++++++++++++++++++++++++++++++
+ src/scenery_brief_clips/runner.py     |   3 +
+ 7 files changed, 230 insertions(+), 2 deletions(-)

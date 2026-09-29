@@ -1,0 +1,2 @@
+BENCH_INPUTS=military
+BENCH_DETECTOR=blend

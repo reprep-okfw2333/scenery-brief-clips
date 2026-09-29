@@ -9,7 +9,7 @@ From the project root. Prefer the venv binary (`uv` is often not on PATH):
   .venv/bin/scenery-brief-clips explain-prompt "PROMPT"
   .venv/bin/scenery-brief-clips run --dry-run --prompt "PROMPT" [--max-results N] [--max-metadata N] [--sleep S] [--config PATH]
   .venv/bin/scenery-brief-clips run-brief --brief BRIEF.json --dry-run [--plan PLAN.json] [--planner-config PATH] [--max-results N] [--max-metadata N] [--sleep S]
-  .venv/bin/scenery-brief-clips run-pipeline --brief BRIEF.json [--plan PLAN.json] [--run-dir RUN] [--vision-agree] [--allow-export] [--judgments FILE] [--acknowledge-uncertain STAGE] [--theme SLUG]
+  .venv/bin/scenery-brief-clips run-pipeline --brief BRIEF.json [--plan PLAN.json | --live-planner [--planner-config FILE]] [--run-dir RUN] [--vision-agree] [--live-vision] [--allow-export] [--judgments FILE] [--acknowledge-uncertain STAGE] [--theme SLUG]
   .venv/bin/scenery-brief-clips jev-gate --run-dir data/runs/<id> [--config PATH]   # optional, off unless jev_gate: true
   .venv/bin/scenery-brief-clips rank --run-dir data/runs/<id> [--max-videos N] [--max-tiles N] [--config PATH]
   .venv/bin/scenery-brief-clips apply-scores --run-dir data/runs/<id> --scores data/runs/<id>/vision_scores.json
@@ -62,7 +62,7 @@ apply-scores
   Relabel ranked.json from vision_scores.json. Writes ranked_before_vision.json once. See docs/VISION.md. Invalid score files (wrong shape, unknown labels, non-finite timestamps) exit 2 without touching ranked.json. Score ids that match no ranked row are reported as unmatched_score_ids (stderr warning + payload field) instead of being silently ignored.
 
 analyze
-  promising/uncertain rows only. Selected-window ≤720p video-only ranges (stream copy + copyts, one yt-dlp call per video, export rendition pinned when ≤720p), validated span-keyed cache, PySceneDetect, continuity gate (dHash + mean-RGB trim/reject), excerpts.json + analysis_manifest.json.
+  promising/uncertain rows only. Selected-window ≤720p video-only ranges (stream copy + copyts, one yt-dlp call per video, export rendition pinned when ≤720p), validated span-keyed cache, PySceneDetect, continuity gate (default `blend`: motion-tolerant cut/dissolve detector; `legacy`: dHash + mean-RGB; trim/reject), excerpts.json + analysis_manifest.json.
   Defaults: --max-videos 1, --max-analysis-s 120 unless config overrides. Partial/failed/invalid work exits 1; complete sources with no usable cuts are counted explicitly.
   Spans across selected videos run concurrently (default 2 workers). Scene detection defaults to frame_skip=1; continuity decode width defaults to 160px before dHash/mean-RGB. Applies to runs from both legacy `run` and `run-brief`. Env overrides restore legacy serial/full-frame behaviour:
     SCENERY_ANALYZE_WORKERS=1 SCENERY_DETECT_FRAME_SKIP=0 SCENERY_CONTINUITY_DECODE_WIDTH=0
