@@ -4,8 +4,9 @@ Latest sessions (2026-09-28/29): see HANDOFF.md in the project root for the
 current state, results, and next steps. Running log:
 docs/PLAN-PROGRESS-2026-09-28.md. Plan steps 1-2 are committed (ba4779d);
 steps 3-4 (blend continuity default, live planner) and step 5 (brief form)
-are committed and pushed on branch fix/analysis-download-bounds, not merged
-to master.
+were developed on branch fix/analysis-download-bounds, merged into master
+by fast-forward on 2026-09-29 together with B1/B2/B2b, Jev (off by default)
+and the unattended-first track.
 
 ## Latest delivery — Brazilian military, 16 of 20 (2026-09-27)
 

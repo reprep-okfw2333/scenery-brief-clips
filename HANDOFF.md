@@ -8,8 +8,12 @@
 > proxy proves it. The always-on part (circuit breaker + status `blocked`)
 > is also unit-tested only.
 
-Branch: `fix/analysis-download-bounds`. Nothing is merged to `master`
-(master = eedb911).
+Branch: `fix/analysis-download-bounds`, MERGED into `master` by fast-forward
+on 2026-09-29 (owner: "can you merge now?"; before: master = eedb911). Checks
+before the merge: master had no commits of its own (fast-forward, no
+conflicts); full suite 1104 passed, 1 xfailed on the exact head; standalone
+`verify --require-export` ok on the pre-branch Brazil run and on batch2 R07
+and R05; `doctor` clean. New work: branch from master.
 
 - **Committed and pushed** (owner, 2026-09-29: "commit everything and push
   but not merge"):
@@ -265,9 +269,9 @@ dissolve in the blend detector; on real footage such false alarms only trim).
   exclusions are not enforced.
 - Benchmark noise about +-15% per stage. Step-2c timings were inflated by a
   Hermes headless Chrome on the host; clean legacy military is 4:57 wall.
-- Branch/skill mismatch still stands: `.hermes/skills/scenery-clips/SKILL.md`
-  step 1 requires HEAD == origin/master, and the skill does not use
-  `run-pipeline` (plan step 6).
+- The Hermes skill (`.hermes/skills/scenery-clips/SKILL.md`) requires HEAD ==
+  origin/master, which holds again since the merge; it still drives the
+  step-by-step commands, not `run-pipeline` (plan step 6, on hold).
 
 ## Decisions (and why)
 
@@ -298,7 +302,7 @@ dissolve in the blend detector; on real footage such false alarms only trim).
   cookies/proxy only as an explicit opt-in used after a refusal. Owner
   (2026-09-29): keep the fallback OFF and documented as not yet functional.
 - Post-87f17c3 work was kept local, then committed and pushed on the owner's
-  request (2026-09-29 evening); still not merged.
+  request (2026-09-29 evening); merged into master later that evening.
 - Tried and dropped: lagged/masked residual (signals.py v2) did not separate
   dissolves from motion; first continuity labels were on buggy sheets
   (output-side `-t`); running pytest or two benchmarks concurrently.
@@ -334,7 +338,7 @@ order".
    confirm `youtube_fallback_used: true` and no credential in any run file.
    Note: the project config.yaml is not gitignored; never put a proxy URL
    with a password there.
-3. Owner decisions open: merge to master; cookies vs proxy vs waiting; B3
+3. Owner decisions open: cookies vs proxy vs waiting; B3
    design; Jev defaults.
 4. B3 brief profiles: partly superseded by the unattended track (sources
    scale with n_clips, labels stop at n_clips). Left: letting "uncertain"
@@ -343,7 +347,7 @@ order".
    (place not a priority).
 5. Plan step 6 (Hermes skill) on hold; plan step 7 (quality signals)
    deprioritized.
-6. Merge to master only when the owner asks.
+6. Merged into master (2026-09-29). Further merges only when the owner asks.
 
 ## Commands
 
