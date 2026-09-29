@@ -1,0 +1,59 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "two clips of the Northern Lights over Norway, around 10 seconds each",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "Northern Lights",
+        "min_visible": 1
+      }
+    ],
+    "setting": null,
+    "action": null,
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "Northern Lights over Norway",
+  "geography": "Norway",
+  "n_clips": 2,
+  "clip_duration_s": {
+    "min": 8,
+    "target": 10,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "Northern Lights"
+    },
+    "geography": {
+      "origin": "user_explicit",
+      "quote": "Norway"
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "two"
+    },
+    "clip_duration_s": {
+      "origin": "user_explicit",
+      "quote": "around 10 seconds"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "status": "failed",
+  "stage": "analyze",
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/batch1-R11-20260929T113607Z/data/runs/20260929T113608Z",
+  "missing": null,
+  "how_to_supply": null,
+  "vision_model": null,
+  "error": "analyze failed for Lc4Bn1v8iZk",
+  "jev": {
+    "enabled": false,
+    "reason": "runner_forces_off"
+  },
+  "timing": {
+    "stages": [
+      {
+        "stage": "discover",
+        "status": "executed",
+        "elapsed_s": 191.448091,
+        "model_calls": 1,
+        "tokens": null
+      },
+      {
+        "stage": "rank",
+        "status": "executed",
+        "elapsed_s": 3.849695,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_vision",
+        "status": "executed",
+        "elapsed_s": 0.003149,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_tiles",
+        "status": "executed",
+        "elapsed_s": 97.128413,
+        "model_calls": 23,
+        "tokens": null
+      },
+      {
+        "stage": "apply_scores",
+        "status": "executed",
+        "elapsed_s": 0.018948,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "analyze",
+        "status": "failed",
+        "elapsed_s": 84.156716,
+        "model_calls": 0,
+        "tokens": null
+      }
+    ],
+    "retries": 0,
+    "waiting_for_input_s": 0.0
+  }
+}

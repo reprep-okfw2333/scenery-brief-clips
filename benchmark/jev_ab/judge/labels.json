@@ -1,0 +1,82 @@
+[
+ {
+  "clip": "c001",
+  "subject_visible": "partly",
+  "matches_request": "partly",
+  "european_look": "yes",
+  "real_footage": "yes",
+  "issues": [
+   "other",
+   "shaky"
+  ],
+  "verdict": "acceptable",
+  "note": "Drone flight over conifers; small lake only far in background, often hidden by treetops. Lake is not the subject."
+ },
+ {
+  "clip": "c002",
+  "subject_visible": "yes",
+  "matches_request": "partly",
+  "european_look": "no",
+  "real_footage": "yes",
+  "issues": [
+   "other"
+  ],
+  "verdict": "bad",
+  "note": "Real lake but looks North American (Rockies/Glacier NP style, turquoise water, pines). Not European alpine."
+ },
+ {
+  "clip": "c003",
+  "subject_visible": "yes",
+  "matches_request": "no",
+  "real_footage": "no",
+  "european_look": "yes",
+  "issues": [
+   "still_or_slideshow",
+   "other"
+  ],
+  "verdict": "bad",
+  "note": "Watercolor/AI illustration with slight motion; not real footage."
+ },
+ {
+  "clip": "c004",
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "european_look": "yes",
+  "real_footage": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Matterhorn over small alpine lake with flowers; static, sharp, clean. Byte-identical to c007."
+ },
+ {
+  "clip": "c005",
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "european_look": "yes",
+  "real_footage": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Aerial of green lake with ferry and lakeside village (Austrian look), smooth drone move."
+ },
+ {
+  "clip": "c006",
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "european_look": "yes",
+  "real_footage": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Aerial of alpine pass lake with rocky slopes and buildings; sharp, stable, no cuts."
+ },
+ {
+  "clip": "c007",
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "european_look": "yes",
+  "real_footage": "yes",
+  "issues": [
+   "other"
+  ],
+  "verdict": "acceptable",
+  "note": "Byte-identical duplicate of c004 (Matterhorn lake). Fine footage, but redundant in a set of 6."
+ }
+]

@@ -1,0 +1,59 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "three cinematic clips of horses grazing in a meadow",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "horse",
+        "min_visible": 1
+      }
+    ],
+    "setting": "meadow",
+    "action": "grazing",
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "cinematic horses grazing in a meadow",
+  "geography": null,
+  "n_clips": 3,
+  "clip_duration_s": {
+    "min": 4,
+    "target": 6,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "horses"
+    },
+    "scene.setting": {
+      "origin": "user_explicit",
+      "quote": "in a meadow"
+    },
+    "scene.action": {
+      "origin": "user_explicit",
+      "quote": "grazing"
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "three"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "traffic",
+        "min_visible": 1
+      }
+    ],
+    "setting": "street at night",
+    "action": null,
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "Tokyo street traffic at night",
+  "geography": "Tokyo",
+  "n_clips": 10,
+  "clip_duration_s": {
+    "min": 8,
+    "target": 11.5,
+    "max": 15
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "street traffic"
+    },
+    "scene.setting": {
+      "origin": "user_explicit",
+      "quote": "at night"
+    },
+    "geography": {
+      "origin": "user_explicit",
+      "quote": "Tokyo"
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "10"
+    },
+    "clip_duration_s": {
+      "origin": "user_explicit",
+      "quote": "8-15 seconds"
+    }
+  }
+}

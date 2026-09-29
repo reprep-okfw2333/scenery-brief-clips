@@ -1,0 +1,110 @@
+{
+  "status": "completed",
+  "stage": "verify_export",
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "missing": null,
+  "how_to_supply": null,
+  "vision_model": null,
+  "error": null,
+  "jev": {
+    "enabled": false,
+    "reason": "config_off"
+  },
+  "timing": {
+    "stages": [
+      {
+        "stage": "discover",
+        "status": "executed",
+        "elapsed_s": 67.532417,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "rank",
+        "status": "executed",
+        "elapsed_s": 9.816664,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_vision",
+        "status": "executed",
+        "elapsed_s": 0.006742,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_tiles",
+        "status": "executed",
+        "elapsed_s": 67.437221,
+        "model_calls": 24,
+        "tokens": null
+      },
+      {
+        "stage": "apply_scores",
+        "status": "executed",
+        "elapsed_s": 0.01741,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "analyze",
+        "status": "executed",
+        "elapsed_s": 288.500263,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "verify_review",
+        "status": "executed",
+        "elapsed_s": 42.789954,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "shortlist_review",
+        "status": "executed",
+        "elapsed_s": 72.908861,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_strips",
+        "status": "executed",
+        "elapsed_s": 49.06621,
+        "model_calls": 14,
+        "tokens": null
+      },
+      {
+        "stage": "shortlist_apply",
+        "status": "executed",
+        "elapsed_s": 0.017652,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_export",
+        "status": "executed",
+        "elapsed_s": 0.005328,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "export",
+        "status": "executed",
+        "elapsed_s": 67.120851,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "verify_export",
+        "status": "executed",
+        "elapsed_s": 10.07999,
+        "model_calls": 0,
+        "tokens": null
+      }
+    ],
+    "retries": 0,
+    "waiting_for_input_s": 0.0
+  }
+}

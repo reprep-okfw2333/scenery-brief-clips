@@ -1,0 +1,321 @@
+[
+ {
+  "run": "R01",
+  "request_text": "three cinematic clips of horses grazing in a meadow",
+  "clip": "0QniL_FyXYo_e0_97100-102476.mp4",
+  "duration_s": 5.4,
+  "subject_visible": "partly",
+  "matches_request": "partly",
+  "issues": [
+   "blurry_or_low_quality",
+   "other"
+  ],
+  "verdict": "acceptable",
+  "note": "Horses are tiny in a wide, tilted phone-quality shot; grazing but not cinematic."
+ },
+ {
+  "run": "R01",
+  "request_text": "three cinematic clips of horses grazing in a meadow",
+  "clip": "iikEpgWHzqI_e1_714770-719770.mp4",
+  "duration_s": 5.0,
+  "subject_visible": "yes",
+  "matches_request": "partly",
+  "issues": [],
+  "verdict": "good",
+  "note": "Single horse grazing at dusk on a dry, sparse field; cinematic shallow focus but not a lush meadow."
+ },
+ {
+  "run": "R01",
+  "request_text": "three cinematic clips of horses grazing in a meadow",
+  "clip": "jRhqBh6E_Zk_e4_838416-844416.mp4",
+  "duration_s": 6.0,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Aerial view of horses grazing on a green meadow; clean and smooth."
+ },
+ {
+  "run": "R03",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "clip": "WHPEKLQID4U_e0_4498-7498.mp4",
+  "duration_s": 3.0,
+  "subject_visible": "yes",
+  "matches_request": "partly",
+  "issues": [
+   "watermark_or_logo"
+  ],
+  "verdict": "acceptable",
+  "note": "Gentle waves rolling onto a beach, not really crashing; RelaxingWhiteNoise.com logo burned in bottom left."
+ },
+ {
+  "run": "R03",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "clip": "WHPEKLQID4U_e1_7201500-7204500.mp4",
+  "duration_s": 3.0,
+  "subject_visible": "yes",
+  "matches_request": "partly",
+  "issues": [
+   "watermark_or_logo"
+  ],
+  "verdict": "acceptable",
+  "note": "Calm surf on the beach, weak crashing action; RelaxingWhiteNoise.com logo burned in."
+ },
+ {
+  "run": "R03",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "clip": "bn9F19Hi1Lk_e0_4498-7498.mp4",
+  "duration_s": 3.0,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Night surf, foamy waves breaking on the shore; dark blue but clean, no logo."
+ },
+ {
+  "run": "R03",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "clip": "bn9F19Hi1Lk_e1_8121300-8124300.mp4",
+  "duration_s": 3.0,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Night surf with breaking waves and foam; dark but clean, no logo."
+ },
+ {
+  "run": "R03",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "clip": "wATW85Biu2c_e0_4498-7498.mp4",
+  "duration_s": 3.0,
+  "subject_visible": "yes",
+  "matches_request": "partly",
+  "issues": [
+   "watermark_or_logo"
+  ],
+  "verdict": "acceptable",
+  "note": "Aerial of foamy surf over rocks at golden light, mostly churning foam rather than a crash; 5minutesleep.com logo burned in."
+ },
+ {
+  "run": "R03",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "clip": "wATW85Biu2c_e1_7201500-7204500.mp4",
+  "duration_s": 3.0,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [
+   "watermark_or_logo"
+  ],
+  "verdict": "acceptable",
+  "note": "Waves splash and crash on rocks; 5minutesleep.com logo burned in."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "AmjJ8Ha2zpQ_e1_465750-477250.mp4",
+  "duration_s": 11.51,
+  "subject_visible": "no",
+  "matches_request": "partly",
+  "issues": [
+   "watermark_or_logo",
+   "people_prominent",
+   "other"
+  ],
+  "verdict": "bad",
+  "note": "Foreground is people's heads and a pole at a crossing; almost no traffic; 'A LITTLE CLOSER JAPAN' watermark."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "AmjJ8Ha2zpQ_e2_1390555-1403900.mp4",
+  "duration_s": 13.35,
+  "subject_visible": "partly",
+  "matches_request": "partly",
+  "issues": [
+   "watermark_or_logo",
+   "people_prominent"
+  ],
+  "verdict": "bad",
+  "note": "Pedestrians at a night street corner with only a few cars, not traffic; faint 'A LITTLE CLOSER JAPAN' watermark."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "H-1stPtm7gM_e1_754900-768255.mp4",
+  "duration_s": 13.35,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Stationary night traffic with tail lights on a Tokyo-looking road; clean and steady."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "H-1stPtm7gM_e2_1511500-1524855.mp4",
+  "duration_s": 13.35,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [
+   "text_overlay"
+  ],
+  "verdict": "acceptable",
+  "note": "Fast hyperlapse drive through night streets, continuous, no cut; small purple overlay strip at the bottom centre."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "H-1stPtm7gM_e3_2258145-2271500.mp4",
+  "duration_s": 13.35,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [
+   "text_overlay"
+  ],
+  "verdict": "acceptable",
+  "note": "Hyperlapse night drive under elevated roads with plenty of cars, continuous; small overlay strip at the bottom."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "H-1stPtm7gM_e4_3014745-3028100.mp4",
+  "duration_s": 13.38,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [
+   "text_overlay"
+  ],
+  "verdict": "acceptable",
+  "note": "Hyperlapse night drive with intersections and cars, continuous; small purple overlay strip at the bottom."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "U_A8KODShLs_e0_449901-457901.mp4",
+  "duration_s": 8.0,
+  "subject_visible": "partly",
+  "matches_request": "partly",
+  "issues": [
+   "blurry_or_low_quality",
+   "other"
+  ],
+  "verdict": "bad",
+  "note": "Rain-streaked windshield with a wiper sweeping across and red glare smears; hard to use."
+ },
+ {
+  "run": "R05",
+  "request_text": "10 clips of Tokyo street traffic at night, 8-15 seconds",
+  "clip": "b9XY3-SEJ-c_e1_1233900-1247265.mp4",
+  "duration_s": 13.35,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Steady night drive on a multi-lane road with a truck ahead and overhead blue signs; dark but clean."
+ },
+ {
+  "run": "R07",
+  "request_text": "four clips of red deer in a misty forest, no people",
+  "clip": "Cfabf1bk86o_e1_258127-264127.mp4",
+  "duration_s": 6.0,
+  "subject_visible": "yes",
+  "matches_request": "partly",
+  "issues": [],
+  "verdict": "acceptable",
+  "note": "Red deer stag in a bracken meadow with trees behind; no mist and not inside a forest."
+ },
+ {
+  "run": "R07",
+  "request_text": "four clips of red deer in a misty forest, no people",
+  "clip": "Cfabf1bk86o_e2_510700-520500.mp4",
+  "duration_s": 9.8,
+  "subject_visible": "partly",
+  "matches_request": "partly",
+  "issues": [],
+  "verdict": "acceptable",
+  "note": "Stags lying and standing in grass, small in frame and hazy; grassland, not a misty forest."
+ },
+ {
+  "run": "R07",
+  "request_text": "four clips of red deer in a misty forest, no people",
+  "clip": "eXhWiDLiLWE_e3_118060-122095.mp4",
+  "duration_s": 4.04,
+  "subject_visible": "partly",
+  "matches_request": "no",
+  "issues": [
+   "watermark_or_logo",
+   "text_overlay",
+   "other"
+  ],
+  "verdict": "bad",
+  "note": "Fallow-type deer silhouettes on a frosty field with large semi-transparent name watermark across the frame; not red deer and not a forest."
+ },
+ {
+  "run": "R07",
+  "request_text": "four clips of red deer in a misty forest, no people",
+  "clip": "mI93bL7qQEA_e0_82114-90444.mp4",
+  "duration_s": 8.36,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Group of red deer stags looking at the camera between tree trunks in a forest; static but clean."
+ },
+ {
+  "run": "R09",
+  "request_text": "6 European alpine lake clips, 5-10 seconds, 720p",
+  "clip": "6BEoWVmmM0E_e0_300-6980.mp4",
+  "duration_s": 6.68,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Aerial of a mountain lake with buildings and peaks in sunlight; plausibly alpine."
+ },
+ {
+  "run": "R09",
+  "request_text": "6 European alpine lake clips, 5-10 seconds, 720p",
+  "clip": "6BEoWVmmM0E_e1_422068-429568.mp4",
+  "duration_s": 7.52,
+  "subject_visible": "partly",
+  "matches_request": "partly",
+  "issues": [],
+  "verdict": "acceptable",
+  "note": "Aerial over conifers with autumn colours; the lake is only a small patch in the distance."
+ },
+ {
+  "run": "R09",
+  "request_text": "6 European alpine lake clips, 5-10 seconds, 720p",
+  "clip": "6BEoWVmmM0E_e3_846060-854020.mp4",
+  "duration_s": 7.96,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Aerial along a cliff to a turquoise alpine lake with snowy peaks behind; clean."
+ },
+ {
+  "run": "R10",
+  "request_text": "two clips of camels walking in the Sahara at sunset",
+  "clip": "UjvJlX2l7xA_e0_7095-11473.mp4",
+  "duration_s": 4.36,
+  "subject_visible": "yes",
+  "matches_request": "yes",
+  "issues": [],
+  "verdict": "good",
+  "note": "Silhouetted camels walking against a low sun with a handler at left; scrubby desert, sunset glow."
+ },
+ {
+  "run": "R10",
+  "request_text": "two clips of camels walking in the Sahara at sunset",
+  "clip": "jAylknIJSyA_e1_23512-27882.mp4",
+  "duration_s": 4.37,
+  "subject_visible": "yes",
+  "matches_request": "no",
+  "issues": [
+   "other"
+  ],
+  "verdict": "bad",
+  "note": "Camel caravan in bright daytime with blue sky, not sunset; car mirror and streaked windshield in frame."
+ }
+]

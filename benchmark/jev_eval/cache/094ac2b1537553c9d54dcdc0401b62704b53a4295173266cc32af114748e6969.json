@@ -1,0 +1,1 @@
+{"answers": {"violation": {"type": "noul", "noul": 0.63}}, "cost": 2.3646e-05, "input_tokens": 563, "latency_s": 0.293, "served_by": "typesafe/jev-1.13-20260917"}

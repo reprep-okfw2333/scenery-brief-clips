@@ -1,0 +1,37 @@
+{
+ "c001": {
+  "brief": "R09",
+  "arm": "C",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-C-20260929T150632Z/out/bench-jevab-r09-c/clips/6BEoWVmmM0E_e1_422068-429568.mp4"
+ },
+ "c002": {
+  "brief": "R09",
+  "arm": "J",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-J-20260929T144720Z/out/bench-jevab-r09-j/clips/QnjD8eQYTDs_e2_6479244-6486744.mp4"
+ },
+ "c003": {
+  "brief": "R09",
+  "arm": "J",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-J-20260929T144720Z/out/bench-jevab-r09-j/clips/CyILvHE6sEc_e0_2238-9738.mp4"
+ },
+ "c004": {
+  "brief": "R09",
+  "arm": "C",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-C-20260929T150632Z/out/bench-jevab-r09-c/clips/mtIyE2vPApk_e0_719034-726534.mp4"
+ },
+ "c005": {
+  "brief": "R09",
+  "arm": "J",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-J-20260929T144720Z/out/bench-jevab-r09-j/clips/c-qAmOjn5Ok_e0_300-8700.mp4"
+ },
+ "c006": {
+  "brief": "R09",
+  "arm": "C",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-C-20260929T150632Z/out/bench-jevab-r09-c/clips/6BEoWVmmM0E_e0_300-6980.mp4"
+ },
+ "c007": {
+  "brief": "R09",
+  "arm": "J",
+  "clip": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-J-20260929T144720Z/out/bench-jevab-r09-j/clips/mtIyE2vPApk_e0_719034-726534.mp4"
+ }
+}

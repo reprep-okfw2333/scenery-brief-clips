@@ -1,0 +1,247 @@
+{
+  "elapsed_s": 95.6859,
+  "workers": 2,
+  "phases": {
+    "acquire": {
+      "total_s": 0.2192,
+      "count": 7,
+      "pct": 0.23
+    },
+    "detect": {
+      "total_s": 53.7687,
+      "count": 7,
+      "pct": 56.19
+    },
+    "hash": {
+      "total_s": 0.1753,
+      "count": 7,
+      "pct": 0.18
+    },
+    "plan": {
+      "total_s": 0.0004,
+      "count": 2,
+      "pct": 0.0
+    },
+    "pool_wait_wall": {
+      "total_s": 28.9507,
+      "count": 1,
+      "pct": 30.26
+    },
+    "prefetch": {
+      "total_s": 114.3206,
+      "count": 2,
+      "pct": 119.47
+    }
+  },
+  "span_events": [
+    {
+      "phase": "plan",
+      "seconds": 0.0002,
+      "video_id": "Lc4Bn1v8iZk"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "3Di_cJAFr4w"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 47.8795,
+      "video_id": "Lc4Bn1v8iZk"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 66.4412,
+      "video_id": "3Di_cJAFr4w"
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0179,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        116.244,
+        125.171
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0204,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        357.659,
+        366.585
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 9.5136,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        116.244,
+        125.171
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0217,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        116.244,
+        125.171
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0298,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        480.829,
+        489.756
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 10.3034,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        357.659,
+        366.585
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0255,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        357.659,
+        366.585
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0332,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        7315.801,
+        7329.798
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 4.6321,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        480.829,
+        489.756
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0175,
+      "video_id": "Lc4Bn1v8iZk",
+      "span": [
+        480.829,
+        489.756
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.037,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        14633.602,
+        14647.599
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 7.1942,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        7315.801,
+        7329.798
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0228,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        7315.801,
+        7329.798
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0358,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        21961.401,
+        21975.398
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 8.8415,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        14633.602,
+        14647.599
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.029,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        14633.602,
+        14647.599
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.045,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        29279.202,
+        29293.199
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 7.5368,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        21961.401,
+        21975.398
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0473,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        21961.401,
+        21975.398
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 5.747,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        29279.202,
+        29293.199
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0114,
+      "video_id": "3Di_cJAFr4w",
+      "span": [
+        29279.202,
+        29293.199
+      ]
+    }
+  ]
+}

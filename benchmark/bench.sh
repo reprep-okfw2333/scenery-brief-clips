@@ -37,8 +37,29 @@ if [ -n "${BENCH_DETECTOR:-}" ]; then
   sed -i '/^continuity_detector:/d' "$root/config.yaml"
   echo "continuity_detector: $BENCH_DETECTOR" >> "$root/config.yaml"
 fi
+# BENCH_JEV=rank|notes|both turns on Jev (docs/JEV.md) without editing the inputs;
+# BENCH_JEV=off removes any jev_rank/jev_note_check line.
+if [ -n "${BENCH_JEV:-}" ]; then
+  sed -i '/^jev_rank:/d; /^jev_note_check:/d' "$root/config.yaml"
+  case "$BENCH_JEV" in
+    rank) echo "jev_rank: true" >> "$root/config.yaml" ;;
+    notes) echo "jev_note_check: true" >> "$root/config.yaml" ;;
+    both) printf 'jev_rank: true\njev_note_check: true\n' >> "$root/config.yaml" ;;
+    off) ;;
+    *) echo "BENCH_JEV must be rank, notes, both or off" >&2; exit 2 ;;
+  esac
+fi
+# BENCH_SEED_METADATA=<dir> pre-fills the metadata cache (e.g. from the paired
+# Jev run) so a control arm makes fewer YouTube metadata requests. Discovery
+# timing is then not cold; yields are unaffected.
+if [ -n "${BENCH_SEED_METADATA:-}" ]; then
+  mkdir -p "$root/data/cache/metadata"
+  cp "$BENCH_SEED_METADATA"/*.json "$root/data/cache/metadata/"
+fi
 echo "BENCH_INPUTS=${BENCH_INPUTS:-improvement}" > "$out/inputs.txt"
 echo "BENCH_DETECTOR=${BENCH_DETECTOR:-}" >> "$out/inputs.txt"
+echo "BENCH_JEV=${BENCH_JEV:-}" >> "$out/inputs.txt"
+echo "BENCH_SEED_METADATA=${BENCH_SEED_METADATA:-}" >> "$out/inputs.txt"
 
 if [ -z "${OPENROUTER_API_KEY:-}" ] && [ -f "$HOME/.hermes/.env" ]; then
   OPENROUTER_API_KEY="$(grep -E '^OPENROUTER_API_KEY=' "$HOME/.hermes/.env" | tail -1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//')"

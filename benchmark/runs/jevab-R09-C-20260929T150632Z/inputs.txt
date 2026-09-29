@@ -1,0 +1,4 @@
+BENCH_INPUTS=jev_ab/inputs/R09
+BENCH_DETECTOR=
+BENCH_JEV=off
+BENCH_SEED_METADATA=/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/jevab-R09-J-20260929T144720Z/data/cache/metadata

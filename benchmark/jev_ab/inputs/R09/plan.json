@@ -1,0 +1,22 @@
+{
+  "version": "search_queries_v1",
+  "brief_sha256": "a640b2909726d279e75502a6723b22ebf569570cef70b646efc0ee7b5f3d5496",
+  "queries": [
+    {
+      "query": "lake in alpine mountains",
+      "strategy": "exact"
+    },
+    {
+      "query": "european alpine lake scenery",
+      "strategy": "context"
+    },
+    {
+      "query": "lake in high mountain landscape",
+      "strategy": "synonym"
+    },
+    {
+      "query": "alpine lake scenery compilation",
+      "strategy": "compilation"
+    }
+  ]
+}

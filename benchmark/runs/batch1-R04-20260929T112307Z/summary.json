@@ -1,0 +1,86 @@
+{
+  "label": "batch1-R04-20260929T112307Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "12:58.98",
+  "max_rss_mb_main_process": 281.1,
+  "stage_sum_s": 777.23,
+  "stages_s": {
+    "discover": 229.23,
+    "rank": 6.13,
+    "agree_vision": 0.0,
+    "label_tiles": 113.93,
+    "apply_scores": 0.02,
+    "analyze": 166.84,
+    "verify_review": 34.12,
+    "shortlist_review": 23.27,
+    "label_strips": 112.57,
+    "shortlist_apply": 0.02,
+    "agree_export": 0.0,
+    "export": 44.26,
+    "verify_export": 46.84
+  },
+  "model_calls": 28,
+  "yield": {
+    "candidates": 17,
+    "candidate_ids": [
+      "rLK5StH_zFM",
+      "izYiDDt6d8s",
+      "AQxNk9zo47s",
+      "T75IKSXVXlc",
+      "0I1hZCD7sT0",
+      "miqbNFmbN2Q",
+      "fVsONlc3OUY",
+      "cyUGplrq4eY",
+      "WL9EOfzoSsA",
+      "pRZM52QAblA",
+      "ZPG2BjaqHuA",
+      "TwBpIsa6mtA",
+      "C0pTO0Z2wok",
+      "_hp4Wxd4o6E",
+      "taJr7qZGHPI",
+      "I0owJBgaoyQ",
+      "77HsHkOEnUI"
+    ],
+    "ranked": 5,
+    "tile_labels": {
+      "reject": 18,
+      "uncertain": 4,
+      "keep": 8
+    },
+    "analyzed_sources": 5,
+    "analysis_ranges": 10,
+    "analysis_seconds_planned": 131.73,
+    "excerpts": 6,
+    "sources_without_excerpts": 3,
+    "continuity_rejected": 3,
+    "shortlist_counts": {
+      "n_candidates": 6,
+      "n_selected": 2,
+      "n_excluded": 4,
+      "n_excluded_by_reason": {
+        "beyond n_clips": 3,
+        "duplicate of T75IKSXVXlc:1": 1
+      },
+      "n_sources_without_moments": 3,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 3,
+      "n_continuity_rejected_upstream_by_reason": {
+        "stable continuity subspan 3.000s below duration_min_s 8.0": 1,
+        "stable continuity subspan 4.833s below duration_min_s 8.0": 1,
+        "stable continuity subspan 7.167s below duration_min_s 8.0": 1
+      }
+    },
+    "clips_delivered": 2,
+    "clips": [
+      "T75IKSXVXlc_e0_1786193-1796193.mp4",
+      "izYiDDt6d8s_e0_48684-59540.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/batch1-R04-20260929T112307Z/data/runs/20260929T112308Z"
+}

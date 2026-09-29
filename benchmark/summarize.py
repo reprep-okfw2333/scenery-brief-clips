@@ -47,6 +47,21 @@ def main(root: Path, out: Path) -> dict:
     clips = sorted(p.name for p in (root / "out").glob("*/clips/*.mp4"))
     verify_export = _load(run_dir / "verify_export.json") or {}
 
+    discovery = _load(run_dir / "discovery.json") or {}
+    jev_rank = discovery.get("jev_rank") or {}
+    jev_notes = _load(run_dir / "jev_notes.json") or {}
+    log_txt = (run_dir / "log.txt").read_text() if (run_dir / "log.txt").exists() else ""
+    jev = {
+        "rank": bool(jev_rank),
+        "rank_counts": jev_rank.get("counts"),
+        "rank_cost_usd": jev_rank.get("cost_usd"),
+        "note_check": bool(jev_notes),
+        "note_counts": jev_notes.get("counts"),
+        "note_cost_usd": jev_notes.get("cost_usd"),
+        # metadata lookups discovery made (cache hits included), in fetch order
+        "metadata_lookups": len(re.findall(r"^(?:keep|reject|metadata error) ", log_txt, flags=re.M)),
+    }
+
     time_txt = (out / "time.txt").read_text() if (out / "time.txt").exists() else ""
     wall = re.search(r"Elapsed \(wall clock\) time.*: (.+)", time_txt)
     rss = re.search(r"Maximum resident set size \(kbytes\): (\d+)", time_txt)
@@ -63,6 +78,7 @@ def main(root: Path, out: Path) -> dict:
         "stage_sum_s": round(sum(stages.values()), 2),
         "stages_s": stages,
         "model_calls": model_calls,
+        "jev": jev,
         "yield": {
             "candidates": len(candidates),
             "candidate_ids": [c.get("video_id") or c.get("id") for c in candidates],

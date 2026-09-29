@@ -1,0 +1,60 @@
+{
+  "label": "batch1-R04-20260929T031217Z",
+  "exit_code": "1",
+  "status": "failed",
+  "stage": "analyze",
+  "error": "analyze failed for 0I1hZCD7sT0",
+  "missing": null,
+  "wall_clock": "7:31.50",
+  "max_rss_mb_main_process": 277.5,
+  "stage_sum_s": 449.71,
+  "stages_s": {
+    "discover": 197.47,
+    "rank": 5.72,
+    "agree_vision": 0.0,
+    "label_tiles": 71.52,
+    "apply_scores": 0.02,
+    "analyze": 174.98
+  },
+  "model_calls": 23,
+  "yield": {
+    "candidates": 17,
+    "candidate_ids": [
+      "WL9EOfzoSsA",
+      "T75IKSXVXlc",
+      "rLK5StH_zFM",
+      "R8PU_vMOmNM",
+      "0I1hZCD7sT0",
+      "LkDkw_-LSTE",
+      "l6CTRJIp2d0",
+      "ss61y9mj-go",
+      "T3ZWOMt0LIw",
+      "miqbNFmbN2Q",
+      "fVsONlc3OUY",
+      "cyUGplrq4eY",
+      "vZ5CIh4TVpM",
+      "77HsHkOEnUI",
+      "yyxeHtRyoX8",
+      "BHACKCNDMW8",
+      "I0owJBgaoyQ"
+    ],
+    "ranked": 5,
+    "tile_labels": {
+      "reject": 18,
+      "uncertain": 4,
+      "keep": 8
+    },
+    "analyzed_sources": 5,
+    "analysis_ranges": 11,
+    "analysis_seconds_planned": 141.65,
+    "excerpts": 7,
+    "sources_without_excerpts": 2,
+    "continuity_rejected": 2,
+    "shortlist_counts": null,
+    "clips_delivered": 0,
+    "clips": [],
+    "verify_export_ok": null,
+    "request_fulfilled": null
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/batch1-R04-20260929T031217Z/data/runs/20260929T031219Z"
+}

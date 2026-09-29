@@ -1,0 +1,68 @@
+{
+  "status": "failed",
+  "stage": "verify_review",
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/batch1-R11-20260929T042558Z/data/runs/20260929T042559Z",
+  "missing": null,
+  "how_to_supply": null,
+  "vision_model": null,
+  "error": "not ready for shortlist",
+  "jev": {
+    "enabled": false,
+    "reason": "runner_forces_off"
+  },
+  "timing": {
+    "stages": [
+      {
+        "stage": "discover",
+        "status": "executed",
+        "elapsed_s": 234.310944,
+        "model_calls": 1,
+        "tokens": null
+      },
+      {
+        "stage": "rank",
+        "status": "executed",
+        "elapsed_s": 5.378014,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_vision",
+        "status": "executed",
+        "elapsed_s": 0.002644,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_tiles",
+        "status": "executed",
+        "elapsed_s": 73.628277,
+        "model_calls": 23,
+        "tokens": null
+      },
+      {
+        "stage": "apply_scores",
+        "status": "executed",
+        "elapsed_s": 0.013764,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "analyze",
+        "status": "executed",
+        "elapsed_s": 95.695941,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "verify_review",
+        "status": "failed",
+        "elapsed_s": 19.95902,
+        "model_calls": 0,
+        "tokens": null
+      }
+    ],
+    "retries": 0,
+    "waiting_for_input_s": 0.0
+  }
+}

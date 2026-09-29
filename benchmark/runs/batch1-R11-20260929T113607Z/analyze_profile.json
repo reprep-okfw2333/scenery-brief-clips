@@ -1,0 +1,48 @@
+{
+  "elapsed_s": 84.145,
+  "workers": 2,
+  "phases": {
+    "plan": {
+      "total_s": 0.0008,
+      "count": 3,
+      "pct": 0.0
+    },
+    "pool_wait_wall": {
+      "total_s": 74.9729,
+      "count": 1,
+      "pct": 89.1
+    },
+    "prefetch": {
+      "total_s": 17.7424,
+      "count": 2,
+      "pct": 21.09
+    }
+  },
+  "span_events": [
+    {
+      "phase": "plan",
+      "seconds": 0.0003,
+      "video_id": "Lc4Bn1v8iZk"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0004,
+      "video_id": "v6cpshTNXMw"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "44e7oYoDkpA"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 8.844,
+      "video_id": "Lc4Bn1v8iZk"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 8.8984,
+      "video_id": "v6cpshTNXMw"
+    }
+  ]
+}

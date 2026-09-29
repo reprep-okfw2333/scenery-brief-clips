@@ -1,0 +1,9 @@
+ CLAUDE.md                                   |  6 ++++
+ HANDOFF.md                                  | 20 ++++++-----
+ docs/PLAN-PROGRESS-2026-09-28.md            | 34 +++++++++++++++---
+ src/scenery_brief_clips/analysis_cache.py   |  3 ++
+ src/scenery_brief_clips/analyze.py          | 53 ++++++++++++++++++++++++++---
+ src/scenery_brief_clips/pipeline_analyze.py | 35 +++++++++++++++++--
+ src/scenery_brief_clips/verify.py           | 53 ++++++++++++++++++++++++++++-
+ src/scenery_brief_clips/yt.py               | 13 +++++++
+ 8 files changed, 197 insertions(+), 20 deletions(-)
