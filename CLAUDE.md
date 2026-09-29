@@ -54,6 +54,9 @@ working on this repo (2026-09-28/29).
 - Blind contact-sheet labels (sub-agent or human) miss short dissolves and
   loop-seam jump cuts. Where a detector and a label disagree, look at every
   frame before trusting either.
+- pytest collects only classes named `Test*`. A class named `FooTests` is
+  silently skipped (tests/test_brief.py lost 29 tests that way until
+  2026-09-29). Name new test classes `Test...` or use plain functions.
 - ffmpeg contact sheets: put `-t` BEFORE `-i`. With the `tile` filter, an
   output `-t` does not stop input reading.
 - Most runtime modules load at process start, but some load lazily inside

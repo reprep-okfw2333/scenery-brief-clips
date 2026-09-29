@@ -1,0 +1,31 @@
+{
+  "label": "step5-iceland-20260929T012602Z",
+  "exit_code": "143",
+  "status": null,
+  "stage": null,
+  "error": null,
+  "missing": null,
+  "wall_clock": "10:55.24",
+  "max_rss_mb_main_process": 276.7,
+  "stage_sum_s": 0,
+  "stages_s": {},
+  "model_calls": 0,
+  "yield": {
+    "candidates": 0,
+    "candidate_ids": [],
+    "ranked": 0,
+    "tile_labels": {},
+    "analyzed_sources": 0,
+    "analysis_ranges": 0,
+    "analysis_seconds_planned": 0,
+    "excerpts": 0,
+    "sources_without_excerpts": 0,
+    "continuity_rejected": 0,
+    "shortlist_counts": null,
+    "clips_delivered": 0,
+    "clips": [],
+    "verify_export_ok": null,
+    "request_fulfilled": null
+  },
+  "run_dir": "."
+}

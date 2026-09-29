@@ -1,0 +1,86 @@
+{
+  "label": "step5-iceland-20260929T012602Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "13:35.31",
+  "max_rss_mb_main_process": 343.1,
+  "stage_sum_s": 814.26,
+  "stages_s": {
+    "discover": 0.0,
+    "rank": 0.0,
+    "agree_vision": 0.0,
+    "label_tiles": 0.0,
+    "apply_scores": 0.0,
+    "analyze": 0.0,
+    "verify_review": 0.0,
+    "shortlist_review": 125.12,
+    "label_strips": 95.39,
+    "shortlist_apply": 0.02,
+    "agree_export": 0.0,
+    "export": 461.79,
+    "verify_export": 131.94
+  },
+  "model_calls": 43,
+  "yield": {
+    "candidates": 17,
+    "candidate_ids": [
+      "IdFm-zn6ad0",
+      "whnR2pr4T10",
+      "Zqsn8GN1OJQ",
+      "fTFBGpUkFLs",
+      "KH-UT0-FZ8Y",
+      "cA5_VZOIWlc",
+      "HGHX9n23LZk",
+      "sLap-R0jBVg",
+      "dxjyWcTyyfg",
+      "_XGaCoNRg6Y",
+      "TYxQSuIbv-E",
+      "wSJohO1TmNg",
+      "wuyv5IjOtRA",
+      "3lpwS0Zvu9A",
+      "Hk-qLR0ze1c",
+      "Pbzn79TSRO0",
+      "beUL7h0_0js"
+    ],
+    "ranked": 5,
+    "tile_labels": {
+      "keep": 17,
+      "reject": 12,
+      "uncertain": 1
+    },
+    "analyzed_sources": 5,
+    "analysis_ranges": 17,
+    "analysis_seconds_planned": 206.39,
+    "excerpts": 16,
+    "sources_without_excerpts": 0,
+    "continuity_rejected": 0,
+    "shortlist_counts": {
+      "n_candidates": 16,
+      "n_selected": 5,
+      "n_excluded": 11,
+      "n_excluded_by_reason": {
+        "beyond n_clips": 4,
+        "duplicate of fTFBGpUkFLs:0": 3,
+        "visual match rejected": 4
+      },
+      "n_sources_without_moments": 0,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 0,
+      "n_continuity_rejected_upstream_by_reason": {}
+    },
+    "clips_delivered": 5,
+    "clips": [
+      "IdFm-zn6ad0_e1_1434416-1440416.mp4",
+      "IdFm-zn6ad0_e2_2160584-2166584.mp4",
+      "KH-UT0-FZ8Y_e0_110276-115072.mp4",
+      "fTFBGpUkFLs_e0_5759999-5765999.mp4",
+      "whnR2pr4T10_e0_17156400-17162400.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z"
+}

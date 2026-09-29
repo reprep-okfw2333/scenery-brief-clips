@@ -1,0 +1,91 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "clips of a lighthouse in a storm, three of them, 20 seconds long",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "lighthouse",
+        "min_visible": 1
+      }
+    ],
+    "setting": "storm",
+    "action": null,
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "lighthouse in a storm",
+  "geography": null,
+  "n_clips": 3,
+  "clip_duration_s": {
+    "min": 18,
+    "target": 20,
+    "max": 22
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "a lighthouse"
+    },
+    "scene.setting": {
+      "origin": "user_explicit",
+      "quote": "in a storm"
+    },
+    "scene.action": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.required_other": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.excluded": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "geography": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "three of them"
+    },
+    "clip_duration_s": {
+      "origin": "user_explicit",
+      "quote": "20 seconds long"
+    },
+    "source_geometry": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "export_max_height": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "delivery": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "search_limits": {
+      "origin": "project_default",
+      "quote": null
+    }
+  }
+}

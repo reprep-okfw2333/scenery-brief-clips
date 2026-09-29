@@ -1,0 +1,2 @@
+BENCH_INPUTS=step5-iceland
+BENCH_DETECTOR=

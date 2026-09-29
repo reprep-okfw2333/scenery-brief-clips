@@ -1,0 +1,153 @@
+{
+  "R01": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "'cinematic' is a subjective style; put in scene.required_other but nothing verifies or enforces it"
+    ],
+    "uncertain_fields": [
+      "scene.required_other: is a subjective style word allowed there or must it be dropped/clarified",
+      "subjects min_visible for plural 'horses' (used 1)",
+      "provenance origin for n_clips when count is in the original request (used user_explicit; example uses user_clarification only for clarified counts)"
+    ]
+  },
+  "R02": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "Iceland: geography only supports none/european, so geography=null and 'Iceland' carried in scene.setting/theme_text (not a location gate)",
+      "1080p final output: export_max_height 1080 set but doc says >720 needs an approved feasible setting; unknown if supported"
+    ],
+    "uncertain_fields": [
+      "geography (how to represent a non-supported place; whether 'european' would be a silent widening)",
+      "whether '1080p' means source gate, export cap, or both (set both)",
+      "one provenance entry for source_geometry although only width/height come from the user and aspect band is default",
+      "placing a country in scene.setting"
+    ]
+  },
+  "R03": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "2 s minimum is below the project default min 4 s; written as requested but doc says an explicit band must be supported by analysis/export gates, unknown whether 2 s is"
+    ],
+    "uncertain_fields": [
+      "target value for a range (chose midpoint 3)",
+      "whether 'waves' means ocean waves (assumed; noun 'ocean wave')",
+      "whether the duration band is supported (clarify/refuse rule)"
+    ]
+  },
+  "R04": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "Norway: not expressible as geography (none/european only); carried in scene.setting/theme_text",
+      "'around 10 seconds' has no defined tolerance; invented band 8-12 with target 10"
+    ],
+    "uncertain_fields": [
+      "how to convert 'around N' into min/max",
+      "geography representation for Norway",
+      "whether min 8/target 10/max 12 is supported"
+    ]
+  },
+  "R05": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "Tokyo: not expressible as geography; carried in scene.setting/theme_text",
+      "'night' has no dedicated field, folded into setting"
+    ],
+    "uncertain_fields": [
+      "target for a range (chose 12)",
+      "whether subject noun 'street traffic' is acceptable as a countable noun with min_visible",
+      "geography for a city",
+      "band 8-15 vs supported gates"
+    ]
+  },
+  "R06": {
+    "wrote_brief": false,
+    "asked_user": "How many clips do you want? (You said 'some drone shots of the Scottish Highlands' with no count.)",
+    "could_not_express": [
+      "Scottish Highlands: not expressible as geography",
+      "'drone shots' is a search hint / camera style, not a scene requirement or verifiable field"
+    ],
+    "uncertain_fields": [
+      "whether 'some' could ever count as a stated n_clips (doc says no hidden choice)"
+    ]
+  },
+  "R07": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "'no people' recorded in scene.excluded but per skill it is recorded context, not an automatic visual gate; absence cannot be enforced/proven"
+    ],
+    "uncertain_fields": [
+      "whether 'misty' belongs in setting or required_other",
+      "exclusion noun form ('people' vs 'person')"
+    ]
+  },
+  "R08": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "4k final output: export_max_height 2160 written but the project caps at 720 by default; doc says needs approved feasible setting, likely unsupported",
+      "'slow motion' cannot be verified from source metadata; stored as required_other only",
+      "source 3840x2160 gate likely leaves very few eligible sources"
+    ],
+    "uncertain_fields": [
+      "4k as source gate vs export cap",
+      "whether slow motion belongs in required_other or only theme_text",
+      "provenance for source_geometry (aspect band default)",
+      "whether to clarify/refuse 4k instead of writing"
+    ]
+  },
+  "R09": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": [
+      "geography value format (string 'european' assumed; doc only says downstream mode is none|european, example shows null)",
+      "target for 5-10 (chose 7)",
+      "whether 'alpine' goes in setting or is part of subject noun (both partially)",
+      "source_geometry equals defaults but user stated 720p; used user_explicit; export_max_height left project_default though 720p likely also means final"
+    ]
+  },
+  "R10": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "Sahara: not expressible as geography (none/european only); carried in scene.setting/theme_text"
+    ],
+    "uncertain_fields": [
+      "whether 'sunset' should be required_other rather than part of setting",
+      "geography for a non-European region"
+    ]
+  },
+  "R11": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "20 s exceeds the project default max 12 s; band 18-22 written but doc says an explicit band unsupported by the gates must be clarified/refused, so this may not be dispatchable",
+      "'20 seconds long' is exact; band width 18-22 invented"
+    ],
+    "uncertain_fields": [
+      "whether to write this brief or stop and clarify/refuse on unsupported duration (cannot check gates from the doc)",
+      "min_visible for lighthouse",
+      "tolerance around exactly 20 s",
+      "'storm' in setting vs required_other"
+    ]
+  },
+  "R12": {
+    "wrote_brief": false,
+    "asked_user": "Vertical (9:16) is not something this pipeline produces: sources must be landscape 16:9 and exports are landscape. Do you want to relax to standard landscape clips (which you could crop for TikTok yourself), or should I look for natively vertical sources anyway? Also confirm Kyoto cannot be enforced as a location gate.",
+    "could_not_express": [
+      "vertical/9:16 orientation: source_geometry aspect band could be set below 1 but the doc says these are source gates, not a promise of final clip geometry, so a vertical deliverable is not expressible",
+      "'for TikTok' target platform: no field",
+      "Kyoto: not expressible as geography"
+    ],
+    "uncertain_fields": [
+      "whether a portrait aspect band in source_geometry is legal/supported",
+      "whether a real contradiction (ask) or writable"
+    ]
+  }
+}

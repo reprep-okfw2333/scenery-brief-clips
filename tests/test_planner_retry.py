@@ -284,6 +284,7 @@ def test_runner_live_planner_first_reply_valid_single_call(tmp_path, monkeypatch
     discovery = json.loads((Path(result["run_dir"]) / "discovery.json").read_text(encoding="utf-8"))
     assert discovery["plan_provenance"]["model_calls"] == 1
     assert discovery["plan_provenance"]["rejected_attempts"] == []
+    assert discovery["export_max_height"] == brief["export_max_height"]
 
 
 def test_runner_live_planner_rejected_twice_fails_discover(tmp_path, monkeypatch):

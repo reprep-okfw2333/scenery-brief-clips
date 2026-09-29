@@ -53,6 +53,7 @@ from scenery_brief_clips.analysis_cache import (
     safe_video_id,
     sha256_file,
 )
+from scenery_brief_clips.brief import EXPORT_HEIGHTS
 from scenery_brief_clips.run_lock import exclusive_run_lock
 from scenery_brief_clips.shortlist import (
     SHORTLIST_SCHEMA_VERSION,
@@ -157,6 +158,48 @@ def resolve_max_height(config: dict | None) -> int:
             f"{EXPORT_CAP_MAX}, got {value!r}"
         )
     return value
+
+
+def requested_export_cap(run_dir: Path) -> int | None:
+    """The brief's export cap recorded in the run's discovery.json, or None.
+
+    None when the run has no brief record of it (legacy ``run``, or a run
+    made before the key existed): the cap then comes from config alone. A
+    record that is present but unreadable or invalid fails closed.
+    """
+    path = Path(run_dir) / "discovery.json"
+    if not path.is_file():
+        return None
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ExportError(f"cannot read {path.name} for the requested export cap: {exc}") from exc
+    if not isinstance(doc, dict) or "export_max_height" not in doc:
+        return None
+    value = doc["export_max_height"]
+    if isinstance(value, bool) or not isinstance(value, int) or value not in EXPORT_HEIGHTS:
+        raise ExportError(
+            f"{path.name} records an invalid export_max_height {value!r}; "
+            f"a brief may request {', '.join(map(str, EXPORT_HEIGHTS))}"
+        )
+    return value
+
+
+def config_with_requested_export_cap(config: dict, requested: int | None) -> dict:
+    """Config whose export cap is the brief's request, lowered by config if it sets less.
+
+    Returned unchanged (the same object) when there is no request or the cap
+    already resolves to it, so runs from before briefs could ask for 1080p
+    keep their export binding.
+    """
+    if requested is None:
+        return config
+    cap = requested
+    if "export_max_height" in config:
+        cap = min(cap, resolve_max_height(config))
+    if cap == resolve_max_height(config):
+        return config
+    return {**config, "export_max_height": cap}
 
 
 def _strict_dimension(value) -> int | None:

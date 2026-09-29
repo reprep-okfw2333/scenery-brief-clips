@@ -100,7 +100,7 @@ culture). --plan skips the model call entirely and uses a pre-validated plan.
 ## Tests
 
   .venv/bin/python -m pytest tests/ -q
-Last recorded full-suite run: 465 passed, 1 xfailed on 2026-09-29 (all
+Last recorded full-suite run: 607 passed, 1 xfailed on 2026-09-29 (all
 offline; model endpoints are stubbed). History: 358 passed on 2026-09-25, when
 the run-brief path was also smoke-tested live with a frozen plan
 (metadata-only; 6 candidates; no download).

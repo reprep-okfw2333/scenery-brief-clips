@@ -71,7 +71,7 @@ def valid_plan(brief=None):
     }
 
 
-class CanonicalHashTests:
+class TestCanonicalHash:
     def test_hash_uses_sorted_compact_utf8_json(self):
         import hashlib
 
@@ -82,7 +82,7 @@ class CanonicalHashTests:
         assert canonical_json_hash(left) == canonical_json_hash(right)
 
 
-class BriefValidationTests:
+class TestBriefValidation:
     def test_accepts_complete_alpaca_brief_without_rewriting_it(self):
         brief = valid_brief()
         assert validate_brief(brief) == brief
@@ -156,17 +156,34 @@ class BriefValidationTests:
         brief["sources"]["n_clips"]["quote"] = "three clips, please"
         assert validate_brief(brief) == brief
 
-    def test_unsupported_geography_is_rejected(self):
-        brief = valid_brief()
-        brief["geography"] = "tropical"
-        with pytest.raises(BriefValidationError):
+    def test_geography_is_a_place_name_or_null(self):
+        # Step 5 (2026-09-29): free-text places are accepted; anything that is
+        # not a short place/region name is rejected.
+        for place in ("Iceland", "Scottish Highlands", "Kyōto", "Côte d'Azur", "european"):
+            brief = valid_brief()
+            brief["geography"] = place
+            validate_brief(brief)
+        for bad in ("", " Iceland", "Tokyo 2020", "x" * 61, "keep; reject", ["Iceland"], 5):
+            brief = valid_brief()
+            brief["geography"] = bad
+            with pytest.raises(BriefValidationError):
+                validate_brief(brief)
+
+    def test_duration_band_within_limits_is_accepted(self):
+        for band in ({"min": 2, "target": 5, "max": 9}, {"min": 18, "target": 20, "max": 22},
+                     {"min": 2, "target": 2, "max": 30}, {"min": 4.5, "target": 6, "max": 12}):
+            brief = valid_brief()
+            brief["clip_duration_s"] = band
             validate_brief(brief)
 
-    def test_only_the_supported_duration_band_is_accepted(self):
-        brief = valid_brief()
-        brief["clip_duration_s"] = {"min": 2, "target": 5, "max": 9}
-        with pytest.raises(BriefValidationError):
-            validate_brief(brief)
+    def test_duration_band_outside_limits_is_rejected(self):
+        for band in ({"min": 1, "target": 3, "max": 5}, {"min": 10, "target": 20, "max": 31},
+                     {"min": 6, "target": 4, "max": 12}, {"min": 8, "target": 8, "max": 8},
+                     {"min": 4, "target": 13, "max": 12}):
+            brief = valid_brief()
+            brief["clip_duration_s"] = band
+            with pytest.raises(BriefValidationError):
+                validate_brief(brief)
 
     def test_geometry_looser_than_1280x720_is_rejected(self):
         brief = valid_brief()
@@ -175,7 +192,7 @@ class BriefValidationTests:
             validate_brief(brief)
 
 
-class PlannerRenderTests:
+class TestPlannerRender:
     def test_instruction_is_invariant_while_compact_view_is_brief_bound(self):
         first = render_planner(valid_brief())
         other = valid_brief()
@@ -203,7 +220,7 @@ class PlannerRenderTests:
             render_planner(brief)
 
 
-class QueryPlanValidationTests:
+class TestQueryPlanValidation:
     def test_accepts_brief_bound_bounded_query_plan(self):
         brief = valid_brief()
         plan = valid_plan(brief)

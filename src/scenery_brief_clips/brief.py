@@ -66,6 +66,31 @@ def _number(value: Any, path: str) -> None:
         _fail(path, "must be a finite number")
 
 
+# Brief-form limits (plan step 5, owner-approved 2026-09-29). The 1280x720
+# source floor, the 16:9 aspect band, search caps and the no-download rule stay.
+DURATION_FLOOR_S = 2.0
+DURATION_CEILING_S = 30.0
+EXPORT_HEIGHTS = (720, 1080)
+REQUIRED_SOURCES = frozenset({"scene.subjects", "n_clips"})
+# A place or region ("Iceland", "Scottish Highlands"): search context and a
+# soft vision check (a clip that visibly contradicts it is geo "conflicting").
+# "european" keeps its historical meaning. Not a proof of location.
+_GEOGRAPHY_RE = re.compile(r"[^\W\d_](?:[^\W\d_]|[ .,'’-]){0,59}", re.UNICODE)
+
+
+def _object_subset(value: Any, path: str, keys: set[str], *, required: frozenset[str]) -> dict:
+    """An object whose keys are a subset of ``keys`` that includes ``required``."""
+    if not isinstance(value, dict):
+        _fail(path, "must be an object")
+    unknown = sorted(set(value) - keys)
+    if unknown:
+        _fail(path, f"unknown key {unknown[0]!r}")
+    missing = sorted(required - set(value))
+    if missing:
+        _fail(path, f"missing required key {missing[0]!r}")
+    return value
+
+
 def validate_brief(brief: Any) -> dict:
     """Validate the complete, strict search_brief_v1 contract."""
     top = {
@@ -115,15 +140,26 @@ def validate_brief(brief: Any) -> dict:
     if any(name in excluded_text for name in subject_names):
         _fail("scene", "a required subject is also excluded")
 
-    if value["geography"] is not None and value["geography"] != "european":
-        _fail("geography", 'supported values are null or "european"')
+    geography = value["geography"]
+    if geography is not None and (
+        not isinstance(geography, str)
+        or not _GEOGRAPHY_RE.fullmatch(geography.strip())
+        or geography != geography.strip()
+    ):
+        _fail("geography", "must be null or a place/region name (letters, spaces, . , ' -; at most 60 characters)")
     _integer(value["n_clips"], "n_clips")
 
     duration = _object(value["clip_duration_s"], "clip_duration_s", {"min", "target", "max"})
     for key in ("min", "target", "max"):
         _number(duration[key], f"clip_duration_s.{key}")
-    if duration != {"min": 4, "target": 6, "max": 12}:
-        _fail("clip_duration_s", "only the supported 4/6/12-second band is accepted")
+    if not (
+        DURATION_FLOOR_S <= duration["min"] <= duration["target"] <= duration["max"] <= DURATION_CEILING_S
+        and duration["min"] < duration["max"]
+    ):
+        _fail(
+            "clip_duration_s",
+            f"band must satisfy {DURATION_FLOOR_S:g} <= min <= target <= max <= {DURATION_CEILING_S:g} seconds with min < max",
+        )
 
     geometry = _object(value["source_geometry"], "source_geometry", {"min_width", "min_height", "aspect_min", "aspect_max"})
     _integer(geometry["min_width"], "source_geometry.min_width")
@@ -137,9 +173,9 @@ def validate_brief(brief: Any) -> dict:
     if (
         isinstance(value["export_max_height"], bool)
         or not isinstance(value["export_max_height"], int)
-        or value["export_max_height"] != 720
+        or value["export_max_height"] not in EXPORT_HEIGHTS
     ):
-        _fail("export_max_height", "only the supported 720p export cap is accepted")
+        _fail("export_max_height", f"export cap must be one of {', '.join(map(str, EXPORT_HEIGHTS))}")
 
     limits = _object(value["search_limits"], "search_limits", {"max_search_results", "max_metadata_fetches", "sleep_s"})
     _integer(limits["max_search_results"], "search_limits.max_search_results")
@@ -161,7 +197,9 @@ def validate_brief(brief: Any) -> dict:
         "scene.excluded", "geography", "n_clips", "clip_duration_s",
         "source_geometry", "export_max_height", "delivery", "search_limits",
     }
-    sources = _object(value["sources"], "sources", source_keys)
+    # Only the subjects and the clip count must carry a source; any other field
+    # without an entry is a project default (origin project_default, quote null).
+    sources = _object_subset(value["sources"], "sources", source_keys, required=REQUIRED_SOURCES)
     for field, source in sources.items():
         item = _object(source, f"sources.{field}", {"origin", "quote"})
         origin, quote = item["origin"], item["quote"]

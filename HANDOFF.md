@@ -1,16 +1,18 @@
 # HANDOFF (sessions of 2026-09-28 and 2026-09-29)
 
-Branch: `fix/analysis-download-bounds`. Nothing is merged to `master`
-(master = eedb911, 3 commits behind the branch).
+Branch: `fix/analysis-download-bounds`, everything committed and pushed to
+origin (owner, 2026-09-29: "commit everything and push but not merge").
+Nothing is merged to `master` (master = eedb911); do not merge without the
+owner asking.
 
-- **Committed AND on origin** (ba4779d and earlier; pushed before the
-  2026-09-28 evening session, not by it): plan steps 1-2, the benchmark
-  harness, export preset, verify compatibility.
-- **Committed locally, NOT pushed** (the "feat: blend continuity detector" commit, 2026-09-29, owner asked for the
-  commit): plan step 3 (the `blend` continuity detector, now the default) and
-  plan step 4 (planner prompt v2, retry, `run-pipeline --live-planner`), the
-  bench.sh options, evaluation data, docs, tests and benchmark records.
-  Push only when the owner asks.
+- Plan steps 1-2, the benchmark harness, export preset, verify
+  compatibility: ba4779d and earlier.
+- Plan step 3 (the `blend` continuity detector, now the default) and plan
+  step 4 (planner prompt v2, retry, `run-pipeline --live-planner`), bench.sh
+  options, evaluation data: the "feat: blend continuity detector" commit.
+- Plan step 5 (brief form loosened per owner decisions, validated live:
+  Iceland 1080p 5/5, verify ok) plus the standalone export/analyze cap fix:
+  the "feat: loosen the brief form (plan step 5)" commit.
 
 Read with: `docs/PLAN-PROGRESS-2026-09-28.md` (running log; "Status per step"
 after the ground rules and harness sections), `benchmark/RESULTS-2026-09-28.md` and
@@ -32,8 +34,11 @@ compare timings AND yield, report honestly. Host: 1 CPU, 1.6 GB RAM.
 
 ## State: done and working
 
-Tests: `.venv/bin/python -m pytest tests/ -q` gives 465 passed, 1 xfailed
-(about 6 min). The xfail is a known limitation (synthetic fast zoom flags a
+Tests: `.venv/bin/python -m pytest tests/ -q` gives 630 passed, 1 xfailed on
+the current working tree (about 6 min): 465 at the step 3-4 commit, plus 30
+tests in tests/test_brief.py that pytest never collected before (class names),
+plus 112 step-5 tests, plus 23 for the brief export cap in standalone
+commands (tests/test_export_cap_request.py). The xfail is a known limitation (synthetic fast zoom flags a
 dissolve in the blend detector; on real footage such false alarms only trim).
 
 1. **Benchmark harness** `benchmark/bench.sh <label> [seed_run_dir]`: fresh
@@ -88,6 +93,29 @@ dissolve in the blend detector; on real footage such false alarms only trim).
    None). Live GLM, 9 briefs x 3: first-attempt valid 8/27 -> 25/27; with
    retry 27/27. First one-command run on a new theme (red deer, cold, with
    export): completed 2/2 in 5:27, verify ok, no operator input.
+6. **Step 5, brief form** (committed and pushed; details in PLAN-PROGRESS "Step 5").
+   Owner approved: duration band 2-30 s, export 720 or 1080, `sources` needs
+   only subjects + n_clips, free-text geography; kept: 1280x720 floor, 16:9
+   band, search caps, no download. Geography design (chosen by me, owner left
+   the amount open): the place goes to the planner and, as a soft hint, to
+   vision; only clips that clearly show a different kind of place are
+   excluded (existing geo "conflicting" rule). Also fixed: the brief's export
+   cap was never used (now effective via run-pipeline), "european" was never
+   enforced (unchanged), and tests/test_brief.py's 29 tests were never
+   collected (class names). Contract doc docs/SEARCH_BRIEF.md rewritten.
+   Operator-agent eval on 12 plain requests: valid briefs 2/10 before, 9/9
+   after, with correct questions for missing count, 4K and vertical
+   (benchmark/brief_eval/).
+   Live check (resumed run, benchmark/runs/step5-iceland-20260929T012602Z/
+   NOTE.md): "5 clips of waterfalls in Iceland, 1080p" delivered 5/5 at
+   1920x1080, verify ok, all continuous Icelandic waterfalls on contact
+   sheets. Geo labels: supported 15, uncertain 1, conflicting 0 (the
+   exclusion path was not exercised: every query named Iceland). 1080p
+   export is slow on this host: nothing is adoptable from the <=720p analysis
+   copies, 462 s for 5 clips vs ~16 s per adopted 720p clip.
+   Follow-up fix: the brief's cap is recorded in discovery.json and the
+   standalone `export`/`analyze` commands apply it (same rule as
+   run-pipeline); runs without the record use config alone.
 
 ## Caveats and known gaps
 
@@ -126,28 +154,22 @@ dissolve in the blend detector; on real footage such false alarms only trim).
   ("build it, off by default", then "make blend default").
 - Planner: state the validator's rule in the prompt and retry once, rather
   than loosen the validator.
+- Brief form (step 5, owner 2026-09-29): loosen duration, export height,
+  provenance defaults and geography; keep the 1280x720 floor, 16:9 band,
+  search caps and no-download. Geography is a soft check, not a hard gate:
+  requiring vision to confirm a place would collapse yield (most scenery is
+  not recognizable) and overclaim. 4K and vertical stay unsupported; the
+  contract tells the operator to ask.
 - Tried and dropped: lagged/masked residual (signals.py v2) did not separate
   dissolves from motion; first continuity labels were on buggy sheets
   (output-side `-t`); running pytest or two benchmarks concurrently.
 
 ## Next steps, in order
 
-1. Ask the owner whether to push the "feat: blend continuity detector" commit and whether to merge the branch to
-   master.
-2. Plan step 5: loosen the brief form. NEEDS OWNER APPROVAL of what may
-   loosen (AGENTS.md: do not start new work or loosen gates without the
-   owner). Where: `src/scenery_brief_clips/brief.py` validate_brief:
-   duration band fixed at 4/6/12 (lines ~122-126), export height fixed at 720
-   (~137-142), mandatory `sources` provenance with quotes that must appear in
-   request_text (~157-180), geography only null/"european" (~118). Contract
-   doc: docs/SEARCH_BRIEF.md (line ~103 documents 4/6/12); tests pinning the
-   limits: tests/test_brief.py. Downstream: clip_duration_s flows to the
-   Constraint (cli.py `_brief_constraint_from_brief`), analyze windows and the
-   continuity gate's min/target/max, so a wider band propagates; export
-   enforces its own 720p floor. Probably keep: the 1280x720 source floor,
-   may_download_video=false in briefs, user-sourced subjects and n_clips.
-   Measure: build a small eval (like benchmark/planner_eval) of plain requests
-   -> agent-written briefs -> first-try validity, before and after.
+1. Ask the owner whether to merge the branch to master (not approved yet).
+2. SKILL.md step 5 still says "Ignore that file's 'not implemented' header"
+   (harmless; fix with step 6). The owner said to leave Hermes/step-6 work
+   alone for now (2026-09-29).
 3. Plan step 6: make the Hermes skill one command (`run-pipeline --brief B
    --live-planner --vision-agree --live-vision --allow-export`), with the
    agreements asked up front; fix the skill's origin/master check.

@@ -1,0 +1,93 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "3 slow-motion clips of hummingbirds, 4k",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "hummingbird",
+        "min_visible": 1
+      }
+    ],
+    "setting": null,
+    "action": null,
+    "required_other": [
+      "slow motion"
+    ],
+    "excluded": []
+  },
+  "theme_text": "hummingbirds in slow motion",
+  "geography": null,
+  "n_clips": 3,
+  "clip_duration_s": {
+    "min": 4,
+    "target": 6,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 3840,
+    "min_height": 2160,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 2160,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "hummingbirds"
+    },
+    "scene.setting": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.action": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.required_other": {
+      "origin": "user_explicit",
+      "quote": "slow-motion"
+    },
+    "scene.excluded": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "geography": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "3 slow-motion clips"
+    },
+    "clip_duration_s": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "source_geometry": {
+      "origin": "user_explicit",
+      "quote": "4k"
+    },
+    "export_max_height": {
+      "origin": "user_explicit",
+      "quote": "4k"
+    },
+    "delivery": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "search_limits": {
+      "origin": "project_default",
+      "quote": null
+    }
+  }
+}

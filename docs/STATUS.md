@@ -3,8 +3,9 @@
 Latest sessions (2026-09-28/29): see HANDOFF.md in the project root for the
 current state, results, and next steps. Running log:
 docs/PLAN-PROGRESS-2026-09-28.md. Plan steps 1-2 are committed (ba4779d);
-steps 3-4 (blend continuity default, live planner) are committed locally in
-the "feat: blend continuity detector" commit, not pushed.
+steps 3-4 (blend continuity default, live planner) and step 5 (brief form)
+are committed and pushed on branch fix/analysis-download-bounds, not merged
+to master.
 
 ## Latest delivery — Brazilian military, 16 of 20 (2026-09-27)
 
@@ -45,6 +46,14 @@ exact-subject rule; a rejected reply is retried once with the error;
 validity 8/27 -> 25/27, 27/27 with retry. First one-command live run on a new
 theme (red deer): completed 2/2, verify ok, 5:27. Full suite 465 passed,
 1 xfailed. benchmark/RESULTS-2026-09-29-step4.md.
+Step 5 (2026-09-29): brief form loosened (duration 2-30 s,
+export 720/1080 now actually applied by run-pipeline, free-text geography as
+a soft vision check, provenance only required for subjects and count);
+docs/SEARCH_BRIEF.md is the current contract. Operator-agent brief validity
+2/10 -> 9/9. Live check "5 clips of waterfalls in Iceland, 1080p": 5/5
+delivered at 1920x1080, verify ok (benchmark/runs/step5-iceland-*/NOTE.md).
+The standalone `export`/`analyze` commands now also apply the brief's cap
+(recorded in discovery.json).
 
 ## Improvement pass (2026-09-25) — superseded: committed in eedb911
 
@@ -104,7 +113,7 @@ Part 6  Hermes skill at `.hermes/skills/scenery-clips/SKILL.md`. Loads when the
         repo. Small end-to-end: 3 clips on disk with a schema-2 manifest.
         Evidence: data/runs/20260922T160610Z and out/part6-european-scenery-3/.
 
-Tests: 465 passed, 1 xfailed on 2026-09-29 (405 on 2026-09-28, 374 on 2026-09-25). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
+Tests: 630 passed, 1 xfailed on 2026-09-29 (405 on 2026-09-28, 374 on 2026-09-25; earlier counts missed 29 never-collected tests in tests/test_brief.py). Contract file tests/test_runner_contract.py: 16 passed in 1.52s, including the unreported-token check.
 System binaries: yt-dlp, ffmpeg, ffprobe.
 Pytest temps are forced onto project tmp/ (tests/conftest.py). Host /tmp is a
 small tmpfs; export's 2GB free-disk guard is real and must not be lowered to

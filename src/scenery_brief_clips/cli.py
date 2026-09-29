@@ -41,7 +41,13 @@ from scenery_brief_clips.shortlist import (
     shortlist_apply_run,
 )
 from scenery_brief_clips.store import MetadataCache, write_json_atomic, write_run
-from scenery_brief_clips.export import ExportError, ExportStaleError, export_run
+from scenery_brief_clips.export import (
+    ExportError,
+    ExportStaleError,
+    config_with_requested_export_cap,
+    export_run,
+    requested_export_cap,
+)
 from scenery_brief_clips.models import Constraint, RunLimits
 from scenery_brief_clips.verify import verify_run
 from scenery_brief_clips.vision import apply_scores_run_detailed
@@ -510,7 +516,9 @@ def _brief_constraint_from_brief(brief: dict, limits_overrides: dict) -> tuple[C
         target_duration_s=float(durations["target"]),
         duration_min_s=float(durations["min"]),
         duration_max_s=float(durations["max"]),
-        geo_requirement="european" if brief["geography"] == "european" else "none",
+        # "european" keeps its historical meaning; any other place name is passed
+        # to vision as a soft check (see vision_wire._theme_from_run).
+        geo_requirement=brief["geography"] or "none",
         allow_download=False,
         limits=limits,
     )
@@ -612,6 +620,8 @@ def _cmd_run_brief(args: argparse.Namespace) -> int:
     discovery = {
         "schema_version": "brief_discovery_v1",
         "brief_sha256": brief_sha256,
+        # The requested cap, so standalone `export`/`analyze` apply it too.
+        "export_max_height": brief["export_max_height"],
         "query_plan": plan,
         "plan_provenance": plan_provenance,
         "attempted_queries": result.queries,
@@ -773,7 +783,13 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
 
     from scenery_brief_clips.export import analysis_format_id, resolve_max_height
 
-    analysis_height_cap = resolve_max_height(config)
+    try:
+        analysis_height_cap = resolve_max_height(
+            config_with_requested_export_cap(config, requested_export_cap(run_dir))
+        )
+    except ExportError as exc:
+        print(f"invalid export cap: {exc}", file=sys.stderr)
+        return 2
 
     try:
         continuity = continuity_settings_from_config(config)
@@ -892,6 +908,11 @@ def _cmd_export(args: argparse.Namespace) -> int:
         config = load_project_config(root, args.config)
     except ConfigError as exc:
         print(f"invalid config: {exc}", file=sys.stderr)
+        return 2
+    try:
+        config = config_with_requested_export_cap(config, requested_export_cap(run_dir))
+    except ExportError as exc:
+        print(f"invalid export cap: {exc}", file=sys.stderr)
         return 2
     try:
         manifest = export_run(

@@ -146,6 +146,7 @@ def advance(
     plan_doc = _load_json(Path(plan)) if plan else None
     if brief_doc is not None:
         validate_brief(brief_doc)
+        config = _config_with_brief_export_cap(config, brief_doc)
     if plan_doc is not None:
         if brief_doc is None:
             raise ValueError("a frozen plan requires the brief it was bound to")
@@ -191,6 +192,17 @@ def advance(
     finally:
         fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
         lock.close()
+
+
+def _config_with_brief_export_cap(config: dict, brief: dict) -> dict:
+    """The brief's export_max_height is the requested cap; config may only lower it.
+
+    Left untouched when the result equals what the config already resolves to,
+    so runs made before briefs could ask for 1080p keep their export binding.
+    """
+    from scenery_brief_clips.export import config_with_requested_export_cap
+
+    return config_with_requested_export_cap(config, int(brief["export_max_height"]))
 
 
 def _advance_locked(**kw) -> dict:
@@ -483,6 +495,8 @@ def _discover(root, run_dir, kw, ports: Ports, counters: _Counters) -> dict:
     discovery = {
         "schema_version": "brief_discovery_v1",
         "brief_sha256": canonical_json_hash(brief),
+        # The requested cap, so standalone `export`/`analyze` apply it too.
+        "export_max_height": brief["export_max_height"],
         "query_plan": plan,
         "plan_provenance": provenance,
         "attempted_queries": result.queries,

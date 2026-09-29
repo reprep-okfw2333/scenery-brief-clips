@@ -421,7 +421,18 @@ def _theme_from_run(run_dir: Path) -> str | None:
     except json.JSONDecodeError:
         return None
     theme = payload.get("theme_text") if isinstance(payload, dict) else None
-    return theme.strip() if isinstance(theme, str) and theme.strip() else None
+    theme = theme.strip() if isinstance(theme, str) and theme.strip() else None
+    place = payload.get("geo_requirement") if isinstance(payload, dict) else None
+    if theme and isinstance(place, str) and place.strip() and place not in ("none", "european"):
+        # A free-text place from the brief: a soft check. Only footage that
+        # clearly shows a different kind of place is "conflicting" (excluded at
+        # shortlist); unrecognizable scenery stays "uncertain" (flagged).
+        theme = (
+            f"{theme}. Requested place: {place.strip()}. Set geo to conflicting only "
+            "when the frames clearly show a different kind of place; scenery that "
+            "could be there but is not recognizable is uncertain"
+        )
+    return theme
 
 
 def label_image(

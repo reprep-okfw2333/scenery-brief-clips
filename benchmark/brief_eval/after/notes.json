@@ -1,0 +1,102 @@
+{
+  "R01": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "'cinematic' has no field (put in theme_text only, soft)"
+    ],
+    "uncertain_fields": [
+      "scene.setting: 'meadow' vs 'in a meadow'"
+    ]
+  },
+  "R02": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": []
+  },
+  "R03": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "'crashing' target surface unspecified; 'short' ignored because numeric range given"
+    ],
+    "uncertain_fields": [
+      "scene.subjects noun 'wave'"
+    ]
+  },
+  "R04": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": [
+      "scene.subjects noun casing/form 'Northern Lights' (plural-only proper name; no singular rule); setting left null (night sky implied but not stated)"
+    ]
+  },
+  "R05": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": [
+      "scene.subjects noun: 'traffic' vs 'car'; setting 'street at night' includes 'street' from subject phrase; clip_duration target 11.5 (midpoint 11.5)"
+    ]
+  },
+  "R06": {
+    "wrote_brief": false,
+    "asked_user": "How many clips?",
+    "could_not_express": [
+      "no brief written: n_clips missing; 'drone' is soft theme_text only; 'some' is not a number"
+    ],
+    "uncertain_fields": []
+  },
+  "R07": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [
+      "exclusion 'no people' is recorded but not enforced by vision (must disclose on delivery)"
+    ],
+    "uncertain_fields": [
+      "scene.excluded item format: 'people' vs 'no people'"
+    ]
+  },
+  "R08": {
+    "wrote_brief": false,
+    "asked_user": "4K is not supported; is 1080p acceptable for the 3 slow-motion hummingbird clips?",
+    "could_not_express": [
+      "4k output"
+    ],
+    "uncertain_fields": []
+  },
+  "R09": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": [
+      "scene.subjects 'lake' with setting 'alpine' vs setting null; geography 'european' quote 'European'; whether 720p needs explicit sources entries (default value)"
+    ]
+  },
+  "R10": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": [
+      "setting 'sunset' vs 'desert at sunset'; geography quote 'Sahara'"
+    ]
+  },
+  "R11": {
+    "wrote_brief": true,
+    "asked_user": null,
+    "could_not_express": [],
+    "uncertain_fields": [
+      "'storm' as setting (weather) - contract says weather belongs in setting"
+    ]
+  },
+  "R12": {
+    "wrote_brief": false,
+    "asked_user": "Vertical/9:16 for TikTok is not supported (landscape 16:9 only); is landscape acceptable for the 8 Kyoto cherry blossom clips?",
+    "could_not_express": [
+      "vertical 9:16 output"
+    ],
+    "uncertain_fields": []
+  }
+}

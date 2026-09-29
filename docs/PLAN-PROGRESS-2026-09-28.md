@@ -58,7 +58,9 @@ every step.
    Sections "Step 3 ..." below.
 4. DONE, in the "feat: blend continuity detector" commit (2026-09-29): planner prompt v2, one retry, `run-pipeline
    --live-planner`. Section "2026-09-29" below.
-5. TODO: loosen brief form (duration band e.g. 2-15 s; fewer provenance fields).
+5. DONE, committed and pushed (2026-09-29): brief form loosened per owner
+   decisions; live 1080p/Iceland run completed 5/5, verify ok; standalone
+   export/analyze now apply the brief's cap. Section "Step 5" below.
 6. TODO: skill = one command (`run-pipeline --live-planner --live-vision` with
    agreements up front); fix the skill's origin/master check.
 7. TODO (later): real quality signal on review frames (blur/sharpness,
@@ -92,7 +94,7 @@ every step.
   with static overlays, 1 stock montage), 3/52 flagged.
 - Session stopped here on owner request (2026-09-28). At that point
   everything (steps 1-2) was committed on fix/analysis-download-bounds
-  (ba4779d); later step 3-4 work was committed in the "feat: blend continuity detector" commit (not pushed).
+  (ba4779d); later step 3-4 work was committed in the "feat: blend continuity detector" commit (pushed 2026-09-29 with step 5).
 
 (Append findings here as each step progresses.)
 
@@ -244,3 +246,73 @@ every step.
   BENCH_LIVE_PLANNER=1; plan.json optional in inputs.
 - Tests: tests/test_planner_retry.py (29, sonnet-high to spec, spot-checked).
   Full suite 465 passed, 1 xfailed.
+
+### Step 5: brief form (2026-09-29; validated and committed later that day)
+
+Owner decisions: accept my recommendations (loosen duration band, export
+height, provenance defaults; keep 1280x720 floor, 16:9 aspect band, search
+caps, no-download) and ALSO loosen geography, amount left to me. I chose
+"free-text place, soft check" (below). The owner then asked to stop and hand
+off; work stopped mid-validation.
+
+Done (working tree, not committed):
+- brief.validate_brief: clip_duration_s any band 2 <= min <= target <= max
+  <= 30 with min < max; export_max_height 720 or 1080; geography null,
+  "european" or a place name (letters, spaces . , ' - ; <= 60 chars);
+  `sources` needs only scene.subjects and n_clips (omitted keys =
+  project_default; origin/quote rules unchanged). Constants DURATION_FLOOR_S,
+  DURATION_CEILING_S, EXPORT_HEIGHTS, REQUIRED_SOURCES, _GEOGRAPHY_RE.
+- Found: the brief's export_max_height was never used downstream (export
+  read config only). runner._config_with_brief_export_cap now makes the
+  brief's cap effective, lowered by config if config sets less; config is
+  left untouched when nothing changes, so old runs keep their export binding.
+  Follow-up (2026-09-29, later session): run-brief and the runner record the
+  brief's cap in discovery.json (`export_max_height`); the standalone
+  `export` and `analyze` commands apply it with the same rule
+  (export.config_with_requested_export_cap, shared with the runner). Runs
+  without the key (legacy `run`, older runs) keep the config-only cap; an
+  invalid recorded value exits 2. tests/test_export_cap_request.py.
+- Found: geography "european" was never enforced (Constraint.geo_requirement
+  had no reader). Geography now flows to constraint.json geo_requirement; for
+  a free-text place, vision_wire._theme_from_run appends "Requested place: X.
+  Set geo to conflicting only when the frames clearly show a different kind of
+  place ..." so shortlist excludes clear contradictions (existing geo
+  "conflicting" rule) and keeps unrecognizable scenery flagged geo_uncertain.
+  "european" and null behave exactly as before.
+- docs/SEARCH_BRIEF.md: header updated (implemented), schema section rewritten
+  as the current contract with mapping rules for durations, 1080p/4K/vertical,
+  places, style words, exact quotes; example validated by tests.
+- Found and fixed: tests/test_brief.py classes were named `*Tests`, so pytest
+  never collected its 29 tests (all earlier suite counts excluded them).
+  Renamed to `Test*`; 2 tests that pinned the old rules were rewritten.
+- New tests/test_brief_step5.py (112, sonnet-high to spec, spot-checked).
+
+Measured (benchmark/brief_eval/): a sonnet-high agent playing the operator
+wrote briefs for 12 plain requests from the contract doc only.
+- Before (old doc + old validator): 10 briefs written, 2/10 valid; places
+  (Iceland, Norway, Tokyo, Sahara, Kyoto), 1080p and non-default durations were
+  not expressible; asked correctly on R06 (no count) and R12 (vertical).
+- After (new doc + new validator): 9 briefs written, 9/9 valid, every
+  requested place/duration/resolution expressed; asked correctly on R06 (no
+  count), R08 (4K) and R12 (vertical). Remaining soft spots are by design
+  (style words only in theme_text; exclusions recorded, not enforced).
+
+Live validation (DONE 2026-09-29, later session): agent-written brief R02
+"5 clips of waterfalls in Iceland, 1080p" (benchmark/step5-iceland,
+BENCH_LIVE_PLANNER=1). The stopped run was resumed (partial review/ frames
+removed, `--acknowledge-uncertain shortlist_review`). Record and per-stage
+times: benchmark/runs/step5-iceland-20260929T012602Z/NOTE.md.
+- Planner (1 call) used Iceland in all 4 queries; constraint carried
+  geo_requirement "Iceland" and min 1920x1080.
+- 17 candidates, 5 sources analyzed, 16 excerpts, 0 continuity rejects;
+  shortlist 5/5; 5 clips delivered, all 1920x1080 H.264; verify_export ok,
+  request_fulfilled true. Stage sum 1458 s over two invocations.
+- 1080p export costs: analysis copies are <=720p, so no clip was adoptable;
+  export took 462 s for 5 clips (~92 s each, fresh 1080p section download +
+  encode) vs ~16 s per adopted 720p clip (red deer run).
+- Geo hint: strip labels supported 15, uncertain 1, conflicting 0. All
+  queries named Iceland, so no off-place footage arrived; the exclusion path
+  was not exercised live (unit-tested only).
+- Contact sheets: all 5 are continuous shots of Icelandic waterfalls. Step 7
+  quality gaps again: one clip has a "Beautiful World 4K" watermark and shows
+  the fall only as distant mist; vision noted a small watermark on another.

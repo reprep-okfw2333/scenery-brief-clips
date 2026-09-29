@@ -1,0 +1,93 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "four clips of red deer in a misty forest, no people",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "red deer",
+        "min_visible": 1
+      }
+    ],
+    "setting": "misty forest",
+    "action": null,
+    "required_other": [],
+    "excluded": [
+      "people"
+    ]
+  },
+  "theme_text": "red deer in a misty forest",
+  "geography": null,
+  "n_clips": 4,
+  "clip_duration_s": {
+    "min": 4,
+    "target": 6,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "red deer"
+    },
+    "scene.setting": {
+      "origin": "user_explicit",
+      "quote": "in a misty forest"
+    },
+    "scene.action": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.required_other": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.excluded": {
+      "origin": "user_explicit",
+      "quote": "no people"
+    },
+    "geography": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "four clips"
+    },
+    "clip_duration_s": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "source_geometry": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "export_max_height": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "delivery": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "search_limits": {
+      "origin": "project_default",
+      "quote": null
+    }
+  }
+}

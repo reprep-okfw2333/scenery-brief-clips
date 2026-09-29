@@ -1,0 +1,63 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "5 clips of waterfalls in Iceland, 1080p",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "waterfall",
+        "min_visible": 1
+      }
+    ],
+    "setting": null,
+    "action": null,
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "waterfalls in Iceland",
+  "geography": "Iceland",
+  "n_clips": 5,
+  "clip_duration_s": {
+    "min": 4,
+    "target": 6,
+    "max": 12
+  },
+  "source_geometry": {
+    "min_width": 1920,
+    "min_height": 1080,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 1080,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "waterfalls"
+    },
+    "geography": {
+      "origin": "user_explicit",
+      "quote": "in Iceland"
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "5"
+    },
+    "source_geometry": {
+      "origin": "user_explicit",
+      "quote": "1080p"
+    },
+    "export_max_height": {
+      "origin": "user_explicit",
+      "quote": "1080p"
+    }
+  }
+}

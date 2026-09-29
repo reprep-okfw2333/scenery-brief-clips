@@ -1,0 +1,166 @@
+{
+  "status": "completed",
+  "stage": "verify_export",
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z",
+  "missing": null,
+  "how_to_supply": null,
+  "vision_model": null,
+  "error": null,
+  "jev": {
+    "enabled": false,
+    "reason": "runner_forces_off"
+  },
+  "timing": {
+    "stages": [
+      {
+        "stage": "discover",
+        "status": "executed",
+        "elapsed_s": 196.769475,
+        "model_calls": 1,
+        "tokens": null
+      },
+      {
+        "stage": "rank",
+        "status": "executed",
+        "elapsed_s": 8.357399,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_vision",
+        "status": "executed",
+        "elapsed_s": 0.004538,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_tiles",
+        "status": "executed",
+        "elapsed_s": 89.49449,
+        "model_calls": 26,
+        "tokens": null
+      },
+      {
+        "stage": "apply_scores",
+        "status": "executed",
+        "elapsed_s": 0.014708,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "analyze",
+        "status": "executed",
+        "elapsed_s": 266.487977,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "verify_review",
+        "status": "executed",
+        "elapsed_s": 82.694532,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "shortlist_review",
+        "status": "paused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "discover",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "rank",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_vision",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_tiles",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "apply_scores",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "analyze",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "verify_review",
+        "status": "reused",
+        "elapsed_s": 0.0,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "shortlist_review",
+        "status": "executed",
+        "elapsed_s": 125.119806,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_strips",
+        "status": "executed",
+        "elapsed_s": 95.38923,
+        "model_calls": 16,
+        "tokens": null
+      },
+      {
+        "stage": "shortlist_apply",
+        "status": "executed",
+        "elapsed_s": 0.01693,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_export",
+        "status": "executed",
+        "elapsed_s": 0.004189,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "export",
+        "status": "executed",
+        "elapsed_s": 461.786113,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "verify_export",
+        "status": "executed",
+        "elapsed_s": 131.936778,
+        "model_calls": 0,
+        "tokens": null
+      }
+    ],
+    "retries": 1,
+    "waiting_for_input_s": 25.825925
+  }
+}

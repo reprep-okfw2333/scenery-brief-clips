@@ -1,9 +1,11 @@
-# Proposed Part 7: frozen request brief and search worker
+# Part 7: frozen request brief and search worker
 
-Status: design proposal; not implemented. Do not use this document to claim that
-visual exclusions, the new brief, or a one-command pipeline are active. Parts 1–6
-and the legacy `run --dry-run --prompt` behavior remain as documented elsewhere.
-The user has asked to leave vision unchanged for this part.
+Status: implemented (7A-7C). `run-brief` and the one-command `run-pipeline
+--brief ... --live-planner` use this brief. The brief form was loosened on
+2026-09-29 (plan step 5, owner-approved): duration band, export height 720 or
+1080, free-text geography, optional provenance for defaulted fields. The
+schema section below is the current contract. Brief exclusions are still
+recorded context, not enforced visual gates.
 
 ## Objective and ownership
 
@@ -75,71 +77,111 @@ requirements, **not enforced visual gates**. Before delivering files for such a
 request, an operator must still inspect the output and disclose that gap, or
 stop rather than certify the exclusion.
 
-## Proposed brief schema (application-owned, version `search_brief_v1`)
+## Brief schema (application-owned, version `search_brief_v1`)
 
-Strict object; every field is required, including empty arrays and explicit
-nulls. Validate nested keys as well as top-level keys. Source annotations carry
-`user_explicit`, `user_clarification`, or `project_default` plus a quotation for
-user-sourced facts. No `inferred` source is allowed for a new *requirement*.
-A concise searchable `theme_text` is not the definition of visual acceptance.
+Strict object: every top-level and nested field below is required (use empty
+arrays and explicit nulls), unknown fields are rejected. Only `sources` may
+omit entries (see below). `src/scenery_brief_clips/brief.py` `validate_brief`
+is the authority; this section describes it.
 
 - `schema_version`: exactly `search_brief_v1`.
-- `request_text`: user's exact original words; preserve them even when a
-  clarification supplies additional parameters.
-- `scene`: `subjects` (object entries with noun and minimum visible count),
-  `setting` (required scene description or null), `action` (required action or
-  null), `required_other` (additional user-stated visual requirements),
-  `excluded` (only user-stated exclusions). Do not add "no people" by default.
-  Reject mutually exclusive fields and unrepresentable mandatory semantics.
-- `theme_text`: searchable scene description. If the legacy vision prompt
-  consumes it, keep the relevant original obligations visible, but do not
-  mistake that for per-rule enforcement.
-- `geography`: explicit location requirement or null; today the downstream
-  geography mode is only `none` or `european`. Reject/clarify others rather
-  than silently widening.
-- `n_clips`: positive integer explicitly requested or clarified. The current
-  parser's implicit 20 is not an acceptable hidden choice for a plural request.
-- `clip_duration_s`: `min`, `target`, `max`. The current project default is
-  4, 6, 12 seconds. An explicit different band must be supported by the
-  actual analysis/export gates before dispatch; otherwise clarify/refuse.
-- `source_geometry`: `min_width`, `min_height`, `aspect_min`, `aspect_max`.
-  Current no-resolution default is at least 1280×720 with aspect band
-  1.70–1.86. These are source eligibility gates, not a promise about final
-  clip geometry. An explicit "any aspect" conflicts with today's code.
-- `export_max_height`: currently 720 by default; keep separate from the
-  source minimum. Requested final dimensions above this cap require an
-  approved, feasible setting rather than an implicit 720p substitute.
-- `search_limits`: effective max distinct search results, max uncached
-  metadata fetches, and sleep seconds. Current defaults: 20, 30, 2.0.
-- `delivery`: `files`, `shortlist`, or `links`; clarify if consequential.
-- `permissions`: search allowed; video download false for discovery. Export
-  authorization is separate and not granted by this brief.
-- `sources`: provenance for every user-editable field, including null/empty
-  fields and disclosed defaults. Do not include secret values.
+- `request_text`: the user's exact original words. Keep them unchanged even
+  when a clarification adds parameters.
+- `scene`:
+  - `subjects`: `[{"noun": ..., "min_visible": 1}]`, the thing(s) that must be
+    visible. For a compound phrase pick the visible thing and move the rest to
+    `setting`/`geography` ("Tokyo street traffic at night": noun "traffic",
+    setting "street at night", geography "Tokyo"); keep names as written
+    ("Northern Lights", "red deer"). Use the singular for regular nouns (`horse` matches search phrases
+    with "horse" and "horses"); keep an irregular form as the user wrote it
+    (`geese`). `min_visible` is 1 unless the user states a number.
+  - `setting`: where/when the scene is ("misty forest", "street at night",
+    "desert at sunset"), or null. Time of day and weather belong here.
+  - `action`: what the subject does ("grazing", "crashing on rocks"), or null.
+  - `required_other`: other concrete things the user requires to be visible
+    ("snow on the ground"). Not style words.
+  - `excluded`: only exclusions the user stated, written as the thing that
+    must not appear ("people" for "no people"). Never add one by default.
+    Recorded, not enforced by vision: disclose that on delivery.
+- `theme_text`: a short searchable description of the whole request. Vision
+  judges clips against this text, so include style and camera words here
+  ("cinematic", "slow motion", "drone/aerial"); they have no other field and
+  are soft (not verified).
+- `geography`: null, `"european"` (historic mode), or a place/region name the
+  user asked for: letters, spaces and `. , ' -`, at most 60 characters
+  ("Iceland", "Scottish Highlands", "Kyoto", "Sahara"). The planner may add it
+  to searches, and vision is told the place: a clip that clearly shows a
+  different kind of place is excluded (`geo: conflicting`), unrecognizable
+  scenery is kept but flagged `geo_uncertain`. It is not proof of location.
+- `n_clips`: positive integer the user stated or confirmed. Missing: stop and
+  ask ("How many clips?"). Never assume one.
+- `clip_duration_s`: `{"min", "target", "max"}` in seconds with
+  2 <= min <= target <= max <= 30 and min < max. Default (user said nothing
+  about length): 4 / 6 / 12. Mapping:
+  - "A-B seconds": min A, max B, target the midpoint (round to 0.5).
+  - "about/around N seconds" or "N seconds long": min max(2, 0.8N),
+    target N, max min(30, 1.2N) (round to 0.5).
+  - "short" or "long" without a number: use the default band (with a number,
+    the number wins).
+  - Anything below 2 s or above 30 s: ask.
+- `source_geometry`: `min_width`, `min_height` (at least 1280 x 720) and an
+  aspect band inside 1.70-1.86 (landscape 16:9 only). Default 1280 / 720 /
+  1.70 / 1.86. These gate which sources are eligible.
+- `export_max_height`: 720 (default) or 1080. For "1080p"/"full HD" set 1080
+  AND raise `source_geometry` to 1920 x 1080 so sources can supply it. For
+  "4K"/1440p: not supported; ask whether 1080p is acceptable. For vertical /
+  9:16 / "for TikTok": not supported (landscape only); ask.
+- `search_limits`: `max_search_results` <= 20, `max_metadata_fetches` <= 30,
+  `sleep_s` 0-2. Default 20 / 30 / 2.0.
+- `delivery`: `files`, `shortlist`, or `links` (default `files`).
+- `permissions`: `{"may_search": true, "may_download_video": false}` always.
+  Export is authorized separately, never by the brief.
+- `sources`: provenance keyed by field name (`scene.subjects`,
+  `scene.setting`, `scene.action`, `scene.required_other`, `scene.excluded`,
+  `geography`, `n_clips`, `clip_duration_s`, `source_geometry`,
+  `export_max_height`, `delivery`, `search_limits`). Each entry is
+  `{"origin": ..., "quote": ...}`.
+  - `scene.subjects` and `n_clips` are REQUIRED and must be `user_explicit`
+    (words in the request) or `user_clarification` (words from the user's
+    answer to a question).
+  - Add an entry for every other field the user's words set. Omit fields the
+    user did not mention: an omitted entry means `project_default`.
+  - `user_explicit` quotes are copied exactly from `request_text` (case does
+    not matter): for "three cinematic clips of horses" quote
+    `"three cinematic clips"` or `"three"`, not `"three clips"`. A quote is the
+    user's words that justify the field; it need not equal the field value
+    (quote "at night" for setting "street at night"; a numeral like "6" is fine).
+  - Add an entry when the user stated a value even if it equals the default
+    ("720p").
+  - `project_default` entries, if written, have `"quote": null`.
 
-Example after the user asks for “clips of alpacas in a field” and clarifies
-“three clips”; other policy fields are disclosed defaults, not user claims:
+Ask the user only when: the clip count is missing, the request needs 4K or
+vertical output, a duration is outside 2-30 s, or two requirements contradict.
+Everything else maps to the fields above.
+
+Example: "three cinematic clips of horses grazing in a meadow in Iceland, 1080p,
+around 10 seconds":
 
 ```json
 {
   "schema_version": "search_brief_v1",
-  "request_text": "clips of alpacas in a field",
+  "request_text": "three cinematic clips of horses grazing in a meadow in Iceland, 1080p, around 10 seconds",
   "scene": {
-    "subjects": [{"noun": "alpaca", "min_visible": 1}],
-    "setting": "outdoor field or pasture",
-    "action": null,
+    "subjects": [{"noun": "horse", "min_visible": 1}],
+    "setting": "meadow",
+    "action": "grazing",
     "required_other": [],
     "excluded": []
   },
-  "theme_text": "alpacas in an outdoor field",
-  "geography": null,
+  "theme_text": "cinematic horses grazing in a meadow in Iceland",
+  "geography": "Iceland",
   "n_clips": 3,
-  "clip_duration_s": {"min": 4, "target": 6, "max": 12},
+  "clip_duration_s": {"min": 8, "target": 10, "max": 12},
   "source_geometry": {
-    "min_width": 1280, "min_height": 720,
+    "min_width": 1920, "min_height": 1080,
     "aspect_min": 1.70, "aspect_max": 1.86
   },
-  "export_max_height": 720,
+  "export_max_height": 1080,
   "search_limits": {
     "max_search_results": 20,
     "max_metadata_fetches": 30, "sleep_s": 2.0
@@ -147,18 +189,14 @@ Example after the user asks for “clips of alpacas in a field” and clarifies
   "delivery": "files",
   "permissions": {"may_search": true, "may_download_video": false},
   "sources": {
-    "scene.subjects": {"origin": "user_explicit", "quote": "alpacas"},
-    "scene.setting": {"origin": "user_explicit", "quote": "in a field"},
-    "scene.action": {"origin": "project_default", "quote": null},
-    "scene.required_other": {"origin": "project_default", "quote": null},
-    "scene.excluded": {"origin": "project_default", "quote": null},
-    "geography": {"origin": "project_default", "quote": null},
-    "n_clips": {"origin": "user_clarification", "quote": "three clips"},
-    "clip_duration_s": {"origin": "project_default", "quote": null},
-    "source_geometry": {"origin": "project_default", "quote": null},
-    "export_max_height": {"origin": "project_default", "quote": null},
-    "delivery": {"origin": "project_default", "quote": null},
-    "search_limits": {"origin": "project_default", "quote": null}
+    "scene.subjects": {"origin": "user_explicit", "quote": "horses"},
+    "scene.setting": {"origin": "user_explicit", "quote": "in a meadow"},
+    "scene.action": {"origin": "user_explicit", "quote": "grazing"},
+    "geography": {"origin": "user_explicit", "quote": "in Iceland"},
+    "n_clips": {"origin": "user_explicit", "quote": "three cinematic clips"},
+    "clip_duration_s": {"origin": "user_explicit", "quote": "around 10 seconds"},
+    "source_geometry": {"origin": "user_explicit", "quote": "1080p"},
+    "export_max_height": {"origin": "user_explicit", "quote": "1080p"}
   }
 }
 ```

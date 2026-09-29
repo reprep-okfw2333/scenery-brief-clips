@@ -1,0 +1,91 @@
+{
+  "schema_version": "search_brief_v1",
+  "request_text": "short 2-4 second clips of waves crashing, I need 6 of them",
+  "scene": {
+    "subjects": [
+      {
+        "noun": "ocean wave",
+        "min_visible": 1
+      }
+    ],
+    "setting": null,
+    "action": "crashing",
+    "required_other": [],
+    "excluded": []
+  },
+  "theme_text": "ocean waves crashing",
+  "geography": null,
+  "n_clips": 6,
+  "clip_duration_s": {
+    "min": 2,
+    "target": 3,
+    "max": 4
+  },
+  "source_geometry": {
+    "min_width": 1280,
+    "min_height": 720,
+    "aspect_min": 1.7,
+    "aspect_max": 1.86
+  },
+  "export_max_height": 720,
+  "search_limits": {
+    "max_search_results": 20,
+    "max_metadata_fetches": 30,
+    "sleep_s": 2.0
+  },
+  "delivery": "files",
+  "permissions": {
+    "may_search": true,
+    "may_download_video": false
+  },
+  "sources": {
+    "scene.subjects": {
+      "origin": "user_explicit",
+      "quote": "waves"
+    },
+    "scene.setting": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.action": {
+      "origin": "user_explicit",
+      "quote": "waves crashing"
+    },
+    "scene.required_other": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "scene.excluded": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "geography": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "n_clips": {
+      "origin": "user_explicit",
+      "quote": "I need 6 of them"
+    },
+    "clip_duration_s": {
+      "origin": "user_explicit",
+      "quote": "2-4 second"
+    },
+    "source_geometry": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "export_max_height": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "delivery": {
+      "origin": "project_default",
+      "quote": null
+    },
+    "search_limits": {
+      "origin": "project_default",
+      "quote": null
+    }
+  }
+}

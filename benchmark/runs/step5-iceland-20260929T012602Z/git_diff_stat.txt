@@ -1,0 +1,7 @@
+ docs/SEARCH_BRIEF.md                   | 172 ++++++++++++++++++++-------------
+ src/scenery_brief_clips/brief.py       |  52 ++++++++--
+ src/scenery_brief_clips/cli.py         |   4 +-
+ src/scenery_brief_clips/runner.py      |  17 ++++
+ src/scenery_brief_clips/vision_wire.py |  13 ++-
+ tests/test_brief.py                    |  43 ++++++---
+ 6 files changed, 212 insertions(+), 89 deletions(-)

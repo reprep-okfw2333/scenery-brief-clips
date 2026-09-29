@@ -47,7 +47,7 @@ Jev gate is documented in docs/JEV_GATE.md.
 - run-brief can NEVER fetch video, call vision, or export. Its limit flags only tighten the brief's own search_limits (final = min).
 - Metadata cache is reusable; prompt-specific files stay in the run dir.
 - `verify` is run-scoped and fail-closed: input/output hashes, exact plan/range/copy reconciliation, completion markers, probe, duration, and strict decode. The verifier checks file integrity, not scene fidelity.
-- Tests: `.venv/bin/python -m pytest tests/ -q` (465 passed, 1 xfailed as of 2026-09-29; about 6 min on this host). Prefer fixtures over live YouTube.
+- Tests: `.venv/bin/python -m pytest tests/ -q` (630 passed, 1 xfailed as of 2026-09-29; about 6 min on this host). Prefer fixtures over live YouTube.
 - Expected environment: Linux + Python 3.14. Run/export locks use fcntl (not available on native Windows).
 - Shortlist: `continuity_suspect` + keep without `continuity_ok:` / `continuity_ok: true` → exclude `continuity_suspect_uncleared`.
 - Export preserves approved shortlist intervals (no continuity re-trim).
