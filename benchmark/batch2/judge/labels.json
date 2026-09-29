@@ -1,0 +1,20 @@
+{
+  "judge": "Opus (orchestrator), contact sheets of 8 frames per clip; c11 also at 2 fps around its view change",
+  "c01": {"verdict": "acceptable", "note": "sharp red deer stag close-up; no mist or forest (soft setting rule let it through; batch1 rejected this moment)"},
+  "c02": {"verdict": "acceptable", "note": "deer silhouettes in misty frosty parkland; large 'SOI...' watermark"},
+  "c03": {"verdict": "good", "note": "herd of red deer stags in woodland"},
+  "c04": {"verdict": "good", "note": "deer in misty dawn meadow, forest treeline"},
+  "c05": {"verdict": "acceptable", "note": "person fly-fishing in a green forest lake; alpine only loosely"},
+  "c06": {"verdict": "good", "note": "turquoise lake under jagged peaks (likely Canadian Rockies; place is soft by design)"},
+  "c07": {"verdict": "good", "note": "alpine lake, conifers, peak"},
+  "c08": {"verdict": "good", "note": "Tokyo night drive, buses and traffic"},
+  "c09": {"verdict": "good", "note": "night drive under expressways, traffic"},
+  "c10": {"verdict": "acceptable", "note": "dark, nearly empty expressway; little traffic"},
+  "c11": {"verdict": "good", "note": "Shibuya crossing, continuous handheld pan (checked at 2 fps: no cut)"},
+  "c12": {"verdict": "acceptable", "note": "dark road, Docomo tower, small caption, little traffic"},
+  "c13": {"verdict": "good", "note": "tunnel expressway with trucks"},
+  "c14": {"verdict": "acceptable", "note": "rainy intersection through windshield, letterboxed, wiper streaks"},
+  "c15": {"verdict": "bad", "note": "very dark rainy highway, one truck, letterboxed"},
+  "c16": {"verdict": "good", "note": "night drive following a van under an overpass"},
+  "c17": {"verdict": "good", "note": "night drive following trucks"}
+}

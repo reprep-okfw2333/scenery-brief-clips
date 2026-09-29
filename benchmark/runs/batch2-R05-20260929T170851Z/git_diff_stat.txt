@@ -1,0 +1,20 @@
+ AGENTS.md                              |   5 +-
+ HANDOFF.md                             |  49 +++++++--
+ config.example.yaml                    |  16 ++-
+ docs/CLI.md                            |   2 +-
+ docs/ISSUES.md                         |  17 +++-
+ docs/PLAN-PROGRESS-2026-09-28.md       |  66 ++++++++++++
+ docs/RUNNER.md                         |  32 ++++--
+ docs/SEARCH_BRIEF.md                   |  16 +--
+ docs/SHORTLIST.md                      |  22 +++-
+ docs/STATUS.md                         |   6 ++
+ docs/VISION.md                         |   9 ++
+ src/scenery_brief_clips/cli.py         |   7 +-
+ src/scenery_brief_clips/config.py      |   8 ++
+ src/scenery_brief_clips/runner.py      |  81 ++++++++++++++-
+ src/scenery_brief_clips/shortlist.py   |  53 +++++++++-
+ src/scenery_brief_clips/vision_wire.py | 179 +++++++++++++++++++++++++++------
+ tests/test_runner_contract.py          |  86 ++++++++++++++--
+ tests/test_runner_reliability.py       |   9 +-
+ tests/test_vision_wire.py              |  22 ++++
+ 19 files changed, 605 insertions(+), 80 deletions(-)

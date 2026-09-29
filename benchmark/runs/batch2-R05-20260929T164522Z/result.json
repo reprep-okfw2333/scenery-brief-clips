@@ -1,0 +1,61 @@
+{
+  "status": "blocked",
+  "stage": "analyze",
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/batch2-R05-20260929T164522Z/data/runs/20260929T164523Z",
+  "missing": "YouTube is refusing this host (\"Sign in to confirm you're not a bot\")",
+  "how_to_supply": "wait (the block usually lifts within hours), then rerun the same command with the same --run-dir; completed stages and cached analysis spans are reused. No fallback is configured; the owner may opt in with youtube_cookies_file or youtube_proxy in config.",
+  "vision_model": null,
+  "error": "analyze failed for b9XY3-SEJ-c",
+  "jev": {
+    "enabled": false,
+    "reason": "config_off"
+  },
+  "timing": {
+    "stages": [
+      {
+        "stage": "discover",
+        "status": "executed",
+        "elapsed_s": 108.500418,
+        "model_calls": 1,
+        "tokens": null
+      },
+      {
+        "stage": "rank",
+        "status": "executed",
+        "elapsed_s": 12.828898,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "agree_vision",
+        "status": "executed",
+        "elapsed_s": 0.004104,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "label_tiles",
+        "status": "executed",
+        "elapsed_s": 53.358733,
+        "model_calls": 42,
+        "tokens": null
+      },
+      {
+        "stage": "apply_scores",
+        "status": "executed",
+        "elapsed_s": 0.016583,
+        "model_calls": 0,
+        "tokens": null
+      },
+      {
+        "stage": "analyze",
+        "status": "failed",
+        "elapsed_s": 0.174705,
+        "model_calls": 0,
+        "tokens": null
+      }
+    ],
+    "retries": 0,
+    "waiting_for_input_s": 0.0
+  }
+}

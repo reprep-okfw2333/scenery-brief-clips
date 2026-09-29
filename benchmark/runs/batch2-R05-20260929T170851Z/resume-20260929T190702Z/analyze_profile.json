@@ -1,0 +1,1099 @@
+{
+  "elapsed_s": 591.8163,
+  "workers": 2,
+  "phases": {
+    "acquire": {
+      "total_s": 17.9245,
+      "count": 28,
+      "pct": 3.03
+    },
+    "continuity": {
+      "total_s": 250.6318,
+      "count": 25,
+      "pct": 42.35
+    },
+    "detect": {
+      "total_s": 333.7546,
+      "count": 28,
+      "pct": 56.39
+    },
+    "hash": {
+      "total_s": 1.4376,
+      "count": 28,
+      "pct": 0.24
+    },
+    "plan": {
+      "total_s": 0.001,
+      "count": 8,
+      "pct": 0.0
+    },
+    "pool_wait_wall": {
+      "total_s": 309.645,
+      "count": 1,
+      "pct": 52.32
+    },
+    "prefetch": {
+      "total_s": 563.4583,
+      "count": 7,
+      "pct": 95.21
+    }
+  },
+  "span_events": [
+    {
+      "phase": "plan",
+      "seconds": 0.0004,
+      "video_id": "b9XY3-SEJ-c"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "-Xh4BNbxpI8"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "spJqqu2H8n4"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "PSruoJDCssQ"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "9YnM8jaHSIQ"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "JZpeOFGuys8"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "kJD-PQEi38s"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "Mv8UnM9jSCg"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 99.1714,
+      "video_id": "b9XY3-SEJ-c"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 105.9448,
+      "video_id": "-Xh4BNbxpI8"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 31.9804,
+      "video_id": "spJqqu2H8n4"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 83.9465,
+      "video_id": "PSruoJDCssQ"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 71.7898,
+      "video_id": "9YnM8jaHSIQ"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 91.4741,
+      "video_id": "JZpeOFGuys8"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 79.1513,
+      "video_id": "kJD-PQEi38s"
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.056,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0587,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 15.6964,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0429,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 17.1154,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0447,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 9.8778,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0434,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 12.5255,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0672,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 15.4283,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0586,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 18.1437,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0652,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 14.6374,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0603,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 16.0147,
+      "video_id": "b9XY3-SEJ-c",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.056,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 16.7997,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0549,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 15.2082,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0488,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 12.1488,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        615.8,
+        629.765
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0442,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 11.1403,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1233.6,
+        1247.565
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.062,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 14.1277,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.043,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 21.4582,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0758,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 13.1412,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        1841.435,
+        1855.4
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0302,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 5.7178,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0105,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 4.2596,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0142,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        29724.405,
+        29738.401
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 5.0989,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        29724.405,
+        29738.401
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0058,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        29724.405,
+        29738.401
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 18.353,
+      "video_id": "-Xh4BNbxpI8",
+      "span": [
+        2459.235,
+        2473.2
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.037,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        825.22,
+        839.187
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 4.6291,
+      "video_id": "spJqqu2H8n4",
+      "span": [
+        29724.405,
+        29738.401
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.071,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        1662.407,
+        1676.373
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 12.31,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        825.22,
+        839.187
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0305,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        825.22,
+        839.187
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 15.9935,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        1662.407,
+        1676.373
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0432,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        1662.407,
+        1676.373
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 12.0214,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        825.22,
+        839.187
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0644,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        2489.627,
+        2503.593
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 15.1664,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        1662.407,
+        1676.373
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0645,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        3326.813,
+        3340.78
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 15.757,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        2489.627,
+        2503.593
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0473,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        2489.627,
+        2503.593
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 14.3164,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        3326.813,
+        3340.78
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0423,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        3326.813,
+        3340.78
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 13.8261,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        2489.627,
+        2503.593
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0794,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        474.628,
+        488.558
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 6.5423,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        474.628,
+        488.558
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0262,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        474.628,
+        488.558
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 11.7941,
+      "video_id": "PSruoJDCssQ",
+      "span": [
+        3326.813,
+        3340.78
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.06,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        951.256,
+        965.186
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 7.1956,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        474.628,
+        488.558
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0789,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1437.814,
+        1451.744
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 8.1745,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        951.256,
+        965.186
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0609,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        951.256,
+        965.186
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 8.4625,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1437.814,
+        1451.744
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0517,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1437.814,
+        1451.744
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 8.1173,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        951.256,
+        965.186
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.052,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1914.442,
+        1928.372
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 5.9499,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1914.442,
+        1928.372
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.052,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1914.442,
+        1928.372
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 8.5869,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1437.814,
+        1451.744
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0589,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 5.809,
+      "video_id": "9YnM8jaHSIQ",
+      "span": [
+        1914.442,
+        1928.372
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0639,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        2156.002,
+        2169.993
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 5.9811,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.039,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 6.4416,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        2156.002,
+        2169.993
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0494,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        2156.002,
+        2169.993
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 6.3844,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0818,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        6472.006,
+        6485.996
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 8.7991,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        2156.002,
+        2169.993
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.058,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        8630.007,
+        8643.998
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 10.5629,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        6472.006,
+        6485.996
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0769,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        6472.006,
+        6485.996
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 8.244,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        8630.007,
+        8643.998
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0344,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        8630.007,
+        8643.998
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 9.0635,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        6472.006,
+        6485.996
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0634,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        10788.0,
+        10800.0
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 7.6345,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        8630.007,
+        8643.998
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.1043,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 8.0769,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        10788.0,
+        10800.0
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0713,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        10788.0,
+        10800.0
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 11.2766,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0643,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        0.0,
+        12.0
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0857,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        49.298,
+        61.298
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 7.5244,
+      "video_id": "JZpeOFGuys8",
+      "span": [
+        10788.0,
+        10800.0
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0848,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        66.915,
+        78.915
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 14.9527,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        66.915,
+        78.915
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.1266,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        66.915,
+        78.915
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 15.2972,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        49.298,
+        61.298
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.079,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        49.298,
+        61.298
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0799,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        80.0,
+        92.0
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 8.7025,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        66.915,
+        78.915
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 16.546,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        80.0,
+        92.0
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0767,
+      "video_id": "kJD-PQEi38s",
+      "span": [
+        80.0,
+        92.0
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 16.2442,
+      "video_id": "Mv8UnM9jSCg",
+      "span": [
+        0.0,
+        16.0
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 4.0749,
+      "video_id": "Mv8UnM9jSCg",
+      "span": [
+        0.0,
+        16.0
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0157,
+      "video_id": "Mv8UnM9jSCg",
+      "span": [
+        0.0,
+        16.0
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 3.2793,
+      "video_id": "Mv8UnM9jSCg",
+      "span": [
+        0.0,
+        16.0
+      ]
+    }
+  ]
+}

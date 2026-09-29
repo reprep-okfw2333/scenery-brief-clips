@@ -1,0 +1,100 @@
+{
+  "label": "resume-20260929T190702Z",
+  "exit_code": "0",
+  "status": "completed",
+  "stage": "verify_export",
+  "error": null,
+  "missing": null,
+  "wall_clock": "29:58.31",
+  "max_rss_mb_main_process": 278.4,
+  "stage_sum_s": 1795.85,
+  "stages_s": {
+    "discover": 107.82,
+    "rank": 17.15,
+    "agree_vision": 0.0,
+    "label_tiles": 145.23,
+    "apply_scores": 0.02,
+    "analyze": 591.83,
+    "verify_review": 134.95,
+    "shortlist_review": 106.54,
+    "label_strips": 57.19,
+    "shortlist_apply": 0.03,
+    "agree_export": 0.0,
+    "export": 572.35,
+    "verify_export": 62.74
+  },
+  "model_calls": 67,
+  "jev": {
+    "rank": false,
+    "rank_counts": null,
+    "rank_cost_usd": null,
+    "note_check": false,
+    "note_counts": null,
+    "note_cost_usd": null,
+    "metadata_lookups": 12
+  },
+  "yield": {
+    "candidates": 12,
+    "candidate_ids": [
+      "b9XY3-SEJ-c",
+      "cUBDSC-y7sU",
+      "-Xh4BNbxpI8",
+      "spJqqu2H8n4",
+      "PSruoJDCssQ",
+      "9YnM8jaHSIQ",
+      "JZpeOFGuys8",
+      "kJD-PQEi38s",
+      "Mv8UnM9jSCg",
+      "bNfZSSVbuSo",
+      "BkH6V1d01q0",
+      "01lXtVf7ePA"
+    ],
+    "ranked": 12,
+    "tile_labels": {
+      "reject": 21,
+      "keep": 49,
+      "uncertain": 2
+    },
+    "analyzed_sources": 12,
+    "analysis_ranges": 28,
+    "analysis_seconds_planned": 379.27,
+    "excerpts": 19,
+    "sources_without_excerpts": 6,
+    "continuity_rejected": 6,
+    "shortlist_counts": {
+      "n_candidates": 19,
+      "n_selected": 10,
+      "n_excluded": 9,
+      "n_excluded_by_reason": {
+        "duplicate of -Xh4BNbxpI8:0": 1,
+        "duplicate of -Xh4BNbxpI8:1": 1,
+        "not labeled: enough clips kept": 7
+      },
+      "n_sources_without_moments": 6,
+      "request_fulfilled": true,
+      "n_continuity_rejected_upstream": 6,
+      "n_continuity_rejected_upstream_by_reason": {
+        "stable continuity subspan 4.333s below duration_min_s 8.0": 3,
+        "stable continuity subspan 5.167s below duration_min_s 8.0": 1,
+        "stable continuity subspan 6.667s below duration_min_s 8.0": 1,
+        "stable continuity subspan 7.333s below duration_min_s 8.0": 1
+      }
+    },
+    "clips_delivered": 10,
+    "clips": [
+      "-Xh4BNbxpI8_e0_619633-629465.mp4",
+      "-Xh4BNbxpI8_e1_1233900-1247265.mp4",
+      "9YnM8jaHSIQ_e0_474928-488258.mp4",
+      "9YnM8jaHSIQ_e1_951556-964886.mp4",
+      "Mv8UnM9jSCg_e0_300-15282.mp4",
+      "PSruoJDCssQ_e0_825520-838887.mp4",
+      "PSruoJDCssQ_e1_1662707-1676073.mp4",
+      "b9XY3-SEJ-c_e2_1841735-1855100.mp4",
+      "spJqqu2H8n4_e0_300-11700.mp4",
+      "spJqqu2H8n4_e1_29724705-29738101.mp4"
+    ],
+    "verify_export_ok": true,
+    "request_fulfilled": true
+  },
+  "run_dir": "/root/github-checkouts/reprep-okfw2333/scenery-brief-clips/tmp/bench/batch2-R05-20260929T170851Z/data/runs/20260929T170852Z"
+}

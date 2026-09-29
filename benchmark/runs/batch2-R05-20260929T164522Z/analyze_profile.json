@@ -1,0 +1,98 @@
+{
+  "elapsed_s": 0.1642,
+  "workers": 2,
+  "phases": {
+    "plan": {
+      "total_s": 0.0009,
+      "count": 8,
+      "pct": 0.56
+    },
+    "pool_wait_wall": {
+      "total_s": 0.095,
+      "count": 1,
+      "pct": 57.88
+    },
+    "prefetch": {
+      "total_s": 0.0202,
+      "count": 7,
+      "pct": 12.3
+    }
+  },
+  "span_events": [
+    {
+      "phase": "plan",
+      "seconds": 0.0003,
+      "video_id": "b9XY3-SEJ-c"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "-Xh4BNbxpI8"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "2DJfsa2576c"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "DOggqLXW0TY"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "PSruoJDCssQ"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "ScFjbbLj9yU"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "7eVPiAnc7fE"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "byGTaXSZ0nA"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.005,
+      "video_id": "b9XY3-SEJ-c"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0058,
+      "video_id": "-Xh4BNbxpI8"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0008,
+      "video_id": "PSruoJDCssQ"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0029,
+      "video_id": "2DJfsa2576c"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0018,
+      "video_id": "ScFjbbLj9yU"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0017,
+      "video_id": "7eVPiAnc7fE"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0021,
+      "video_id": "byGTaXSZ0nA"
+    }
+  ]
+}

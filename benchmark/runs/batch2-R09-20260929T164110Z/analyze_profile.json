@@ -1,0 +1,227 @@
+{
+  "elapsed_s": 83.8199,
+  "workers": 2,
+  "phases": {
+    "acquire": {
+      "total_s": 0.0833,
+      "count": 4,
+      "pct": 0.1
+    },
+    "continuity": {
+      "total_s": 19.4394,
+      "count": 4,
+      "pct": 23.19
+    },
+    "detect": {
+      "total_s": 32.5626,
+      "count": 4,
+      "pct": 38.85
+    },
+    "hash": {
+      "total_s": 0.0884,
+      "count": 4,
+      "pct": 0.11
+    },
+    "plan": {
+      "total_s": 0.0006,
+      "count": 5,
+      "pct": 0.0
+    },
+    "pool_wait_wall": {
+      "total_s": 26.6291,
+      "count": 1,
+      "pct": 31.77
+    },
+    "prefetch": {
+      "total_s": 64.6038,
+      "count": 3,
+      "pct": 77.07
+    }
+  },
+  "span_events": [
+    {
+      "phase": "plan",
+      "seconds": 0.0002,
+      "video_id": "QnjD8eQYTDs"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "-nPprpooRnI"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0,
+      "video_id": "Neku5Pox_BM"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0,
+      "video_id": "etF71HaE5HM"
+    },
+    {
+      "phase": "plan",
+      "seconds": 0.0001,
+      "video_id": "V8c66IgVy84"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 7.9044,
+      "video_id": "-nPprpooRnI"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 0.0011,
+      "video_id": "etF71HaE5HM"
+    },
+    {
+      "phase": "prefetch",
+      "seconds": 56.6983,
+      "video_id": "QnjD8eQYTDs"
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0181,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        2154.007,
+        2167.989
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0258,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        4310.015,
+        4323.996
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 7.227,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        2154.007,
+        2167.989
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0221,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        2154.007,
+        2167.989
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 9.4188,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        4310.015,
+        4323.996
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.0274,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        4310.015,
+        4323.996
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 5.7692,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        2154.007,
+        2167.989
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0192,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        6476.004,
+        6489.985
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 4.6864,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        4310.015,
+        4323.996
+      ]
+    },
+    {
+      "phase": "acquire",
+      "seconds": 0.0202,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        8632.011,
+        8645.993
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 7.4699,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        6476.004,
+        6489.985
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.02,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        6476.004,
+        6489.985
+      ]
+    },
+    {
+      "phase": "detect",
+      "seconds": 8.4469,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        8632.011,
+        8645.993
+      ]
+    },
+    {
+      "phase": "hash",
+      "seconds": 0.019,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        8632.011,
+        8645.993
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 5.0066,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        6476.004,
+        6489.985
+      ]
+    },
+    {
+      "phase": "continuity",
+      "seconds": 3.9772,
+      "video_id": "QnjD8eQYTDs",
+      "span": [
+        8632.011,
+        8645.993
+      ]
+    }
+  ]
+}

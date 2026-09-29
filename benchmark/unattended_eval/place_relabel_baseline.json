@@ -1,0 +1,1028 @@
+[
+ {
+  "run": "tmp/bench/batch1-R01-20260929T023532Z",
+  "run_dir": "tmp/bench/batch1-R01-20260929T023532Z/data/runs/20260929T023534Z",
+  "video_id": "jRhqBh6E_Zk",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/batch1-R01-20260929T023532Z/data/runs/20260929T023534Z/review/jRhqBh6E_Zk/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The herd is galloping across the meadow with heads up and manes flying, not grazing as the brief requires."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The horses are galloping with heads up across the meadow, not grazing as the brief requests."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R05-20260929T031949Z",
+  "run_dir": "tmp/bench/batch1-R05-20260929T031949Z/data/runs/20260929T031951Z",
+  "video_id": "U_A8KODShLs",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/batch1-R05-20260929T031949Z/data/runs/20260929T031951Z/review/U_A8KODShLs/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Night dashcam driving matches the brief, but a creator text overlay ('Where should I drive next in Tokyo?') fills most frames, and the generic residential street is not recognizably Tokyo."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Night dashcam driving fits the brief, but a large 'Where should I drive next in Tokyo?' title overlays most frames and the generic residential street is not recognizably Tokyo."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R05-20260929T031949Z",
+  "run_dir": "tmp/bench/batch1-R05-20260929T031949Z/data/runs/20260929T031951Z",
+  "video_id": "H-1stPtm7gM",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R05-20260929T031949Z/data/runs/20260929T031951Z/review/H-1stPtm7gM/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Night traffic matches the brief, but a title overlay 'NIGHT DRIVE IN TOKYO AT 09:24 PM' fills every frame."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: A 'Night Drive in Tokyo' title overlay fills every frame despite the matching dashcam night-traffic footage."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R05-20260929T031949Z",
+  "run_dir": "tmp/bench/batch1-R05-20260929T031949Z/data/runs/20260929T031951Z",
+  "video_id": "AmjJ8Ha2zpQ",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R05-20260929T031949Z/data/runs/20260929T031951Z/review/AmjJ8Ha2zpQ/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: Title text ('A LITTLE CLOSER JAPAN', 'SHINJUKU, TOKYO') overlays the dusk street crossing through much of the strip, filling the moment."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: Title cards reading 'A LITTLE CLOSER JAPAN' and 'SHINJUKU, TOKYO' fill multiple frames of this dusk pedestrian crossing."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "Cfabf1bk86o",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/Cfabf1bk86o/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: A red deer stag is clearly shown, but the setting is open moorland with bracken and no mist or forest, so the brief's setting is missing."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: A red deer stag is clearly present, but the blurred background is open bracken-covered moorland with no forest, trees, or mist to satisfy the misty-forest brief."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "eXhWiDLiLWE",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/eXhWiDLiLWE/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Deer stand in a misty frosty open meadow with only overhanging branches, likely fallow rather than red deer, and a watermark overlays the frames."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Antlered deer stand in misty frost but in an open park-like meadow with a feeding trough, not a forest."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "eXhWiDLiLWE",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/eXhWiDLiLWE/1/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer stags stand in thick golden mist beside a trough, but the setting is open frosty parkland with a single overhanging tree rather than a forest."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Deer stand in heavy dawn mist as briefed, but the setting is an open frosty field with overhanging branches rather than a forest, and the palmate antlers suggest fallow rather than red deer."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "eXhWiDLiLWE",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/eXhWiDLiLWE/2/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer are clearly present in heavy mist, but they stand at a trough in an open frosty field under a lone tree rather than in a forest, with a faint watermark overlay across the frames."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer graze in heavy mist, but the setting is a frosty open field beside a single tree rather than a forest, and the frames are one continuous static shot."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "TsxiGDPkrmM",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/TsxiGDPkrmM/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer graze in golden mist by a treeline, but they stand in an open meadow rather than inside a forest."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Deer graze in an open golden meadow with ground mist and only a distant treeline, not in a misty forest."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "TsxiGDPkrmM",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/TsxiGDPkrmM/1/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Silhouetted deer graze in misty open grassland before a distant treeline, not within a forest as briefed."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer silhouettes graze in morning mist, but they stand in an open field with the forest only as a distant treeline rather than inside a misty forest."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "TsxiGDPkrmM",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/TsxiGDPkrmM/2/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer graze in ground mist at dawn, but they are in an open meadow with a distant treeline rather than inside a misty forest."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer graze in glowing low mist across an open grassy field with only a distant treeline, not the misty forest setting the brief asks for."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R07-20260929T034551Z",
+  "run_dir": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z",
+  "video_id": "TsxiGDPkrmM",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/batch1-R07-20260929T034551Z/data/runs/20260929T034553Z/review/TsxiGDPkrmM/3/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Red deer graze in a misty dawn meadow with only a distant forest treeline, not inside a forest."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Deer with mist appear, but they graze in an open dawn meadow with only a distant tree line rather than in a misty forest as the brief requires."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/QnjD8eQYTDs/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with jagged peaks and conifers matches the visual brief, but the terrain and forest look more like the Canadian Rockies than a recognizable European location."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A continuous alpine lake with jagged peaks and conifer forest matches the brief visually, but the flora suggests it may be the North American Rockies rather than the European Alps, so the location is not confirmable."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/QnjD8eQYTDs/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: A scenic alpine lake, but the turquoise water, dense spruce forest, and jagged peak profile suggest the North American Rockies rather than the European Alps."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A turquoise alpine lake ringed by conifers and rugged peaks fits the brief, but the vegetation and mountain character suggest North American Rockies rather than a recognizable European location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/QnjD8eQYTDs/2/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with forest and jagged peaks, but the landscape is not recognizably European and could plausibly be the North American Rockies."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A glacial alpine lake with turquoise water and jagged peaks fits the brief generically, but the subalpine spruce framing suggests North America and no recognizable European landmark confirms the location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/QnjD8eQYTDs/3/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Continuous footage of a turquoise alpine lake with conifer forest and jagged peaks, but the terrain resembles the Canadian Rockies more than a recognizable European Alps location."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A serene alpine lake with turquoise water and jagged peaks fills every frame, but the landscape resembles the Canadian Rockies rather than a recognizable European location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "M4xe3MHenuE",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/M4xe3MHenuE/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The turquoise lake with steep limestone peaks and lodgepole-style evergreens strongly resembles the Canadian Rockies rather than a recognizable European alpine setting, and no specific European location is identifiable."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The stratified limestone peaks and turquoise water match the Canadian Rockies (Lake O'Hara area), not a European alpine lake."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "M4xe3MHenuE",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/M4xe3MHenuE/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The turquoise lake and white limestone wall match the Canadian Rockies (Banff area), not a European alpine lake."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with turquoise water and limestone peaks matches the brief's scenery, but the terrain resembles the Canadian Rockies and no landmark confirms a European location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "M4xe3MHenuE",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/M4xe3MHenuE/2/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A continuous alpine lake scene matches the scenery brief, but the limestone peaks and conifers resemble the Canadian Rockies and nothing identifies Europe."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "conflicting",
+   "note": "continuity_ok: A continuous alpine lake with turquoise water, conifers, and rocky peaks fits the scenery brief, but the landscape strongly resembles the Canadian Rockies rather than a recognizable European location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "M4xe3MHenuE",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/M4xe3MHenuE/3/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A continuous shot of a turquoise alpine lake with limestone cliffs and wildflowers fits the alpine-lake look, but the scenery strongly resembles the Canadian Rockies and nothing identifies it as European."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: Turquoise alpine lake scenery is continuous across frames, but the banded limestone peaks and conifer forest strongly resemble the Canadian Rockies rather than a recognizable European alpine location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "Se5NjX-cM5I",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/Se5NjX-cM5I/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The turquoise glacial lake with jagged snowy peaks and evergreen shore matches Moraine Lake in the Canadian Rockies, not a European alpine lake."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The turquoise glacial water and jagged snowy peaks match Moraine Lake in the Canadian Rockies, not a European alpine lake."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "6BEoWVmmM0E",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/6BEoWVmmM0E/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The strip shows an alpine meadow with a stream and snowy peaks, but no lake appears in any frame."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The strip shows an alpine stream and meadows with snowy peaks, but no lake appears in any frame, so the brief's 'lake' is not fulfilled."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "6BEoWVmmM0E",
+  "excerpt_index": 4,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/6BEoWVmmM0E/4/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Continuous glacial turquoise water consistent with an alpine lake, but no shoreline or landmarks to confirm it is European."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: All frames show glacial turquoise water but no shoreline, mountains, or landmarks confirm a European alpine location."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R09-20260929T035859Z",
+  "run_dir": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z",
+  "video_id": "tgz_IQKBz4M",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R09-20260929T035859Z/data/runs/20260929T035900Z/review/tgz_IQKBz4M/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: All frames show a woman speaking to camera in front of a wooden cabin wall, with no lake or alpine landscape visible."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: All frames show a woman talking to camera in front of a log cabin wall with no alpine lake visible."
+  }
+ },
+ {
+  "run": "tmp/bench/batch1-R10-20260929T041603Z",
+  "run_dir": "tmp/bench/batch1-R10-20260929T041603Z/data/runs/20260929T041605Z",
+  "video_id": "jAylknIJSyA",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/batch1-R10-20260929T041603Z/data/runs/20260929T041605Z/review/jAylknIJSyA/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: A camel caravan walks across sandy desert, but the bright blue daylight clearly contradicts the requested sunset, and the Sahara setting is only plausible, not recognizable."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Camels are clearly walking through sandy dunes, but the bright blue midday sky contradicts the requested sunset lighting and the desert is not recognizably the Sahara."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "tVwICcTGVI8",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/tVwICcTGVI8/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A continuous pan over a scenic alpine lake with snowy peaks, but no recognizable European landmark and the granite terrain looks more North American than Alpine."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Turquoise alpine lake beneath snowy granite peaks fits the brief visually, but no landmark confirms it is European; the seated person is incidental."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "9aSmbjgCp0c",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/9aSmbjgCp0c/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The strip shows a man walking a mountain bike along a rocky riverbank, with no alpine lake visible and the dry river-valley setting conflicting with the brief."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The strip shows a man with a mountain bike on a rocky riverbank, not an alpine lake, and the canyon vegetation suggests a North American river valley rather than the European Alps."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/QnjD8eQYTDs/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A continuous turquoise alpine lake framed by conifers and jagged peaks fits the lake brief, but no identifiable feature confirms it is European."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A turquoise alpine lake with jagged peaks matches the lake brief, but the conifer forest and peaks are not recognizably European and could be North American Rockies."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/QnjD8eQYTDs/1/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A continuous scenic strip of a turquoise alpine lake beneath rugged forested peaks, but the setting is not recognizable as specifically European."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: Turquoise alpine lake with jagged peaks, but the dense spruce forest and peak forms resemble the Canadian Rockies rather than the European Alps."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/QnjD8eQYTDs/2/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Scenery fits an alpine lake with continuous frames, but the location is not recognizably European and resembles North American Rockies terrain."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A calm alpine lake with turquoise water and jagged peaks matches the brief, but the coniferous forest suggests North American Rockies and no recognizable European landmark confirms location."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/QnjD8eQYTDs/3/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with mountains and conifers matches the brief generically, but the setting resembles the Canadian Rockies more than a recognizable European alpine location."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A turquoise alpine lake with conifer forest and jagged peaks fits an alpine lake, but the vegetation and peaks look more like the Canadian Rockies than a recognizable European Alps location."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "6BEoWVmmM0E",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/6BEoWVmmM0E/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: All frames show an alpine meadow with a small stream and distant snow peaks, but no lake appears anywhere in the strip."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: No lake appears in any frame; the strip shows only a small stream on a grassy alpine slope with distant hikers."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-C-20260929T150632Z",
+  "run_dir": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z",
+  "video_id": "6BEoWVmmM0E",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/jevab-R09-C-20260929T150632Z/data/runs/20260929T150633Z/review/6BEoWVmmM0E/3/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: Striking turquoise water consistent with a glacial alpine lake, but only open water is visible with no shore, peaks, or landmarks to confirm the European alpine setting."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: All frames show only a close-up of rippled turquoise-green water with no shoreline, mountains, or identifiable alpine features to confirm the location."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "2vx5HtDSrBo",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/2vx5HtDSrBo/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: A large 'THE ALPS' title overlay dominates the middle frames even though the continuous alpine lake scene matches the brief."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The alpine lake (Pragser Wildsee-like Dolomites setting) matches the brief, but a large 'THE ALPS' title overlay fills the middle frames, forcing rejection."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "2vx5HtDSrBo",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/2vx5HtDSrBo/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: The strip shows a Dolomites alpine village with church and mountains, but no lake appears in any frame as the brief requires."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The strip shows an alpine valley village with a church and Dolomite peaks but no lake, and a watermark/title text is present."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "2vx5HtDSrBo",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/2vx5HtDSrBo/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: A Dolomite alpine lake resembling Lago di Braies fits the brief, but a large 'THE ALPS' title fades in and fills the latter half of the strip."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The frames show Lago di Braies in the Dolomites, but a 'THE ALPS' title overlays the scene, which disqualifies it."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "c-qAmOjn5Ok",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/c-qAmOjn5Ok/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The frames show an alpine village stream with a footbridge, but no lake appears in any frame as the brief requires."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The scene shows an alpine river with a wooden bridge and village, not a lake as the brief requires."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "c-qAmOjn5Ok",
+  "excerpt_index": 2,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/c-qAmOjn5Ok/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The strip shows a snow-covered alpine peak with a drifting hot-air balloon, but no lake appears in any frame."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The strip shows a snowy alpine peak and a hot air balloon but no lake, so the brief for a European alpine lake is not met."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "c-qAmOjn5Ok",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/c-qAmOjn5Ok/3/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The frames show a sunlit fog/cloud inversion over forested hills with distant mountains, but no alpine lake is visible."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The strip shows a sunrise cloud inversion over forested hills with a distant mountain ridge, but no alpine lake is visible."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/QnjD8eQYTDs/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A turquoise mountain lake with conifer forest and jagged peaks fits an alpine-lake brief, but the setting is not recognizably European and could plausibly be North American."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with rugged peaks and conifer forest fits the brief visually, but the location is not recognizable as a specifically European alpine lake."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/QnjD8eQYTDs/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: A turquoise alpine lake with jagged peaks and spruce forest that resembles the Canadian Rockies (Kananaskis), not a recognizable European alpine location."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with rugged peaks fits the brief visually, but the dark conifer forest and jagged skyline suggest a North American Rockies setting rather than a recognizable European Alpine location."
+  }
+ },
+ {
+  "run": "tmp/bench/jevab-R09-J-20260929T144720Z",
+  "run_dir": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z",
+  "video_id": "QnjD8eQYTDs",
+  "excerpt_index": 3,
+  "strip": "tmp/bench/jevab-R09-J-20260929T144720Z/data/runs/20260929T144721Z/review/QnjD8eQYTDs/3/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: The frames show a continuous alpine lake with jagged peaks, but the conifer-dominated terrain is not recognizably a European location."
+  },
+  "control": false,
+  "new": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A scenic alpine lake with rugged peaks and conifers fits the brief visually, but the vegetation and terrain look more North American than recognizably European."
+  }
+ },
+ {
+  "run": "tmp/bench/step5-iceland-20260929T012602Z",
+  "run_dir": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z",
+  "video_id": "IdFm-zn6ad0",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z/review/IdFm-zn6ad0/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The Sk\u00f3gafoss-like waterfall scenery matches Iceland, but a persistent 'Nature Meditation & Relaxation' title overlay fills the moment."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The Skogafoss-like Iceland waterfall footage is plausible, but a 'NATURE Meditation & Relaxation' title card overlays and fills nearly every frame."
+  }
+ },
+ {
+  "run": "tmp/bench/step5-iceland-20260929T012602Z",
+  "run_dir": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z",
+  "video_id": "whnR2pr4T10",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z/review/whnR2pr4T10/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: This is Kirkjufell mountain, not a waterfall, so the requested subject is absent."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The frames show Kirkjufell mountain and coastline in Iceland, but no waterfall is visible to match the brief."
+  }
+ },
+ {
+  "run": "tmp/bench/step5-iceland-20260929T012602Z",
+  "run_dir": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z",
+  "video_id": "Zqsn8GN1OJQ",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z/review/Zqsn8GN1OJQ/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: A large ICELAND title overlay dominates the middle frames as the waterfall drifts out of view."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: Kirkjufellsfoss and Kirkjufell clearly show an Icelandic waterfall, but a large 'ICELAND' title overlay fills frames 2-3."
+  }
+ },
+ {
+  "run": "tmp/bench/step5-iceland-20260929T012602Z",
+  "run_dir": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z",
+  "video_id": "Zqsn8GN1OJQ",
+  "excerpt_index": 1,
+  "strip": "tmp/bench/step5-iceland-20260929T012602Z/data/runs/20260929T012603Z/review/Zqsn8GN1OJQ/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: The frames show a glacier lagoon with drifting icebergs, not a waterfall, so the brief is not met despite the Iceland label."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: The frames show an Icelandic glacier lagoon with floating icebergs, but no waterfall appears in any frame."
+  }
+ },
+ {
+  "run": "tmp/bench/heldout-horses-20260928T233348Z",
+  "run_dir": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z",
+  "video_id": "U4qjIADZArM",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/heldout-horses-20260928T233348Z/data/runs/20260928T233350Z/review/U4qjIADZArM/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Horses graze in a mountain meadow throughout, but every frame is overlaid with orange title text (FALL, SPIRITS, AS, GATHERED, HER, RELAXED), which fails the title rule."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Horses graze in a mountain meadow, but every frame carries a sequential title caption that fills the moment."
+  }
+ },
+ {
+  "run": "tmp/bench/step4-reddeer-20260929T003207Z",
+  "run_dir": "tmp/bench/step4-reddeer-20260929T003207Z/data/runs/20260929T003209Z",
+  "video_id": "g1nLXABEYSM",
+  "excerpt_index": 0,
+  "strip": "tmp/bench/step4-reddeer-20260929T003207Z/data/runs/20260929T003209Z/review/g1nLXABEYSM/0/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "uncertain",
+   "note": "continuity_ok: A deer clearly walks through a misty, sunlit forest in one continuous shot, but the spotted coat and palmate antlers suggest a fallow deer rather than a red deer."
+  },
+  "control": false,
+  "new": {
+   "match": "keep",
+   "geo": "uncertain",
+   "note": "continuity_ok: A deer walks steadily left-to-right through a misty, sunlit forest, though its spotted coat and palmate antlers suggest fallow deer rather than red deer."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "cZaSgUiqXlQ",
+  "excerpt_index": 2,
+  "strip": "data/runs/20260927T220608Z/review/cZaSgUiqXlQ/2/strip.jpg",
+  "old": {
+   "match": "uncertain",
+   "geo": "supported",
+   "note": "continuity_ok: A Brazilian street parade (Sept 7 style) with soldiers in formation in the foreground and Brazilian flag patches, but the marching column in red costumes appears to be a civilian troupe rather than an epic military march."
+  },
+  "control": false,
+  "new": {
+   "match": "keep",
+   "geo": "supported",
+   "note": "continuity_ok: Brazilian soldiers in camouflage with green berets and flag patches march in formation down a crowded street parade, with Globo and Pague Menos signage confirming Brazil."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "7OcHzlgp-B4",
+  "excerpt_index": 0,
+  "strip": "data/runs/20260927T220608Z/review/7OcHzlgp-B4/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: A French Navy L9011 landing ship docked at port, not a Brazilian vessel performing any ceremonial or operational action."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: Hull L9011 is the French Navy Foudre-class LPD with a French tricolor visible, docked passively in a harbor, so it is not Brazilian military action."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "EjGo4GJN-EI",
+  "excerpt_index": 2,
+  "strip": "data/runs/20260927T220608Z/review/EjGo4GJN-EI/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "Carrier battle group appears to be US Navy, not Brazilian, and the first frame contains a cross-dissolve; no Brazilian identifiers are visible."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "Strip shows a Cold War-era US Navy carrier battle group with escorts (opening on a dissolve), not recognizable Brazilian forces."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "cq6Jw1D64cI",
+  "excerpt_index": 0,
+  "strip": "data/runs/20260927T220608Z/review/cq6Jw1D64cI/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "The strip cuts between unrelated scenes including an East Asian-looking city street inconsistent with Brazil, and uniformed personnel lack a ceremony/march context."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "Soldiers on patrol with a Brazilian flag graphic fit the brief, but the strip cuts back and forth between a jungle patrol and a separate city-street scene, fracturing the moment with edits."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "cq6Jw1D64cI",
+  "excerpt_index": 1,
+  "strip": "data/runs/20260927T220608Z/review/cq6Jw1D64cI/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: AI-rendered jungle combat patrol with generic Brazilian flags, not a march, ceremony, equipment display, or speech, and lacks authentic recruitment-style footage."
+  },
+  "control": false,
+  "new": {
+   "match": "keep",
+   "geo": "uncertain",
+   "note": "continuity_ok: Brazilian-flagged soldiers advance in formation through jungle with rifles, an epic recruitment-style action, though the rendered look and generic jungle make the exact location unverifiable."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "cq6Jw1D64cI",
+  "excerpt_index": 2,
+  "strip": "data/runs/20260927T220608Z/review/cq6Jw1D64cI/2/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Soldiers firing rifles in jungle warfare is combat action, not the requested march, equipment display, or ceremony, and the imagery appears synthetic with only a flag overlay suggesting Brazil."
+  },
+  "control": false,
+  "new": {
+   "match": "keep",
+   "geo": "uncertain",
+   "note": "continuity_ok: Soldiers in Brazilian-marked gear advance and fire through jungle in an epic recruitment-style shot, but the scene looks AI-generated and Brazil is asserted only by flag overlays, not a recognizable location."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "iZyDYIEKxoU",
+  "excerpt_index": 0,
+  "strip": "data/runs/20260927T220608Z/review/iZyDYIEKxoU/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: Static infographic with title text and no active military action; the ship is a motionless studio render."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: Static 3D render of the Brazilian hospital ship U18 with title and stat text overlays rather than epic live footage of the vessel operating."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "X63NLVbL1GA",
+  "excerpt_index": 0,
+  "strip": "data/runs/20260927T220608Z/review/X63NLVbL1GA/0/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "uncertain",
+   "note": "continuity_ok: Static parked self-propelled howitzers appear to be museum display pieces (German markings) with title graphics, not active Brazilian military activity."
+  },
+  "control": false,
+  "new": {
+   "match": "reject",
+   "geo": "conflicting",
+   "note": "continuity_ok: Static parked artillery in a museum display with a Swiss cross marking and an animating 'Self-Propelled Artillery' title filling the moment, not active Brazilian military action."
+  }
+ },
+ {
+  "run": "data/runs/20260927T220608Z",
+  "run_dir": "data/runs/20260927T220608Z",
+  "video_id": "X63NLVbL1GA",
+  "excerpt_index": 1,
+  "strip": "data/runs/20260927T220608Z/review/X63NLVbL1GA/1/strip.jpg",
+  "old": {
+   "match": "reject",
+   "geo": "supported",
+   "note": "continuity_ok: A For\u00e7a A\u00e9rea Brasileira A-1A jet flying near a tanker drogue matches the brief, but a persistent 'Dedicated Attack 77' title banner and channel watermark fill the frames."
+  },
+  "control": false,
+  "new": {
+   "match": "keep",
+   "geo": "supported",
+   "note": "continuity_ok: Brazilian Air Force A-1A attack jet in epic in-flight shot with refueling drogue; a small lower-third title graphic animates in but never fills the moment."
+  }
+ }
+]
