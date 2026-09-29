@@ -89,6 +89,9 @@ def test_interrupted_discovery_does_not_accept_old_nonempty_files(tmp_path, monk
         'stage': 'discover', 'binding': state['completed']['discover']['binding']}))
     searches = yt.searches
     resumed = advance(root, brief=brief, plan=plan, run_dir=run, ports=_ports(yt))
-    assert resumed['status'] == 'recovery', resumed
-    assert resumed['stage'] == 'discover'
-    assert yt.searches == searches
+    # Redone automatically (once): discovery runs again instead of trusting
+    # the files an interrupted invocation may have left.
+    assert resumed['auto_recoveries'] == {'discover': 1}, resumed
+    assert yt.searches > searches
+    discover_records = [r for r in resumed['timing']['stages'] if r['stage'] == 'discover']
+    assert discover_records[-1]['status'] == 'executed'

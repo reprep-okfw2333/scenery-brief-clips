@@ -309,22 +309,62 @@ def test_export_requires_allowance_and_jev_stays_off(tmp_path, monkeypatch):
         assert paused["stage"] in {"agree_export", "label_strips", "analyze", "verify_review", "shortlist_review"}
 
 
-def test_interrupted_external_stage_pauses_for_recovery(tmp_path, monkeypatch):
+def _interrupted_run(root: Path, name: str, stage: str = "discover") -> Path:
+    run_dir = root / "data" / "runs" / name
+    run_dir.mkdir(parents=True)
+    (run_dir / "runner_inflight.json").write_text(
+        json.dumps({"stage": stage, "binding": "x"}),
+        encoding="utf-8",
+    )
+    return run_dir
+
+
+def test_interrupted_external_stage_is_redone_once_automatically(tmp_path, monkeypatch):
     Guard().install(monkeypatch)
     root = _root(tmp_path)
     brief_path, plan_path = _brief_plan(root)
-    run_dir = root / "data" / "runs" / "interrupted"
-    run_dir.mkdir(parents=True)
-    (run_dir / "runner_inflight.json").write_text(
-        json.dumps({"stage": "discover", "binding": "x"}),
-        encoding="utf-8",
-    )
+    run_dir = _interrupted_run(root, "interrupted")
+    yt = FakeYt()
+    result = advance(root, brief=brief_path, plan=plan_path, run_dir=run_dir, ports=_ports(yt))
+    assert result["status"] != "recovery"
+    assert result["auto_recoveries"] == {"discover": 1}
+    assert result["timing"]["retries"] == 1
+    assert yt.searches > 0
+    assert not (run_dir / "runner_inflight.json").exists()
+
+
+def test_second_interruption_of_the_same_stage_pauses_for_recovery(tmp_path, monkeypatch):
+    Guard().install(monkeypatch)
+    root = _root(tmp_path)
+    brief_path, plan_path = _brief_plan(root)
+    run_dir = _interrupted_run(root, "twice")
+    state = {"completed": {}, "timing": {"stages": [], "retries": 1, "waiting_for_input_s": 0.0},
+             "auto_recoveries": {"discover": 1}}
+    (run_dir / "runner_state.json").write_text(json.dumps(state), encoding="utf-8")
     yt = FakeYt()
     result = advance(root, brief=brief_path, plan=plan_path, run_dir=run_dir, ports=_ports(yt))
     assert result["status"] == "recovery"
     assert result["stage"] == "discover"
+    assert "automatic recovery already used" in result["missing"]
     assert "acknowledge_uncertain=discover" in result["how_to_supply"]
     assert yt.searches == 0
+
+
+def test_auto_recover_off_pauses_for_recovery(tmp_path, monkeypatch):
+    Guard().install(monkeypatch)
+    root = _root(tmp_path)
+    with (root / "config.yaml").open("a", encoding="utf-8") as handle:
+        handle.write("\nauto_recover: false\n")
+    brief_path, plan_path = _brief_plan(root)
+    run_dir = _interrupted_run(root, "manual")
+    yt = FakeYt()
+    result = advance(root, brief=brief_path, plan=plan_path, run_dir=run_dir, ports=_ports(yt))
+    assert result["status"] == "recovery"
+    assert result["stage"] == "discover"
+    assert "automatic recovery already used" not in result["missing"]
+    assert "acknowledge_uncertain=discover" in result["how_to_supply"]
+    assert yt.searches == 0
+    assert "auto_recoveries" not in result
 
 
 def test_second_runner_cannot_modify_a_locked_run(tmp_path, monkeypatch):
@@ -784,3 +824,37 @@ def test_run_deadline_config_must_be_positive(tmp_path):
     (root / "config.yaml").write_text("run_deadline_s: 0\n", encoding="utf-8")
     with pytest.raises(ConfigError):
         load_project_config(root)
+
+
+def test_interrupted_shortlist_review_with_partial_frames_is_redone(tmp_path, monkeypatch):
+    # The 2026-09-29 Iceland run was killed in shortlist_review and needed a
+    # manual cleanup plus acknowledge_uncertain; now the resume redoes it.
+    Guard().install(monkeypatch)
+    root = _root(tmp_path)
+    brief_path, plan_path = _brief_plan(root)
+    yt = FakeYt()
+    ports = _ports(yt, tile_caller=_tile_text, strip_caller=_strip_text)
+    first = advance(root, brief=brief_path, plan=plan_path, vision_agree=True, ports=ports)
+    run_dir = Path(first["run_dir"])
+    state = json.loads((run_dir / "runner_state.json").read_text(encoding="utf-8"))
+    if "shortlist_review" not in state["completed"]:
+        pytest.skip(f"fixture run stopped before shortlist_review: {first['status']} {first['stage']}")
+    # The fixture blocks ffmpeg, so review makes no moments, but it creates
+    # each excerpt's moment dir before extracting: where partial frames land.
+    rows = json.loads((run_dir / "excerpts.json").read_text(encoding="utf-8"))
+    row = next(r for r in rows if r.get("excerpts"))
+    moment_dir = run_dir / "review" / row["video_id"] / "0"
+    moment_dir.mkdir(parents=True, exist_ok=True)
+    junk = moment_dir / "frame_999.jpg"
+    junk.write_bytes(b"partial")
+    (run_dir / "runner_inflight.json").write_text(
+        json.dumps({"stage": "shortlist_review", "binding": state["completed"]["shortlist_review"]["binding"]}),
+        encoding="utf-8",
+    )
+    resumed = advance(root, brief=brief_path, plan=plan_path, run_dir=run_dir, ports=ports)
+    assert resumed["auto_recoveries"] == {"shortlist_review": 1}
+    assert resumed["status"] == first["status"]
+    assert resumed["stage"] == first["stage"]
+    assert not junk.exists()
+    executed = [r["stage"] for r in resumed["timing"]["stages"] if r["status"] == "executed"]
+    assert "shortlist_review" in executed

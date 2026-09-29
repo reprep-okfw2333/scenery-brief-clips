@@ -30,6 +30,12 @@ REASON_GEO_CONFLICTING = "geographic evidence conflicting"
 REASON_NOTE_VIOLATION = "jev note violation"
 REASON_BEYOND = "beyond n_clips"
 REASON_CONTINUITY_SUSPECT_UNCLEARED = "continuity_suspect_uncleared"
+# Strip label budget (vision_wire.label_review_strips): moments the labeler
+# skipped are listed under the labels file's "unlabeled" key with one of these
+# reasons, so shortlist and verify reproduce the exclusion from the file alone.
+UNLABELED_KEY = "unlabeled"
+REASON_UNLABELED_ENOUGH = "not labeled: enough clips kept"
+REASON_UNLABELED_DUPLICATE_PREFIX = "not labeled: duplicate of "
 
 CONTINUITY_OK_NOTE_PREFIX = "continuity_ok:"
 
@@ -92,7 +98,7 @@ def _validated_n_clips(value) -> int:
     return value
 
 
-RESERVED_LABEL_KEYS = frozenset({"excerpts_sha256"})
+RESERVED_LABEL_KEYS = frozenset({"excerpts_sha256", UNLABELED_KEY})
 
 
 def video_label_entries(labels: dict) -> dict:
@@ -145,7 +151,33 @@ def validate_label_payload(payload) -> dict:
                 raise ShortlistInputError(
                     f"shortlist note_violation for {video_id} must be a boolean when present"
                 )
+    unlabeled = payload.get(UNLABELED_KEY)
+    if unlabeled is not None:
+        if not isinstance(unlabeled, list):
+            raise ShortlistInputError("labels unlabeled must be a list")
+        for item in unlabeled:
+            if not isinstance(item, dict) or not isinstance(item.get("video_id"), str):
+                raise ShortlistInputError("labels unlabeled entries must be objects with a video_id")
+            index = item.get("excerpt_index")
+            if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+                raise ShortlistInputError("labels unlabeled excerpt_index must be a non-negative integer")
+            reason = item.get("reason")
+            if not isinstance(reason, str) or not (
+                reason == REASON_UNLABELED_ENOUGH or reason.startswith(REASON_UNLABELED_DUPLICATE_PREFIX)
+            ):
+                raise ShortlistInputError(f"labels unlabeled reason is not recognized: {reason!r}")
     return payload
+
+
+def unlabeled_reasons(labels: dict) -> dict[tuple[str, int], str]:
+    """Moments the strip labeler skipped on purpose, with the recorded reason."""
+    reasons: dict[tuple[str, int], str] = {}
+    for item in labels.get(UNLABELED_KEY) or []:
+        key = (item["video_id"], int(item["excerpt_index"]))
+        if key in reasons:
+            raise ShortlistInputError(f"labels list {key[0]}:{key[1]} as unlabeled twice")
+        reasons[key] = item["reason"]
+    return reasons
 
 
 def _doc_moment(video_id: str, excerpt_index: int, excerpt: dict) -> dict:
@@ -168,6 +200,16 @@ def _exclusion_reason(entry: dict) -> str | None:
     if entry.get("note_violation") is True:
         return REASON_NOTE_VIOLATION
     return None
+
+
+def label_keeps(entry: dict, moment: dict) -> bool:
+    """True when a label lets a moment into the shortlist (before dedup).
+
+    The strip label budget uses the same rule to count keeps while labeling.
+    """
+    if _exclusion_reason(entry) is not None:
+        return False
+    return not (moment.get("continuity_suspect") and not continuity_cleared(entry))
 
 
 def continuity_cleared(entry: dict) -> bool:
@@ -301,6 +343,13 @@ def build_shortlist(
                 raise ShortlistInputError(f"duplicate shortlist label for {video_id}:{index}")
             labels_by_key[key] = entry
 
+    skipped = unlabeled_reasons(labels)
+    for key in skipped:
+        if key[0] not in rows_by_video or key[1] >= len(rows_by_video[key[0]].get("excerpts") or []):
+            raise ShortlistInputError(f"labels unlabeled entry {key[0]}:{key[1]} is not an analyzed moment")
+        if key in labels_by_key:
+            raise ShortlistInputError(f"{key[0]}:{key[1]} is both labeled and listed as unlabeled")
+
     review_by_key: dict[tuple[str, int], dict] = {}
     for moment in review["moments"]:
         if not isinstance(moment, dict):
@@ -335,7 +384,7 @@ def build_shortlist(
     for key in ordered_keys:
         entry = labels_by_key.get(key)
         if entry is None:
-            excluded[key] = [REASON_NO_LABEL]
+            excluded[key] = [skipped.get(key, REASON_NO_LABEL)]
             continue
         reason = _exclusion_reason(entry)
         if reason is not None:

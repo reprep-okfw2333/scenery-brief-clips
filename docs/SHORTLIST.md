@@ -63,6 +63,25 @@ the Python process (same pattern as Part 2). Every decision is recorded.
   Unknown video_id, out-of-range index, duplicate entries, or unknown
   match/geo values are rejected. A moment with no entry is unscored.
 
+  Optional "unlabeled" key (written by the strip label budget, below):
+    "unlabeled": [ { "video_id": "...", "excerpt_index": 3,
+                     "reason": "not labeled: enough clips kept"
+                             | "not labeled: duplicate of <video_id>:<index>" } ]
+  A moment listed there is excluded with that reason instead of "no label".
+  Unknown reasons, unknown moments, a moment both labeled and listed, or one
+  listed twice are rejected.
+
+  Strip label budget (label-strips and run-pipeline, default on): strips go
+  to the model in waves of SCENERY_VISION_WORKERS calls, sources
+  interleaved. A moment that duplicates an already-kept moment (same dHash
+  rule as below) is not sent, and labeling stops once constraint n_clips
+  distinct keeps exist ("keep" = eligible under the decision rules below).
+  Decisions depend only on the labels, not on call timing. Off with
+  `label-strips --label-all`, config `strip_label_budget: false`, or when
+  jev_note_check is on (it can drop keeps after labeling). Replay on the 29
+  local runs (benchmark/unattended_eval/replay_budget.py): 270 -> 185 strip
+  labels, 93 -> 94 selected, no run lost a clip.
+
   The labels file must live inside the run dir (convention:
   DIR/shortlist_scores.json). shortlist-apply refuses paths outside it, and
   shortlist.json records the labels path relative to the run dir, so the
@@ -115,7 +134,8 @@ the Python process (same pattern as Part 2). Every decision is recorded.
 
 ## Decision rules (per moment, in this order)
 
-  1. unscored                       -> excluded "no label"
+  1. unscored                       -> excluded "no label", or the
+                                       recorded "not labeled: ..." reason
   2. match == "reject"              -> excluded "visual match rejected"
   3. match == "uncertain"           -> excluded "visual match uncertain"
   4. geo == "conflicting"           -> excluded "geographic evidence conflicting"

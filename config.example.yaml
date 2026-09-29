@@ -18,9 +18,13 @@ min_width: 1280
 aspect_min: 1.70
 aspect_max: 1.86
 max_tiles: 12
-max_rank_videos: 10
 max_analysis_s: 120
-max_analyze_videos: 1
+# Sources: leave these unset so run-pipeline scales them with the brief's
+# n_clips (max_analyze_videos = ceil(n_clips / 1.5) + 1, at most 12; rank
+# = analyze + 4 when that exceeds 10). Setting either pins it; standalone
+# commands without a value use 1 source and 10 ranked videos.
+# max_rank_videos: 10
+# max_analyze_videos: 1
 
 # Part 3 continuity gate (soft dissolve / mid-excerpt cut detection on analysis copies).
 # Samples ~continuity_sample_fps dHashes across each candidate excerpt; if adjacent or
@@ -44,6 +48,14 @@ continuity_max_adjacent_hamming: 18
 continuity_max_endpoint_hamming: 22
 continuity_max_adjacent_color: 28.0
 continuity_max_endpoint_color: 35.0
+
+# Strip labels stop once n_clips distinct keeps exist and skip duplicates of
+# a keep (docs/SHORTLIST.md). false labels every moment. Forced off while
+# jev_note_check is on.
+strip_label_budget: true
+# Redo an external stage interrupted by a killed process once automatically
+# (docs/RUNNER.md). false: always pause for --acknowledge-uncertain.
+auto_recover: true
 
 # Optional Jev decisions (off by default). See docs/JEV.md.
 # typesafe/jev-1.13 via the OpenRouter decisions endpoint; text only, no pixels.

@@ -107,12 +107,16 @@ is the authority; this section describes it.
   judges clips against this text, so include style and camera words here
   ("cinematic", "slow motion", "drone/aerial"); they have no other field and
   are soft (not verified).
-- `geography`: null, `"european"` (historic mode), or a place/region name the
-  user asked for: letters, spaces and `. , ' -`, at most 60 characters
-  ("Iceland", "Scottish Highlands", "Kyoto", "Sahara"). The planner may add it
-  to searches, and vision is told the place: a clip that clearly shows a
-  different kind of place is excluded (`geo: conflicting`), unrecognizable
-  scenery is kept but flagged `geo_uncertain`. It is not proof of location.
+- `geography`: null (most requests), `"european"` (historic mode), or a
+  place/region name the user asked for: letters, spaces and `. , ' -`, at
+  most 60 characters ("Iceland", "Scottish Highlands", "Kyoto", "Sahara").
+  Place matching is loose by design (owner, 2026-09-29: this is a holistic
+  request-to-clips gatherer; footage that looks like the place is enough).
+  The planner may add the place to searches; vision treats places and
+  settings as soft (vision_wire.PLACE_SOFT_RULE): only footage that clearly
+  shows a different kind of place is excluded (`geo: conflicting`), and
+  unrecognizable scenery is kept, flagged `geo_uncertain`. Never ask the user
+  for a place they did not mention. It is not proof of location.
 - `n_clips`: positive integer the user stated or confirmed. Missing: stop and
   ask ("How many clips?"). Never assume one.
 - `clip_duration_s`: `{"min", "target", "max"}` in seconds with

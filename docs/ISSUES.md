@@ -29,11 +29,18 @@ the analysis manifest as `min_window_s`.
 
 ## Open (2026-09-29, B1 batch): yield and speed limits
 
-- The number of analyzed sources comes from config (`max_analyze_videos`,
-  default 1) and does not grow with n_clips: 10 requested clips from 5
-  sources gave 8.
-- Every excerpt is labeled even when few clips are needed. (Strip labels
-  were serial, ~9 s each; since B2 they run 4 at a time, not yet measured.)
+- FIXED (2026-09-29, evening, run-pipeline): the number of analyzed sources
+  came from config (`max_analyze_videos`, default 1) and did not grow with
+  n_clips (10 requested clips from 5 sources gave 8). With no config value it
+  is now ceil(n_clips / 1.5) + 1, at most 12. Not yet measured live.
+- FIXED (2026-09-29, evening): vision lowered `match` for place and setting
+  (R09 "European alpine lake": lakes that "resemble the Canadian Rockies"),
+  losing 3 of 6 clips. Places and settings are now soft in the prompt;
+  offline 21 such doubts became keeps with no control lost
+  (benchmark/unattended_eval/README.md).
+- FIXED (2026-09-29, evening): every excerpt was labeled even when few
+  clips were needed. The strip label budget stops at n_clips distinct keeps
+  and skips duplicates of a keep (replay: 270 -> 185 labels, no clip lost).
 - YouTube refused this host after ~10 live runs in a few hours ("Sign in to
   confirm you're not a bot"), metadata included. The runner now stops with
   status `blocked` (wait, then rerun); pacing live runs matters. Cookies

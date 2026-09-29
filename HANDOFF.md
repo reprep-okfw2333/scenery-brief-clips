@@ -56,8 +56,10 @@ started). No Hermes/skill (plan step 6) work for now.
 
 ## State: done and working
 
-Tests: `.venv/bin/python -m pytest tests/ -q` gives 958 passed, 1 xfailed on
-the current working tree (about 7 min; 797 before the Jev work, +161 in
+Tests: `.venv/bin/python -m pytest tests/ -q` gives 1104 passed, 1 xfailed on
+the current working tree (about 6 min; +146 for the unattended track:
+tests/test_strip_budget.py 120, tests/test_source_scaling.py 21, runner
+recovery and vision prompt tests; 958 before it; 797 before the Jev work, +161 in
 tests/test_jev.py and the rewritten tests/test_jev_gate.py): 465 at the step 3-4 commit, plus 30
 tests in tests/test_brief.py that pytest never collected before (class names),
 plus 112 step-5 tests, plus 23 for the brief export cap in standalone
@@ -201,6 +203,31 @@ dissolve in the blend detector; on real footage such false alarms only trim).
      vs 3 without. The score ignores Jev's own place answer, and an
      illustration channel passed every stage.
 
+11. **Unattended-first track** (2026-09-29 evening, UNCOMMITTED; owner chose
+   it and set the direction "holistic gatherer; place matching is not a
+   priority, looks like the country is enough"). PLAN-PROGRESS
+   "Unattended-first track"; offline evidence in benchmark/unattended_eval/.
+   - Strip label budget (default on, `strip_label_budget`): label in waves,
+     sources interleaved, skip duplicates of a keep, stop at n_clips distinct
+     keeps; skipped moments recorded under `unlabeled` so verify reproduces
+     the shortlist. Product replay on 29 runs: 270 -> 185 labels, 93 -> 94
+     selected, no run lost a clip. tests/test_strip_budget.py (120).
+   - Source count scales with n_clips when config is silent:
+     max_analyze_videos = ceil(n/1.5)+1 (max 12), rank = that + 4 when > 10.
+     config.example.yaml no longer pins 1/10. tests/test_source_scaling.py.
+   - Places and settings are soft in the vision prompt (PLACE_SOFT_RULE,
+     label policy vision_label_v2): offline relabel of 70 stored strips,
+     21 place/setting doubts became keeps beyond model noise, 13/13
+     controls kept, overlays/missing subjects/wrong actions still rejected.
+   - An interrupted external stage is redone once automatically
+     (`auto_recoveries`; `auto_recover: false` restores the pause).
+   - Live (benchmark/RESULTS-2026-09-29-batch2.md, R05/R07/R09 vs B1):
+     R05 10/10 (B1 8/10), R07 4/4 in 10:34 (13:07), R09 3/6 (same; pool
+     of distinct moments too small, 6 of 10 were duplicates). Verify ok on
+     all; by eye 16/17 usable (B1 11/15), no cut in any clip. First live
+     auto-recovery (R05 discover). Two runs hit brief YouTube refusals
+     (`blocked`) and were resumed with benchmark/resume.sh.
+
 ## Caveats and known gaps
 
 - **YouTube accepted the host again** at 14:24 UTC 2026-09-29 (it had
@@ -284,11 +311,18 @@ work for now. Use a Sonnet sub-agent for repetitive work and keep docs
 current with every change. Full order: PLAN-PROGRESS "Priorities and new
 order".
 
-1. Jev follow-up (if the owner wants it): add the place rule (reject when the
-   brief names a place and P(place=different) >= 0.5; offline it rejects
-   14/184, 12 reference-no, 2 unsure, none truly on-place) and "not real
-   camera footage (painting, illustration, render)" to the note criteria
-   (bump jev_note_q_v1). Then run the remaining pairs,
+0. Follow-ups from batch2 (RESULTS-2026-09-29-batch2.md), suggested order:
+   (a) top up with more sources when the shortlist is short (R09);
+   (b) tie max_rank_videos to the analyzed count when config is silent
+   (rank 10 labels tiles of videos never analyzed); (c) one wait-and-retry
+   on a YouTube refusal before the breaker trips (refusals cleared within
+   minutes); (d) owner call: soft setting lets subject-true clips through
+   without the setting (R07 stag in bracken).
+1. Jev follow-up (if the owner wants it). DROPPED by the owner's direction
+   (2026-09-29, place is not a priority): the Jev place rule (reject when
+   P(place=different) >= 0.5). Still possible: "not real camera footage
+   (painting, illustration, render)" in the note criteria (bump
+   jev_note_q_v1). Then run the remaining pairs,
    `benchmark/jev_ab.sh R07 R10 R03` (~2 h, spaced; C arms reuse J's plan
    and metadata), judge the clips blind, and decide defaults.
    Also rerun `benchmark/batch.sh batch1` (or a subset, spaced out) to
@@ -302,9 +336,11 @@ order".
    with a password there.
 3. Owner decisions open: merge to master; cookies vs proxy vs waiting; B3
    design; Jev defaults.
-4. B3 brief profiles (quick/standard), proposed: quick analyzes more sources
-   as n_clips grows, lets "uncertain" moments fill a shortfall, labels only
-   the best-ranked moments; standard = today's behavior. Not started.
+4. B3 brief profiles: partly superseded by the unattended track (sources
+   scale with n_clips, labels stop at n_clips). Left: letting "uncertain"
+   moments fill a shortfall, if the live batch still shows shortfalls; the
+   orchestrator questions/profile idea. "european" query fix: dropped
+   (place not a priority).
 5. Plan step 6 (Hermes skill) on hold; plan step 7 (quality signals)
    deprioritized.
 6. Merge to master only when the owner asks.

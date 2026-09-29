@@ -54,6 +54,13 @@ docs/SEARCH_BRIEF.md is the current contract. Operator-agent brief validity
 delivered at 1920x1080, verify ok (benchmark/runs/step5-iceland-*/NOTE.md).
 The standalone `export`/`analyze` commands now also apply the brief's cap
 (recorded in discovery.json).
+Unattended-first track (2026-09-29 evening, uncommitted): strip labels stop
+at n_clips distinct keeps (270 -> 185 labels on replay, no clip lost);
+analyzed sources scale with n_clips when config is silent; places and
+settings are soft in the vision prompt (owner: place matching is not a
+priority); an interrupted external stage is redone once automatically.
+Live (batch2): R05 10/10 (was 8/10), R07 4/4 faster, R09 3/6 (unchanged,
+too few distinct moments); 16/17 clips usable by eye. Tests 1104 passed.
 B1 batch baseline + B2 + B2b (2026-09-29, committed aa315a8, pushed, not merged): 8 varied
 requests, 6/8 unattended, 26/36 clips, 21/26 usable by eye
 (benchmark/RESULTS-2026-09-29-batch1.md). Fixed: long clips (16-30 s) could

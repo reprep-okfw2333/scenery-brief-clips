@@ -356,6 +356,11 @@ def main(argv: list[str] | None = None) -> int:
     p_ls = sub.add_parser("label-strips", help="Label review strips with the wired vision model")
     p_ls.add_argument("--run-dir", type=Path, required=True)
     p_ls.add_argument("--confirm-vision", action="store_true")
+    p_ls.add_argument(
+        "--label-all",
+        action="store_true",
+        help="label every moment (default: stop at n_clips distinct keeps and skip duplicates)",
+    )
     p_ls.add_argument("--root", type=Path, default=None)
 
     p_pipe = sub.add_parser(
@@ -1174,7 +1179,7 @@ def _cmd_label_strips(args: argparse.Namespace) -> int:
         return missing
     try:
         wire = load_vision_wire(root)
-        result = label_review_strips(run_dir, wire)
+        result = label_review_strips(run_dir, wire, budget=not args.label_all)
     except VisionWireError as exc:
         print(str(exc), file=sys.stderr)
         return 2

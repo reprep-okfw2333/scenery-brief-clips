@@ -4,7 +4,7 @@ From the project root. Prefer the venv binary (`uv` is often not on PATH):
 
   .venv/bin/scenery-brief-clips vision-show
   .venv/bin/scenery-brief-clips label-tiles --run-dir data/runs/<id> --confirm-vision
-  .venv/bin/scenery-brief-clips label-strips --run-dir data/runs/<id> --confirm-vision
+  .venv/bin/scenery-brief-clips label-strips --run-dir data/runs/<id> --confirm-vision [--label-all]
   .venv/bin/scenery-brief-clips doctor
   .venv/bin/scenery-brief-clips explain-prompt "PROMPT"
   .venv/bin/scenery-brief-clips run --dry-run --prompt "PROMPT" [--max-results N] [--max-metadata N] [--sleep S] [--config PATH]

@@ -19,6 +19,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from scenery_brief_clips.config import _parse_scalar
+from scenery_brief_clips.shortlist import (
+    REASON_UNLABELED_DUPLICATE_PREFIX,
+    REASON_UNLABELED_ENOUGH,
+    ShortlistError,
+    label_keeps,
+    moments_are_duplicates,
+    parse_frame_hashes,
+)
 
 CODEX_LOGIN = "codex-login"
 OPENAI_API = "openai-api"
@@ -62,6 +70,20 @@ STRIP_PROMPT = (
     "Reject when a cut, dissolve, title, or town fills the moment, even if "
     "most frames match. geo supported only when the place is recognizable. "
     "Set continuity_ok true only when the strip is one continuous scene."
+)
+
+
+# Owner (2026-09-29): a holistic request-to-clips gatherer; place matching is
+# not a priority. Before this rule the model lowered match for lakes that
+# "resemble the Canadian Rockies" in a "European alpine lake" brief (R09 lost 3
+# of 6 clips that way; benchmark/unattended_eval/).
+PLACE_SOFT_RULE = (
+    "Places, regions and settings named in the brief are soft: footage that "
+    "could plausibly be from there counts as a match even when the place is "
+    "not recognizable or resembles a similar region elsewhere. Do not lower "
+    "match for place or setting unless the frames clearly contradict it, for "
+    "example a desert when the brief asks for a snowy forest. This relaxes "
+    "only place and setting, never the rules on cuts, titles, subject or action. "
 )
 
 
@@ -421,6 +443,7 @@ def brief_prompt(kind: str, theme: str | None) -> str:
         "actively doing the requested action when that action is visible and "
         "central. Reject incidental people, conversation, or equipment that "
         "does not show the requested action. "
+        + PLACE_SOFT_RULE
         + base
     )
 
@@ -575,7 +598,16 @@ def label_ranked_tiles(run_dir: str | Path, wire: VisionWire, caller=None) -> di
     return {"scores": scores, "failures": failures}
 
 
-def label_review_strips(run_dir: str | Path, wire: VisionWire, caller=None) -> dict:
+def label_review_strips(run_dir: str | Path, wire: VisionWire, caller=None, *, budget: bool = False) -> dict:
+    """Label the review strips of a run.
+
+    budget=True labels only what the shortlist can use: moments go out in
+    waves of vision_workers() calls, sources interleaved; a moment that
+    duplicates an already-kept moment is skipped, and labeling stops once
+    constraint.json's n_clips distinct keeps exist. Skipped moments are listed
+    under the labels file's "unlabeled" key. Decisions depend only on the
+    labels, never on call timing. Without a valid n_clips it labels all.
+    """
     run_dir = Path(run_dir)
     review_path = run_dir / "review.json"
     if not review_path.is_file():
@@ -583,37 +615,128 @@ def label_review_strips(run_dir: str | Path, wire: VisionWire, caller=None) -> d
     review = json.loads(review_path.read_text(encoding="utf-8"))
     if not isinstance(review, dict):
         raise VisionWireError("review.json must be an object")
-    scores: dict[str, list] = {}
     failures: list[dict] = []
     binding = review.get("excerpts_sha256")
     theme = _theme_from_run(run_dir)
-    pending: list[tuple[dict, str, Path, Future[dict]]] = []
+    moments: list[tuple[dict, str, Path]] = []
+    for moment in review.get("moments") or []:
+        if not isinstance(moment, dict):
+            continue
+        video_id = str(moment.get("video_id") or "")
+        strip = moment.get("strip")
+        if not video_id or not strip:
+            continue
+        strip_path = Path(str(strip))
+        if not strip_path.is_absolute():
+            strip_path = run_dir / strip_path
+        moments.append((moment, video_id, strip_path))
+
+    n_clips = _run_n_clips(run_dir) if budget else None
+    labeled: dict[int, dict] = {}
+    unlabeled: dict[int, str] = {}
+
+    def finish(position: int, labeled_value: dict) -> dict:
+        moment = moments[position][0]
+        if moment.get("continuity_suspect") and not labeled_value.get("continuity_ok"):
+            labeled_value["note"] = f"continuity not cleared: {labeled_value['note']}"
+        return {"excerpt_index": int(moment.get("excerpt_index") or 0), **labeled_value}
+
     with ThreadPoolExecutor(max_workers=vision_workers()) as pool:
-        for moment in review.get("moments") or []:
-            if not isinstance(moment, dict):
-                continue
-            video_id = str(moment.get("video_id") or "")
-            strip = moment.get("strip")
-            if not video_id or not strip:
-                continue
-            strip_path = Path(str(strip))
-            if not strip_path.is_absolute():
-                strip_path = run_dir / strip_path
-            future = pool.submit(_checkpointed_label, run_dir, wire, strip_path, "strip", caller, theme)
-            pending.append((moment, video_id, strip_path, future))
-        # Results are collected in review order, so the output is the same as
-        # serial labeling whatever order the calls finish in.
-        for moment, video_id, strip_path, future in pending:
-            try:
-                labeled = future.result()
-            except VisionWireError as exc:
-                failures.append({"path": str(strip_path), "error": str(exc)})
-                continue
-            if moment.get("continuity_suspect") and not labeled.get("continuity_ok"):
-                labeled["note"] = f"continuity not cleared: {labeled['note']}"
-            entry = {"excerpt_index": int(moment.get("excerpt_index") or 0), **labeled}
-            scores.setdefault(video_id, []).append(entry)
-    payload = dict(scores)
+        if n_clips is None:
+            futures = [pool.submit(_checkpointed_label, run_dir, wire, path, "strip", caller, theme)
+                       for _moment, _video_id, path in moments]
+            # Results are collected in review order, so the output is the same
+            # as serial labeling whatever order the calls finish in.
+            for position, future in enumerate(futures):
+                try:
+                    labeled[position] = finish(position, future.result())
+                except VisionWireError as exc:
+                    failures.append({"path": str(moments[position][2]), "error": str(exc)})
+        else:
+            order = _interleaved_by_source(moments)
+            signatures = {position: _signature(moments[position][0]) for position in order}
+            kept: list[int] = []
+
+            def duplicate_of(position: int) -> int | None:
+                return next((other for other in kept
+                             if moments_are_duplicates(signatures[position], signatures[other])), None)
+
+            cursor = 0
+            while cursor < len(order):
+                if len(kept) >= n_clips:
+                    for position in order[cursor:]:
+                        unlabeled[position] = REASON_UNLABELED_ENOUGH
+                    break
+                wave: list[int] = []
+                while cursor < len(order) and len(wave) < vision_workers():
+                    position = order[cursor]
+                    cursor += 1
+                    other = duplicate_of(position)
+                    if other is not None:
+                        unlabeled[position] = REASON_UNLABELED_DUPLICATE_PREFIX + _moment_ref(moments[other][0])
+                        continue
+                    wave.append(position)
+                futures = [(position, pool.submit(_checkpointed_label, run_dir, wire, moments[position][2],
+                                                  "strip", caller, theme)) for position in wave]
+                for position, future in futures:
+                    try:
+                        entry = finish(position, future.result())
+                    except VisionWireError as exc:
+                        failures.append({"path": str(moments[position][2]), "error": str(exc)})
+                        continue
+                    labeled[position] = entry
+                    # Wave members are judged in order, so two duplicates in
+                    # one wave count as one keep, as in the shortlist.
+                    if label_keeps(entry, moments[position][0]) and duplicate_of(position) is None:
+                        kept.append(position)
+
+    scores: dict[str, list] = {}
+    for position, (_moment, video_id, _path) in enumerate(moments):
+        if position in labeled:
+            scores.setdefault(video_id, []).append(labeled[position])
+    payload: dict = dict(scores)
     if isinstance(binding, str):
         payload = {"excerpts_sha256": binding, **payload}
+    if unlabeled:
+        payload["unlabeled"] = [
+            {"video_id": moments[position][1],
+             "excerpt_index": int(moments[position][0].get("excerpt_index") or 0),
+             "reason": unlabeled[position]}
+            for position in sorted(unlabeled)
+        ]
     return {"scores": payload, "failures": failures}
+
+
+def _moment_ref(moment: dict) -> str:
+    return f"{moment.get('video_id')}:{int(moment.get('excerpt_index') or 0)}"
+
+
+def _run_n_clips(run_dir: Path) -> int | None:
+    try:
+        value = json.loads((run_dir / "constraint.json").read_text(encoding="utf-8")).get("n_clips")
+    except (OSError, ValueError, AttributeError):
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        return None
+    return value
+
+
+def _interleaved_by_source(moments: list) -> list[int]:
+    """Positions round-robin across sources, each source in review order."""
+    queues: dict[str, list[int]] = {}
+    for position, (_moment, video_id, _path) in enumerate(moments):
+        queues.setdefault(video_id, []).append(position)
+    order: list[int] = []
+    while any(queues.values()):
+        for queue in queues.values():
+            if queue:
+                order.append(queue.pop(0))
+    return order
+
+
+def _signature(moment: dict) -> tuple[int, ...]:
+    """Frame hashes for dedup; a moment without valid hashes never matches."""
+    try:
+        return parse_frame_hashes(moment)
+    except ShortlistError:
+        return ()

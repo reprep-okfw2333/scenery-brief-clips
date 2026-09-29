@@ -40,7 +40,10 @@ commands, in the only order that produces clips, are:
     analyze's exit code alone.
 11. shortlist-review — frames and strips. Needs a verified run. Uses ffmpeg
     on the analysis copy.
-12. label-strips --confirm-vision — same model agreement as tiles.
+12. label-strips --confirm-vision — same model agreement as tiles. Labels
+    only until n_clips distinct keeps exist and skips duplicates of a keep
+    (strip label budget, docs/SHORTLIST.md); config `strip_label_budget:
+    false` labels every moment. The budget enters the label_strips binding.
 13. shortlist-apply — deterministic. Writes shortlist.json. A shortfall is
     a result, not a reason to add clips.
 14. export --allow-export — the only video-acquisition path for final clips.
@@ -101,9 +104,19 @@ These are the only reasons the runner stops while the run can still continue:
   refused call is retried once through it and the rest of the invocation
   uses it; the result then carries `youtube_fallback_used: true`, and a
   `blocked` result says whether the fallback was refused too.
-- Uncertain external outcome. A stage was started and its required files do
-  not validate. Stop with a recovery instruction. Do not call that outside
-  step again until the operator acknowledges recovery.
+- Interrupted external stage (process killed mid-stage; runner_inflight.json
+  left behind). Since 2026-09-29 the next invocation redoes that stage
+  automatically, once per stage and run (`auto_recoveries` in the result and
+  runner_state.json; counted in timing retries). Every external stage is
+  safe to redo: discover/rank/analyze reuse validated caches, the label
+  stages their per-image checkpoints, shortlist_review clears each moment
+  dir, export clears its staging files and accepts its own run's output. A
+  second interruption of the same stage, or config `auto_recover: false`,
+  pauses with a recovery instruction as below.
+- Uncertain external outcome. A stage finished but its required files do
+  not validate, or a completed stage's files changed afterwards. Stop with a
+  recovery instruction. Do not call that outside step again until the
+  operator acknowledges recovery.
 - Another runner holds this run. Stop without writing. The lock file is
   runner.lock inside the run directory, separate from .pipeline.lock so a
   stage can take the stage lock without deadlocking the runner.
@@ -133,11 +146,11 @@ are, and enter the bindings only when switched on (table below).
 | --- | --- |
 | brief or frozen plan bytes | discovery and every later stage |
 | max_search_results, max_metadata_fetches, min_width, min_height, aspect_min, aspect_max | discovery and every later stage |
-| max_rank_videos, max_tiles | rank and every later stage |
+| max_rank_videos (derived when config is silent and analyze needs more than 10), max_tiles | rank and every later stage |
 | jev_rank on, or jev_reject_below while it is on | discovery and every later stage |
 | jev_note_check on, or jev_note_reject_at while it is on | strip labels (re-read from the vision cache), the shortlist, and export |
 | vision.yaml backend or model | vision agreement, both label files, and every stage that consumed them (apply-scores onward) |
-| max_analyze_videos, max_analysis_s, continuity_* config, SCENERY_DETECT_FRAME_SKIP, SCENERY_CONTINUITY_DECODE_WIDTH | analyze and every later stage |
+| max_analyze_videos (or, when config is silent, the count derived from n_clips), max_analysis_s, continuity_* config, SCENERY_DETECT_FRAME_SKIP, SCENERY_CONTINUITY_DECODE_WIDTH | analyze and every later stage |
 | export_max_height | export and export verify only |
 | dropping export allowance | does not delete earlier stages; export will not run |
 
@@ -166,8 +179,9 @@ validate. Completion is recorded only after that validation.
 ## Retries
 
 The runner adds no retry loop. Existing functions may retry internally
-(export already has a bounded attempt loop). If an outside call's outcome is
-uncertain, the runner pauses. The recovery instruction is: inspect the run
+(export already has a bounded attempt loop). An interrupted external stage
+is redone once automatically (above). Otherwise, if an outside call's
+outcome is uncertain, the runner pauses. The recovery instruction is: inspect the run
 directory, fix or delete the partial stage output, then resume with
 acknowledge_uncertain for that stage name. Until then the outside call is
 not repeated. The retry count in the timing record stays 0 unless a resumed
@@ -183,7 +197,7 @@ runner_state.json in the run directory includes a timing object:
 - active_execution_s: sum of executed and failed stage times
 - waiting_for_input_s: time from a pause until the next resume, when the
   saved pause timestamp is present
-- retries: recovery reruns only
+- retries: recovery reruns only (acknowledged and automatic)
 - tokens is null when the caller did not report usage. Null is not zero.
 
 Fake tests prove these fields classify work. They do not prove a speed or

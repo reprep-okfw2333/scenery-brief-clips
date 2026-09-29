@@ -41,6 +41,10 @@ _ALLOWED_KEYS = {
     "export_max_height",
     "continuity_enabled",
     "continuity_detector",
+    # Strip labeling stops at n_clips distinct keeps (default true).
+    "strip_label_budget",
+    # Redo an interrupted external stage once automatically (default true).
+    "auto_recover",
     # Opt-in YouTube fallback, used only after YouTube refuses the host
     # (bot check). Never set by default; see yt.YoutubeFallback.
     "youtube_cookies_file",
@@ -70,6 +74,10 @@ def _validate_config(config: dict) -> dict:
         raise ConfigError("allow_export must be a boolean")
     if "continuity_enabled" in config and not isinstance(config.get("continuity_enabled"), bool):
         raise ConfigError("continuity_enabled must be a boolean")
+    if "auto_recover" in config and not isinstance(config.get("auto_recover"), bool):
+        raise ConfigError("auto_recover must be a boolean")
+    if "strip_label_budget" in config and not isinstance(config.get("strip_label_budget"), bool):
+        raise ConfigError("strip_label_budget must be a boolean")
     if "continuity_detector" in config and config.get("continuity_detector") not in ("legacy", "blend"):
         raise ConfigError("continuity_detector must be 'legacy' or 'blend'")
     if "youtube_cookies_file" in config and (

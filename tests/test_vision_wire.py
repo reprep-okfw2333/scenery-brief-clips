@@ -178,3 +178,25 @@ def test_vision_show_prints_the_wired_model(tmp_path, capsys):
     assert code == 0
     assert "gpt-6-astra" in out
     assert "ChatGPT/Codex sign-in" in out
+
+
+def test_place_rule_is_in_brief_prompts_only():
+    from scenery_brief_clips.vision_wire import PLACE_SOFT_RULE, brief_prompt
+
+    for kind in ("tile", "strip"):
+        assert PLACE_SOFT_RULE in brief_prompt(kind, "European alpine lake")
+        assert PLACE_SOFT_RULE not in brief_prompt(kind, "")
+        assert PLACE_SOFT_RULE not in brief_prompt(kind, None)
+    assert "never the rules on cuts, titles, subject or action" in PLACE_SOFT_RULE
+
+
+def test_vision_bindings_carry_label_policy_v2():
+    from scenery_brief_clips.runner import _bindings, _hash
+    from scenery_brief_clips.vision_wire import brief_prompt
+
+    model_id = {"backend": "openai-api", "model": "m"}
+    expected = {"model": model_id, "tile_prompt": brief_prompt("tile", ""),
+                "strip_prompt": brief_prompt("strip", ""), "label_policy": "vision_label_v2"}
+    bindings = _bindings(None, None, {}, model_id)
+    assert bindings["agree_vision"] == _hash(expected)
+    assert bindings["label_tiles"] == _hash(expected)

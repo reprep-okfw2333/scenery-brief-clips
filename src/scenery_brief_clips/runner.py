@@ -11,6 +11,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import math
 import os
 import threading
 import time
@@ -72,6 +73,22 @@ EXPORT_KEYS = ("export_max_height",)
 # new spans) and returns status "deadline"; rerunning the same command resumes
 # with a fresh budget and reuses completed stages and cached spans.
 DEFAULT_RUN_DEADLINE_S = 3 * 3600.0
+# Sources analyzed when config does not set max_analyze_videos: an analyzed
+# source gave ~1.75 distinct keeps (median of the B1 batch runs;
+# benchmark/unattended_eval/), so 1.5 per source plus one spare, capped.
+CLIPS_PER_SOURCE = 1.5
+MAX_DERIVED_SOURCES = 12
+DEFAULT_RANK_VIDEOS = 10
+RANK_SPARE_VIDEOS = 4
+
+# An external stage interrupted mid-run (process killed; runner_inflight.json
+# left behind) is redone automatically this many times per stage and run.
+# Every external stage publishes atomically or through validated caches:
+# discover/rank/analyze reuse their caches, labels their per-image
+# checkpoints, shortlist_review clears each moment dir, export clears its
+# staging files and accepts its own run's output. Config auto_recover: false
+# restores the pause-and-acknowledge behaviour.
+AUTO_RECOVERY_LIMIT = 1
 
 EXTERNAL_STAGES = {
     "discover",
@@ -157,6 +174,7 @@ def advance(
     if brief_doc is not None:
         validate_brief(brief_doc)
         config = _config_with_brief_export_cap(config, brief_doc)
+        config = config_with_brief_source_count(config, brief_doc)
     if plan_doc is not None:
         if brief_doc is None:
             raise ValueError("a frozen plan requires the brief it was bound to")
@@ -204,6 +222,26 @@ def advance(
         lock.close()
 
 
+def sources_for_clips(n_clips: int) -> int:
+    return min(MAX_DERIVED_SOURCES, math.ceil(n_clips / CLIPS_PER_SOURCE) + 1)
+
+
+def config_with_brief_source_count(config: dict, brief: dict) -> dict:
+    """Scale analyzed sources with the brief's n_clips when config is silent.
+
+    An explicit max_analyze_videos / max_rank_videos always wins. Rank is
+    raised above its default only when analyze needs more candidates, so
+    configs that set max_analyze_videos alone keep their rank binding.
+    """
+    derived = dict(config)
+    if "max_analyze_videos" not in derived:
+        derived["max_analyze_videos"] = sources_for_clips(int(brief["n_clips"]))
+    wanted_rank = int(derived["max_analyze_videos"]) + RANK_SPARE_VIDEOS
+    if "max_rank_videos" not in derived and wanted_rank > DEFAULT_RANK_VIDEOS:
+        derived["max_rank_videos"] = wanted_rank
+    return derived
+
+
 def _config_with_brief_export_cap(config: dict, brief: dict) -> dict:
     """The brief's export_max_height is the requested cap; config may only lower it.
 
@@ -249,6 +287,12 @@ def _advance_locked(**kw) -> dict:
             _clear_inflight(run_dir)
             _drop_from(state, stage)
             state["timing"]["retries"] = int(state["timing"].get("retries") or 0) + 1
+        elif stage in EXTERNAL_STAGES and _may_auto_recover(state, config, stage):
+            _clear_inflight(run_dir)
+            _drop_from(state, stage)
+            state["timing"]["retries"] = int(state["timing"].get("retries") or 0) + 1
+            recoveries = state.setdefault("auto_recoveries", {})
+            recoveries[stage] = int(recoveries.get(stage) or 0) + 1
         elif stage in EXTERNAL_STAGES:
             return _pause(
                 state,
@@ -256,7 +300,8 @@ def _advance_locked(**kw) -> dict:
                 clock,
                 status="recovery",
                 stage=stage,
-                missing=f"stage {stage} was interrupted and its output is not valid",
+                missing=f"stage {stage} was interrupted and its output is not valid"
+                + (" (automatic recovery already used)" if config.get("auto_recover", True) else ""),
                 how_to_supply=(
                     f"inspect {run_dir}, fix or remove the partial {stage} output, "
                     f"then resume with acknowledge_uncertain={stage}"
@@ -412,7 +457,8 @@ def _run_stage(stage, root, run_dir, kw, ports: Ports, wire, counters: _Counters
         review_run(run_dir)
         return {}
     if stage == "label_strips":
-        outcome = _label(run_dir, wire, ports.strip_caller, counters, kind="strip", judgments=kw["judgments"])
+        outcome = _label(run_dir, wire, ports.strip_caller, counters, kind="strip", judgments=kw["judgments"],
+                         budget=strip_label_budget_on(kw["config"]))
         captured = (kw["judgments"] or {}).get("strip_scores") is not None
         settings = JevSettings.from_config(kw["config"])
         if outcome or captured or not settings.note_check:
@@ -580,7 +626,17 @@ def _review_decodes(run_dir: Path) -> dict[str, str]:
     return {str(k): v for k, v in decoded.items() if isinstance(v, str) and len(v) == 64}
 
 
-def _label(run_dir, wire, caller, counters: _Counters, *, kind: str, judgments: dict | None) -> dict:
+def strip_label_budget_on(config: dict) -> bool:
+    """Label strips only until n_clips distinct keeps exist (default on).
+
+    Off when the Jev note check runs: it can drop keeps after labeling, and
+    the skipped moments would then be missing.
+    """
+    return bool(config.get("strip_label_budget", True)) and not JevSettings.from_config(config).note_check
+
+
+def _label(run_dir, wire, caller, counters: _Counters, *, kind: str, judgments: dict | None,
+           budget: bool = False) -> dict:
     captured = None
     if judgments:
         captured = judgments.get("tile_scores" if kind == "tile" else "strip_scores")
@@ -597,7 +653,7 @@ def _label(run_dir, wire, caller, counters: _Counters, *, kind: str, judgments: 
             return {"failed": True, "error": "tile label failed"}
         write_json_atomic(run_dir / "vision_scores.json", result["scores"])
         return {}
-    result = label_review_strips(run_dir, wire, caller=wrapped)
+    result = label_review_strips(run_dir, wire, caller=wrapped, budget=budget)
     if result["failures"]:
         return {"failed": True, "error": "strip label failed"}
     write_json_atomic(run_dir / "shortlist_scores.json", result["scores"])
@@ -728,8 +784,10 @@ def _bindings(brief, plan, config, model_id) -> dict:
         discovery["jev_rank"] = jev_settings.rank_binding()
         rank["jev_rank"] = jev_settings.rank_binding()
     from scenery_brief_clips.vision_wire import brief_prompt
+    # The binding holds the prompts without a brief; theme-dependent prompt
+    # text (e.g. the v2 place rule) changes only through label_policy.
     vision = {"model": model_id, "tile_prompt": brief_prompt("tile", ""),
-              "strip_prompt": brief_prompt("strip", ""), "label_policy": "vision_label_v1"}
+              "strip_prompt": brief_prompt("strip", ""), "label_policy": "vision_label_v2"}
     analyze = {
         "config": {key: config.get(key) for key in ANALYZE_KEYS},
         "env": {key: os.environ.get(key) for key in ANALYZE_ENV},
@@ -742,6 +800,10 @@ def _bindings(brief, plan, config, model_id) -> dict:
         analyze["config"]["continuity_detector"] = detector
     export = {"config": {key: config.get(key) for key in EXPORT_KEYS}}
     strips = vision if jev_settings.note_binding() is None else {**vision, "jev_note": jev_settings.note_binding()}
+    # Runs labeled before the budget relabel on resume; the run's vision_labels
+    # checkpoints answer every strip already labeled without a model call.
+    if strip_label_budget_on(config):
+        strips = {**strips, "strip_budget": "v1"}
     encoded = {
         "discover": _hash(discovery),
         "rank": _hash(rank),
@@ -778,6 +840,13 @@ def _reusable(state, run_dir, stage, bindings) -> bool:
         return False
     saved = (state.get("completed") or {}).get(stage) or {}
     return saved.get("binding") == bindings.get(stage) and _outputs_ok(run_dir, stage)
+
+
+def _may_auto_recover(state, config, stage) -> bool:
+    if not config.get("auto_recover", True):
+        return False
+    used = int((state.get("auto_recoveries") or {}).get(stage) or 0)
+    return used < AUTO_RECOVERY_LIMIT
 
 
 def _drop_from(state, stage):
@@ -924,6 +993,8 @@ def _result(state, run_dir, **fields) -> dict:
     }
     if state.get("youtube_fallback_used"):
         payload["youtube_fallback_used"] = True
+    if state.get("auto_recoveries"):
+        payload["auto_recoveries"] = dict(state["auto_recoveries"])
     return payload
 
 

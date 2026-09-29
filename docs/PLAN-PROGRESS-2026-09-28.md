@@ -537,3 +537,79 @@ sheets/ (7 contact sheets of third-party video frames; the repo tracks no
 images). Secret scan before committing: the OpenRouter key appears in no
 file; the only credential-like strings are dummy fixtures in
 tests/test_youtube_fallback.py.
+
+### Unattended-first track: offline findings (2026-09-29, evening)
+
+Owner chose the unattended-first track (A1 source count + B label budget ->
+C auto-recovery -> one small live batch) and set a direction: this is a
+holistic request-to-clips gatherer; place matching is NOT a priority ("if it
+looks like the country, that is enough"; most requests name no place).
+
+Offline study over the 29 local runs with a shortlist
+(benchmark/unattended_eval/, run with .venv/bin/python from the repo root):
+- Geography: the geo gate never excluded a moment vision marked keep (0 of
+  213 keeps had geo conflicting). The cost is in `match`: the place is in
+  the theme text, and vision downgrades match for place. R09 "European
+  alpine lake": 9 of 12 non-keeps say "resembles the Canadian Rockies" / "not
+  recognizably European" (shortfall 3 of 6; the Jev control arm the same).
+  R07 is the same strictness about setting ("meadow rather than inside a
+  forest", 7 uncertain). Shortlist excludes match uncertain outright.
+- Label budget (label_budget.py, strip labels replayed from stored labels):
+  270 labeled, 93 selected. Skipping moments that duplicate an already-kept
+  moment (frame hashes exist in review.json before labeling): 204 labels,
+  identical selections. Plus stopping once n_clips distinct keeps exist
+  (waves of 4, sources interleaved): 170 labels (-37%), selected 94 vs 93.
+- Source count: distinct keeps per analyzed source ~0.9-3.8, median ~1.75
+  (batch runs). The batch config pinned max_analyze_videos 5; with no config
+  the default is 1.
+Nothing changed in src/ yet.
+
+### Unattended-first track: built (2026-09-29, evening; owner "yes" to items 1-3 incl. the place rule)
+
+1. Strip label budget (vision_wire.label_review_strips(budget=True), default
+   on via config strip_label_budget; off with jev_note_check or
+   `label-strips --label-all`). Waves of vision_workers(), sources
+   interleaved, duplicates of a keep skipped before labeling, stop at n_clips
+   distinct keeps (shortlist.label_keeps = the shortlist's own rule). Skipped
+   moments go under "unlabeled" in shortlist_scores.json; build_shortlist
+   uses the recorded reason, so verify reproduces it. Binding gains
+   strip_budget v1 (old runs relabel from their checkpoints, no model call).
+   Product replay (benchmark/unattended_eval/replay_budget.py): 270 -> 185
+   labels, selected 93 -> 94, no run lost a clip. tests/test_strip_budget.py
+   (120, sonnet-high to spec; I mutation-checked 3 rules: 15/6/3 failures).
+2. Source scaling (runner.config_with_brief_source_count): with no config
+   value, max_analyze_videos = ceil(n_clips/1.5)+1, max 12; max_rank_videos
+   = analyze+4 when that exceeds 10. Explicit config wins.
+   config.example.yaml no longer pins 1/10 (copying it would have disabled
+   scaling). Every benchmark config still pins both: the live check needs
+   configs without them. tests/test_source_scaling.py (21).
+3. Place/setting soft rule (vision_wire.PLACE_SOFT_RULE, only when a brief
+   theme exists; label_policy vision_label_v2 so resumed runs relabel).
+   benchmark/unattended_eval/relabel_place.py, 70 stored strips, GLM:
+   baseline (old prompt) 5 flips = noise (4 from the Brazil run, first
+   labeled by gpt-6-sol); v2 28 flips incl. a strip whose note says it cuts
+   and an R05 caption clip; v2b (+ "relaxes only place and setting, never
+   cuts, titles, subject or action") 24 flips: 18 place-only alpine lakes,
+   3 of 4 R07 meadow deer, the rest shared with the baseline; 13/13 controls
+   kept; true rejects stayed rejected. Shipped v2b. ~200 GLM calls total.
+4. Auto-recovery (runner): an interrupted external stage (inflight marker
+   left by a killed process) is redone once per stage and run
+   (auto_recoveries; retries counted); a second interruption, changed
+   outputs, missing outputs after a finished stage, or auto_recover: false
+   pause as before. Checked each external stage is safe to redo (caches,
+   checkpoints, review clears moment dirs, export clears staging). Tests:
+   runner contract (redo once, second pause, config off, Iceland-style
+   partial review frames), reliability test updated; mutation (limit 0)
+   fails 3 tests.
+Full suite 1104 passed, 1 xfailed. Uncommitted. Next: small live batch.
+
+### Unattended-first track: live batch2 (2026-09-29, evening; owner: "run all three, if acceptable commit and push")
+
+benchmark/RESULTS-2026-09-29-batch2.md. Acceptance set before the results:
+all complete unattended with verify ok; no clip-count regression (R09 > 3/6,
+R05 >= 8/10, R07 4/4); most clips usable, no cuts. Outcome: verify ok on all;
+R05 10/10, R07 4/4, R09 3/6 (criterion missed: not a regression, cause
+upstream: 6 of 10 moments duplicates, 5 sources); 16/17 usable by eye, no
+cuts. R09 and R05 were `blocked` by brief YouTube refusals and resumed
+(benchmark/resume.sh, new); R05's resume made the first live auto-recovery.
+Judged acceptable with the R09 miss recorded; committed and pushed.

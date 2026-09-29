@@ -17,6 +17,15 @@ Show the current setting:
 
 Hermes must read that sentence to the user and ask whether to continue with that model or change vision.yaml. Do not start the pipeline, and do not pass --confirm-vision, until the user agrees.
 
+Places and settings are soft (label policy `vision_label_v2`, 2026-09-29):
+when the brief names a place, region or setting, footage that could
+plausibly be from there counts as a match, and match is lowered for place or
+setting only when the frames clearly contradict it. Cuts, titles, subject and
+action rules are unchanged. Offline check on 70 stored strips (57 non-keeps,
+13 keep controls; benchmark/unattended_eval/README.md): 21 place/setting
+doubts became keeps beyond model noise, all 13 controls stayed keeps, and
+title overlays, missing subjects and wrong actions stayed rejected.
+
 Label commands, after that agreement:
 
   .venv/bin/scenery-brief-clips label-tiles --run-dir data/runs/<id> --confirm-vision

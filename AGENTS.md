@@ -48,9 +48,12 @@ Jev ranking / note check / gate is documented in docs/JEV.md.
 - run-brief can NEVER fetch video, call vision, or export. Its limit flags only tighten the brief's own search_limits (final = min).
 - Metadata cache is reusable; prompt-specific files stay in the run dir.
 - `verify` is run-scoped and fail-closed: input/output hashes, exact plan/range/copy reconciliation, completion markers, probe, duration, and strict decode. The verifier checks file integrity, not scene fidelity. Inside run-pipeline, verify_export skips re-decoding analysis media that verify_review already decoded when the bytes' SHA-256 still matches (`decoded_media` in verify_review.json); the standalone `verify` decodes everything.
+- run-pipeline scales sources with the brief's n_clips when config does not set them: `max_analyze_videos` = ceil(n_clips / 1.5) + 1 (at most 12), `max_rank_videos` = that + 4 when above 10 (runner.config_with_brief_source_count). Explicit config wins. The strip vision prompt treats places and settings as soft (vision_wire.PLACE_SOFT_RULE, label policy `vision_label_v2`); place matching is not a priority.
+- run-pipeline redoes an interrupted external stage (runner_inflight.json left by a killed process) once automatically (`auto_recoveries`); a second interruption, changed outputs, or `auto_recover: false` pause for `--acknowledge-uncertain` as before (docs/RUNNER.md).
 - run-pipeline's discovery stops fetching metadata once `max_rank_videos` candidates are kept (rank uses only those, in search order); discovery.json records `max_candidates`.
-- Tests: `.venv/bin/python -m pytest tests/ -q` (958 passed, 1 xfailed as of 2026-09-29; about 7 min on this host). Never two pytest processes at once (shared tmp/pytest). Prefer fixtures over live YouTube.
+- Tests: `.venv/bin/python -m pytest tests/ -q` (1104 passed, 1 xfailed as of 2026-09-29 evening; about 6 min on this host). Never two pytest processes at once (shared tmp/pytest). Prefer fixtures over live YouTube.
 - Vision labeling (tiles and strips) runs `SCENERY_VISION_WORKERS` concurrent model calls (default 4, 1..8); results keep review order.
+- Strip labeling stops at n_clips distinct keeps and skips duplicates of a keep (`strip_label_budget`, default true; off with jev_note_check). Skipped moments are listed under `unlabeled` in shortlist_scores.json so shortlist-apply and verify reproduce the exclusion (docs/SHORTLIST.md).
 - Expected environment: Linux + Python 3.14. Run/export locks use fcntl (not available on native Windows).
 - Shortlist: `continuity_suspect` + keep without `continuity_ok:` / `continuity_ok: true` → exclude `continuity_suspect_uncleared`.
 - Export preserves approved shortlist intervals (no continuity re-trim).
